@@ -18,7 +18,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    document.title = site === "bot" ? "Deriv Bot – UI demo clone" : "Deriv – Home (UI demo clone)";
+    document.title = site === "bot" ? "Deriv Bot – Automate your trading" : "Deriv – Trade FX, CFDs & Options";
   }, [site]);
 
   const go = (s: Site, tab?: BotTab) => {
