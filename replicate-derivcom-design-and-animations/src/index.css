@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+@theme {
+  --font-inter: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-plex: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-deriv-red: #ff444f;
+  --color-deriv-navy: #181c25;
+  --color-deriv-teal: #4bb4b3;
+  --color-deriv-blue: #0e4c6e;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #e9ebee;
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- Animations (modelled on home.deriv.com behaviour) ---------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pop-in {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes spin-once {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+@keyframes amy-glow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
+  }
+}
+@keyframes sparkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18) rotate(12deg);
+    opacity: 0.85;
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes toast-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes run-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+@keyframes bell-ring {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  15% {
+    transform: rotate(14deg);
+  }
+  30% {
+    transform: rotate(-12deg);
+  }
+  45% {
+    transform: rotate(8deg);
+  }
+  60% {
+    transform: rotate(-6deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+}
+@keyframes nav-bounce {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-4px) scale(1.12);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.anim-fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.anim-fade-in {
+  animation: fade-in 0.3s ease both;
+}
+.anim-pop {
+  animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.anim-spin-once {
+  animation: spin-once 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(128, 128, 128, 0.12) 25%, rgba(128, 128, 128, 0.26) 50%, rgba(128, 128, 128, 0.12) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+.amy-pill {
+  position: relative;
+  background:
+    linear-gradient(#1d212b, #1d212b) padding-box,
+    linear-gradient(90deg, #5b6df8, #c36bff, #ff8a5c, #3dd7c3, #5b6df8) border-box;
+  background-size: 100% 100%, 300% 100%;
+  border: 1.5px solid transparent;
+  animation: amy-glow 5s linear infinite;
+}
+.amy-text {
+  background: linear-gradient(90deg, #7d8bff, #d98cff 40%, #ffb27a 70%, #ffe6a5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.press {
+  transition: transform 0.15s ease, background-color 0.2s ease, opacity 0.2s ease;
+}
+.press:active {
+  transform: scale(0.94);
+}
+.hide-scroll {
+  scrollbar-width: none;
+}
+.page-enter {
+  animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.bell-ring:hover svg,
+.bell-ring.ringing svg {
+  animation: bell-ring 0.8s ease;
+  transform-origin: 50% 0;
+}
+.nav-bounce svg {
+  animation: nav-bounce 0.4s ease;
+}
+
+/* ---------- Blockly-look blocks for the bot builder ---------- */
+.blk-field {
+  background: #fff;
+  border-radius: 999px;
+  border: 1px solid #c9ced6;
+  padding: 3px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
