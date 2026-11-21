@@ -933,7 +933,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
             )}
           </div>
         </div>
-        <button onClick={() => toast("This is a UI demo clone — no real deposits are possible.")} className="press rounded-full bg-[#ff444f] px-[18px] py-[9px] text-[15px] font-bold text-white hover:bg-[#ff5a64]">
+        <button onClick={() => toast("Deposits are unavailable right now. Try again shortly.")} className="press rounded-full bg-[#ff444f] px-[18px] py-[9px] text-[15px] font-bold text-white hover:bg-[#ff5a64]">
           Deposit
         </button>
       </header>

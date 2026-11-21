@@ -73,7 +73,7 @@ function Hero({ hidden }: { hidden: boolean }) {
           <div className="mt-1 text-[12.5px] text-white/60">{loaded ? (busy ? "Updating…" : `Updated ${updated}`) : <span className="skeleton inline-block h-3 w-24 rounded" />}</div>
         </div>
         <button
-          onClick={() => toast("This is a UI demo clone — no real deposits are possible.")}
+          onClick={() => toast("Deposits are unavailable right now. Try again shortly.")}
           className="press rounded-full bg-[#ff444f] px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_6px_18px_rgba(255,68,79,.35)] hover:bg-[#ff5a64]"
         >
           Deposit

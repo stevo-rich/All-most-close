@@ -29,7 +29,7 @@ function Card({ children, onClick, className = "" }: { children: ReactNode; onCl
 }
 
 function Overview({ toast }: { toast: (m: string) => void }) {
-  const demo = () => toast("This is a UI demo clone — no real payments are possible.");
+  const demo = () => toast("Payments are unavailable right now. Try again shortly.");
   return (
     <>
       <section className="-mt-8 rounded-b-[32px] bg-[#f5f5f5] px-4 pb-6 pt-14">
@@ -142,7 +142,7 @@ export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
     if (el) setInd({ left: el.offsetLeft, width: el.offsetWidth });
   }, [tab]);
 
-  const demo = () => toast("This is a UI demo clone — no real transactions are possible.");
+  const demo = () => toast("Transactions are unavailable right now. Try again shortly.");
 
   return (
     <div>
