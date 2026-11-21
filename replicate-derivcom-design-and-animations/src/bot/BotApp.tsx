@@ -528,7 +528,7 @@ function ActivityView({ tx, symbol, running }: { tx: Tx | null; symbol: string |
 /* ------------------------------------------------------------------ */
 /* Drawer: Summary / Transactions / Journal                            */
 /* ------------------------------------------------------------------ */
-function Totals({ txs, big }: { txs: Tx[]; big?: boolean }) {
+function Totals({ txs, big, compact }: { txs: Tx[]; big?: boolean; compact?: boolean }) {
   const stake = txs.reduce((a, t) => a + t.stake, 0);
   const payout = txs.reduce((a, t) => a + (t.profit > 0 ? t.stake + t.profit : 0), 0);
   const won = txs.filter((t) => t.profit > 0).length;
@@ -536,14 +536,24 @@ function Totals({ txs, big }: { txs: Tx[]; big?: boolean }) {
   const pl = txs.reduce((a, t) => a + t.profit, 0);
   const cell = (label: string, value: string, color?: string) => (
     <div className="text-center">
-      <div className={`font-bold text-[#333] ${big ? "text-[16px]" : "text-[15px]"}`}>{label}</div>
-      <div key={value} className="anim-fade-in mt-3 text-[16px]" style={{ color: color ?? "#333" }}>
+      <div className={`font-bold text-[#333] ${compact ? "text-[14px]" : big ? "text-[16px]" : "text-[15px]"}`}>{label}</div>
+      <div
+        key={value}
+        className={`anim-fade-in font-medium ${compact ? "mt-1 text-[14.5px]" : "mt-3 text-[16px]"}`}
+        style={{ color: color ?? "#333" }}
+      >
         {value}
       </div>
     </div>
   );
   return (
-    <div className="grid grid-cols-3 gap-x-1 gap-y-9 px-2 pb-16 pt-5">
+    <div
+      className={
+        compact
+          ? "grid grid-cols-3 gap-x-1 gap-y-3.5 px-2 pb-3 pt-2.5"
+          : "grid grid-cols-3 gap-x-1 gap-y-9 px-2 pb-16 pt-5"
+      }
+    >
       {cell("Total stake", `${fmt(stake)} USD`)}
       {cell("Total payout", `${fmt(payout)} USD`)}
       {cell("No. of runs", String(txs.length))}
@@ -618,7 +628,7 @@ function Drawer({
 
         {tab === "Transactions" && (
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="flex gap-3 border-b border-[#e6e8ea] px-4 py-3">
+            <div className="flex shrink-0 gap-3 border-b border-[#e6e8ea] px-4 py-2.5">
               <button onClick={() => toast("Download started (demo).")} className="press rounded-[4px] border border-[#999] px-5 py-[7px] text-[16px] font-bold text-[#333]">
                 Download
               </button>
@@ -626,14 +636,14 @@ function Drawer({
                 View Detail
               </button>
             </div>
-            <div className="grid grid-cols-[1.1fr_1.5fr_1.5fr] border-b border-[#e6e8ea] px-5 py-5 text-[15px] font-bold text-[#333]">
+            <div className="grid shrink-0 grid-cols-[1.1fr_1.5fr_1.5fr] border-b border-[#e6e8ea] px-5 py-3 text-[15px] font-bold text-[#333]">
               <span>Type</span>
               <span>Entry/Exit spot</span>
               <span className="text-right">Buy price and P/L</span>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto">
               {txs.map((t) => (
-                <div key={t.id} className="anim-fade-up grid grid-cols-[1.1fr_1.5fr_1.5fr] items-center border-b border-[#e6e8ea] px-4 py-2.5 text-[15.5px] text-[#333]">
+                <div key={t.id} className="anim-fade-up grid grid-cols-[1.1fr_1.5fr_1.5fr] items-center border-b border-[#e6e8ea] px-4 py-2 text-[15.5px] text-[#333]">
                   <span className="flex items-center gap-4">
                     <CandleBadge />
                     <svg width="22" height="22" viewBox="0 0 24 24" className="rotate-0" style={{ color: t.rise ? "#ff444f" : "#4bb4b3" }}>
@@ -661,11 +671,11 @@ function Drawer({
               ))}
               {txs.length === 0 && <p className="px-4 py-10 text-center text-[15px] text-[#8a8f99]">No transactions or activity yet.</p>}
             </div>
-            <div className="shrink-0 bg-[#f2f3f4] pt-3">
-              <div className="pr-6 text-right">
-                <span className="cursor-help border-b border-dotted border-[#333] text-[15px] text-[#333]">What's this?</span>
+            <div className="shrink-0 border-t border-[#e6e8ea] bg-[#f2f3f4] pt-1.5">
+              <div className="pr-5 text-right">
+                <span className="cursor-help border-b border-dotted border-[#333] text-[13.5px] text-[#333]">What's this?</span>
               </div>
-              <Totals txs={txs} />
+              <Totals txs={txs} compact />
             </div>
           </div>
         )}
