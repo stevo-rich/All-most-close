@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { IconDollar, IconMinus, IconPlus, IconRefresh, IconTransfer } from "../icons";
 import { useLoaded, useToast } from "../ui";
+import { fmtUsd, useProfile } from "../account";
 
 const TABS = ["Overview", "Wallet", "Partners", "Trading", "P2P"] as const;
 
@@ -128,6 +129,7 @@ function Placeholder({ tab }: { tab: string }) {
 }
 
 export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
+  const { profile } = useProfile();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [ind, setInd] = useState({ left: 0, width: 0 });
@@ -167,7 +169,7 @@ export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
               <div className="text-[15px] text-[#b5b9c2]">Estimated total value</div>
               <div className="mt-0.5 flex items-center gap-3">
                 {loaded ? (
-                  <span className="anim-fade-in text-[26px] font-bold tracking-tight">{balanceHidden ? "••••••" : "0.00"} USD</span>
+                  <span className="anim-fade-in text-[26px] font-bold tracking-tight">{balanceHidden ? "••••••" : fmtUsd(profile.balance)} USD</span>
                 ) : (
                   <span className="skeleton h-8 w-36 rounded-lg" />
                 )}

@@ -8,6 +8,7 @@ import {
   IconUserCircle,
 } from "../icons";
 import { useToast } from "../ui";
+import { useProfile } from "../account";
 import riseFallImg from "../assets/risefall.jpg";
 import goldImg from "../assets/gold.jpg";
 import { fmtChange, fmtPrice, GREEN, RED, MARKETS, sparkPath, type Market } from "./markets";
@@ -429,6 +430,7 @@ export function OptionsPage({
     if (i !== featIdx) setFeatIdx(i);
   };
 
+  const { profile } = useProfile();
   const hide = hidden || localHidden;
   const shown = MARKETS.slice(0, 5);
   const active = TRADE_GROUPS.find((g) => g.id === group) ?? TRADE_GROUPS[0];
@@ -447,7 +449,7 @@ export function OptionsPage({
 
       <BalanceHero
         hidden={hide}
-        balance={account === "demo" ? 10000 : balance}
+        balance={account === "demo" ? 10000 : Math.max(balance, profile.balance)}
         onTrade={() => onOpenTrader()}
         onTransfer={() => toast("Demo clone — transfers are not available.")}
       />

@@ -287,6 +287,155 @@ export const IconArrowRight = (p: P) => (
   </Svg>
 );
 
+/* ---------- Settings / profile icons ---------- */
+const stroke = { strokeWidth: 1.5 } as const;
+
+export const IconIdCard = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <rect x="2.5" y="5" width="19" height="14" rx="2.2" />
+    <circle cx="8.5" cy="11" r="1.9" />
+    <path d="M5.5 16.2c.4-1.5 1.6-2.3 3-2.3s2.6.8 3 2.3M14.5 10h4.5M14.5 13.5h4.5" />
+  </Svg>
+);
+
+export const IconHouse = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <path d="M4 10.8 12 4l8 6.8V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9.2Z" />
+  </Svg>
+);
+
+export const IconTax = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <path d="M6.5 3.5h8.5l4 4v13H6.5z" />
+    <path d="M15 3.5v4h4" />
+    <path d="M12.4 9.8v7.4M14 11.3c-.3-.7-1-1.1-1.8-1.1-1 0-1.8.6-1.8 1.4 0 1.9 3.6 1 3.6 3 0 .9-.8 1.5-1.9 1.5-.9 0-1.6-.4-1.9-1.2" />
+  </Svg>
+);
+
+export const IconIdBadge = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <rect x="3" y="5.5" width="18" height="13" rx="2.2" />
+    <circle cx="9" cy="11" r="1.8" />
+    <path d="M6.2 16c.3-1.3 1.4-2 2.8-2s2.5.7 2.8 2M14.5 10.5h4M14.5 14h4" />
+  </Svg>
+);
+
+export const IconAssessment = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <circle cx="9" cy="8" r="2.6" />
+    <path d="M4 18c.6-2.8 2.6-4.2 5-4.2s4.4 1.4 5 4.2" />
+    <circle cx="17.5" cy="15.5" r="3.6" />
+    <path d="M17.5 13.9v1.8l1.2.9" />
+  </Svg>
+);
+
+export const IconPassword = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <rect x="2.5" y="7.5" width="19" height="9.5" rx="2" />
+    <path d="M6 11.5h1.2M9.4 11.5h1.2M12.8 11.5h1.2M16.2 11.5h1.6" />
+  </Svg>
+);
+
+export const IconMobile = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <rect x="7" y="2.5" width="10" height="19" rx="2.4" />
+    <path d="M11 18.6h2" />
+  </Svg>
+);
+
+export const IconPasskey = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <path d="M4 18a8 8 0 1 1 13.2 2.2" />
+    <path d="M7.6 15.4a4.4 4.4 0 1 1 7.2 1.2" />
+    <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none" />
+    <path d="M12 13.3v6.2M12 17h2.4M12 19h2" />
+  </Svg>
+);
+
+export const IconLock = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <rect x="4.5" y="10.5" width="15" height="10" rx="2.2" />
+    <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
+  </Svg>
+);
+
+export const IconCloseAccount = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <circle cx="9.5" cy="8.5" r="2.6" />
+    <path d="M4.5 18.5c.6-2.8 2.6-4.2 5-4.2 1 0 1.9.2 2.7.6" />
+    <circle cx="17" cy="16" r="4" />
+    <path d="M15.2 14.2 18.8 17.8M18.8 14.2 15.2 17.8" />
+  </Svg>
+);
+
+export const IconGrid4 = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <rect x="3.5" y="3.5" width="7" height="7" rx="1.4" />
+    <rect x="13.5" y="3.5" width="7" height="7" rx="1.4" />
+    <rect x="3.5" y="13.5" width="7" height="7" rx="1.4" />
+    <rect x="13.5" y="13.5" width="7" height="7" rx="1.4" />
+  </Svg>
+);
+
+export const IconApiToken = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <circle cx="12" cy="12" r="3.2" />
+    <path d="M12 3.2v2.4M12 18.4v2.4M4.8 12H2.4M21.6 12h-2.4M6.9 6.9 5.2 5.2M18.8 18.8l-1.7-1.7M17.1 6.9l1.7-1.7M5.2 18.8l1.7-1.7" />
+    <path d="M12 9.4v5.2M9.4 12h5.2" strokeWidth={1.1} />
+  </Svg>
+);
+
+export const IconLaptop = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <rect x="4" y="5" width="16" height="10.5" rx="1.8" />
+    <path d="M2.5 18.5h19" />
+  </Svg>
+);
+
+export const IconGlobe = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M3.5 12h17M12 3.5c2.2 2.3 3.3 5.2 3.3 8.5S14.2 18.2 12 20.5c-2.2-2.3-3.3-5.2-3.3-8.5S9.8 5.8 12 3.5Z" />
+  </Svg>
+);
+
+export const IconHelp = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M9.6 9.4c.2-1.3 1.2-2.2 2.5-2.2 1.4 0 2.4.9 2.4 2.1 0 1.7-2.4 1.9-2.4 3.7" />
+    <circle cx="12" cy="16.6" r="0.9" fill="currentColor" stroke="none" />
+  </Svg>
+);
+
+export const IconChat = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <path d="M3.5 6.5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8l-4.5 3v-11Z" />
+    <path d="M18.5 8.5h.5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-.5" />
+  </Svg>
+);
+
+export const IconInfo = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 10.8v5.4" />
+    <circle cx="12" cy="7.9" r="0.9" fill="currentColor" stroke="none" />
+  </Svg>
+);
+
+export const IconPen = (p: P) => (
+  <Svg {...p} {...stroke}>
+    <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z" />
+    <path d="M14.5 6.5 17.5 9.5" />
+  </Svg>
+);
+
+export const IconExternal = (p: P) => (
+  <Svg {...p} strokeWidth={1.7}>
+    <path d="M9 5h10v10" />
+    <path d="M19 5 5.5 18.5" />
+  </Svg>
+);
+
 /* ---------- Markets / dashboard extras ---------- */
 
 /** Candlestick glyph inside a circle — the "Trade" action button */

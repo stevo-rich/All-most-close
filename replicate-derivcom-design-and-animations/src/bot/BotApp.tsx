@@ -23,6 +23,7 @@ import {
   IconZoomOut,
 } from "../icons";
 import { Sheet, useToast } from "../ui";
+import { accountStore, useProfile } from "../account";
 
 type BotTab = "dashboard" | "builder" | "chart" | "menu";
 type Account = "real" | "demo";
@@ -64,19 +65,16 @@ const DEFAULT_CFG: Cfg = {
 /* ------------------------------------------------------------------ */
 const STORE_KEY = "deriv-demo-bot-state-v1";
 
-type Store = { bal: { real: number; demo: number }; txs: Tx[] };
+type Store = { demoBal: number; txs: Tx[] };
 
 function loadState(): Store {
-  const fallback: Store = { bal: { real: 0, demo: 10000 }, txs: [] };
+  const fallback: Store = { demoBal: 10000, txs: [] };
   try {
     const raw = window.localStorage.getItem(STORE_KEY);
     if (!raw) return fallback;
     const parsed = JSON.parse(raw) as Partial<Store>;
     return {
-      bal: {
-        real: typeof parsed.bal?.real === "number" ? parsed.bal.real : fallback.bal.real,
-        demo: typeof parsed.bal?.demo === "number" ? parsed.bal.demo : fallback.bal.demo,
-      },
+      demoBal: typeof parsed.demoBal === "number" ? parsed.demoBal : fallback.demoBal,
       txs: Array.isArray(parsed.txs) ? parsed.txs.filter((t) => typeof t?.id === "number") : [],
     };
   } catch {
@@ -86,7 +84,7 @@ function loadState(): Store {
 
 function saveState(s: Store) {
   try {
-    window.localStorage.setItem(STORE_KEY, JSON.stringify({ bal: s.bal, txs: s.txs.slice(0, 50) }));
+    window.localStorage.setItem(STORE_KEY, JSON.stringify({ demoBal: s.demoBal, txs: s.txs.slice(0, 50) }));
   } catch {
     /* storage unavailable — demo continues in memory */
   }
@@ -720,7 +718,11 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
     return () => window.clearTimeout(t);
   }, []);
   const [account, setAccount] = useState<Account>("real");
-  const [bal, setBal] = useState<{ real: number; demo: number }>(() => loadState().bal);
+  const [demoBal, setDemoBal] = useState<number>(() => loadState().demoBal);
+  const { profile } = useProfile();
+  // The real account balance is the single shared balance edited in
+  // Personal details, so trades here move the number shown everywhere.
+  const bal: { real: number; demo: number } = { real: profile.balance, demo: demoBal };
   const [acctMenu, setAcctMenu] = useState(false);
   const [running, setRunning] = useState(false);
   const [drawer, setDrawer] = useState(false);
@@ -738,8 +740,8 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
   const idRef = useRef(Math.max(1, ...loadState().txs.map((t) => t.id + 1)));
 
   useEffect(() => {
-    saveState({ bal, txs });
-  }, [bal, txs]);
+    saveState({ demoBal, txs });
+  }, [demoBal, txs]);
 
   const set = (p: Partial<Cfg>) => setCfg((c) => ({ ...c, ...p }));
   const log = (m: string) => setJournal((j) => [`${new Date().toLocaleTimeString()}  ${m}`, ...j].slice(0, 60));
@@ -767,15 +769,16 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
       toast({ message: "Set a stake greater than 0 to run the bot." });
       return;
     }
-    // A real account starts at 0 USD, so fall back to the funded demo
-    // account instead of dead-ending — this is what makes trades runnable.
+    // A real account may still be at 0 USD. Rather than dead-ending, fall
+    // back to the funded demo account so trades always run. Once the real
+    // balance is funded in Personal details, trades hit the real account.
     if (bal[account] < stake) {
       if (bal.demo >= stake) {
         setAccount("demo");
         accRef.current = "demo";
         toast({ message: "Not enough on the real account — switched to Demo so the bot can trade." });
       } else {
-        setBal((b) => ({ ...b, demo: 10000 }));
+        setDemoBal(10000);
         accRef.current = "demo";
         setAccount("demo");
         toast({ message: "Demo balance topped up to 10,000.00 USD." });
@@ -802,7 +805,8 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
       const tx: Tx = { id: idRef.current++, entry, exit, stake: c.stake, profit, rise, contractId };
       setTxs((t) => [tx, ...t]);
       setActiveSymbol(c.symbol);
-      setBal((b) => ({ ...b, [acc]: Math.max(0, Math.round((b[acc] + profit) * 100) / 100) }));
+      if (acc === "real") accountStore.adjustBalance(profit);
+      else setDemoBal((d) => Math.max(0, Math.round((d + profit) * 100) / 100));
       setJournal((j) => [
         `${win ? "Profit" : "Loss"} amount: ${fmt(Math.abs(profit))} USD`,
         `Bought! Contract purchased (ID: ${contractId})`,

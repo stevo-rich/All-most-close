@@ -12,6 +12,7 @@ import {
   TileTv,
 } from "../icons";
 import { useLoaded, useToast } from "../ui";
+import { fmtUsd, useProfile } from "../account";
 import antImg from "../assets/ant.jpg";
 import dxnImg from "../assets/dxn.jpg";
 import metalsImg from "../assets/metals.jpg";
@@ -31,6 +32,7 @@ type Props = {
 function Hero({ hidden }: { hidden: boolean }) {
   const loaded = useLoaded(750);
   const toast = useToast();
+  const { profile } = useProfile();
   const [spin, setSpin] = useState(0);
   const [updated, setUpdated] = useState("just now");
   const [busy, setBusy] = useState(false);
@@ -58,7 +60,7 @@ function Hero({ hidden }: { hidden: boolean }) {
         <div>
           {loaded ? (
             <div className="anim-fade-in flex items-center gap-2.5">
-              <span className="text-[26px] font-bold leading-8 tracking-tight">{hidden ? "••••••" : "0.00"} USD</span>
+              <span className="text-[26px] font-bold leading-8 tracking-tight">{hidden ? "••••••" : fmtUsd(profile.balance)} USD</span>
               <button aria-label="Refresh" onClick={refresh} className="press text-white">
                 <span key={spin} className={`flex ${spin ? "anim-spin-once" : ""}`}>
                   <IconRefresh size={18} />
@@ -85,6 +87,7 @@ function Hero({ hidden }: { hidden: boolean }) {
 /* My trading accounts                                                 */
 /* ------------------------------------------------------------------ */
 function Accounts({ hidden, go }: { hidden: boolean; go: Props["go"] }) {
+  const { profile } = useProfile();
   const val = (v: string) => (hidden ? "••••" : v);
   return (
     <section className="mt-6">
@@ -93,12 +96,12 @@ function Accounts({ hidden, go }: { hidden: boolean; go: Props["go"] }) {
         <button onClick={() => go("cfds")} className="press anim-fade-up flex min-w-[168px] flex-1 flex-col items-start rounded-3xl bg-[#f3f4f5] p-4 text-left hover:bg-[#ecedee]">
           <TileMt5 size={44} sub="SVG" />
           <span className="mt-2 text-[12px] text-[#6c717b]">CFDs | Standard</span>
-          <span className="text-[15px] font-bold">{val("0.00")} USD</span>
+          <span className="text-[15px] font-bold">{val(fmtUsd(profile.balance))} USD</span>
         </button>
         <button onClick={() => go("options")} className="press anim-fade-up flex min-w-[168px] flex-1 flex-col items-start rounded-3xl bg-[#f3f4f5] p-4 text-left hover:bg-[#ecedee]" style={{ animationDelay: "80ms" }}>
           <TileOptions size={44} />
           <span className="mt-2 text-[12px] text-[#6c717b]">Options</span>
-          <span className="text-[15px] font-bold">{val("0.00")} USD</span>
+          <span className="text-[15px] font-bold">{val(fmtUsd(profile.balance))} USD</span>
         </button>
       </div>
     </section>

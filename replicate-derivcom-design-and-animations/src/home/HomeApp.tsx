@@ -22,7 +22,7 @@ import { HomePage, type HomeTab } from "./HomePage";
 import { PortfolioPage } from "./PortfolioPage";
 import { OptionsPage } from "./OptionsPage";
 import { ProductPage } from "./ProductPage";
-import { ProfileHero, ProfilePage } from "./ProfilePage";
+import { ProfilePage } from "./ProfilePage";
 
 const NAV: { id: HomeTab; label: string }[] = [
   { id: "home", label: "Home" },
@@ -99,7 +99,7 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
         <div key={tab} className="page-enter">
           {tab === "home" && <HomePage balanceHidden={hidden} go={go} openMore={() => setOverlay("more")} />}
           {tab === "portfolio" && <PortfolioPage balanceHidden={hidden} />}
-          {isProfile && <ProfilePage />}
+          {isProfile && <ProfilePage unread={unread} onBell={() => setOverlay("bell")} onBack={() => go("home")} />}
           {(tab === "cfds" || tab === "exchange") && <ProductPage kind={tab} />}
         </div>
         {tab === "options" && (
@@ -218,4 +218,3 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
   );
 }
 
-export { ProfileHero };
