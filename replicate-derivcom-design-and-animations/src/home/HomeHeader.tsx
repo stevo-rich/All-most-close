@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { IconBack, IconBell, IconEye, IconSearch, IconSparkle } from "../icons";
+import { IconBack, IconBell, IconEye, IconSearch } from "../icons";
 
 type Props = {
   avatar?: boolean;
   back?: boolean;
-  amy?: boolean;
   eye?: boolean;
   initials?: string;
   unread: number;
@@ -14,7 +13,6 @@ type Props = {
   onBack?: () => void;
   onSearch: () => void;
   onBell: () => void;
-  onAmy?: () => void;
   onToggleBalance?: () => void;
 };
 
@@ -52,15 +50,6 @@ export function HomeHeader(p: Props) {
       </Circle>
 
       <div className="flex-1" />
-
-      {p.amy && (
-        <button onClick={p.onAmy} className="amy-pill press absolute left-1/2 flex h-8 -translate-x-1/2 items-center gap-1.5 rounded-full px-3.5">
-          <span style={{ animation: "sparkle 2.4s ease-in-out infinite" }} className="flex">
-            <IconSparkle size={19} />
-          </span>
-          <span className="amy-text text-[15px] font-bold tracking-tight">Ask Amy</span>
-        </button>
-      )}
 
       {p.eye && (
         <Circle label="Toggle balance" onClick={p.onToggleBalance}>

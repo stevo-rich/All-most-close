@@ -27,9 +27,6 @@ export default function App() {
   return (
     <div className="flex h-full items-center justify-center sm:p-4">
       <div className="relative flex h-full w-full max-w-[430px] flex-col overflow-hidden bg-white font-inter text-[#181c25] sm:max-h-[900px] sm:rounded-[32px] sm:shadow-[0_30px_80px_rgba(0,0,0,.25)]">
-        <div className="z-[70] shrink-0 bg-[#fff4c9] px-3 py-[3px] text-center text-[10.5px] font-medium text-[#6b5400]">
-          UI demo clone · not affiliated with Deriv · no real accounts or funds
-        </div>
         {site === "home" ? (
           <ToastProvider key="home" bottom={92}>
             <HomeApp openBot={() => go("bot")} />

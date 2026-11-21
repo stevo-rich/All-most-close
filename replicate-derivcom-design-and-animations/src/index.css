@@ -74,25 +74,6 @@ body {
     background-position: 200% 0;
   }
 }
-@keyframes amy-glow {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 300% 50%;
-  }
-}
-@keyframes sparkle {
-  0%,
-  100% {
-    transform: scale(1) rotate(0);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.18) rotate(12deg);
-    opacity: 0.85;
-  }
-}
 @keyframes sheet-up {
   from {
     transform: translateY(100%);
@@ -185,21 +166,6 @@ body {
   background: linear-gradient(90deg, rgba(128, 128, 128, 0.12) 25%, rgba(128, 128, 128, 0.26) 50%, rgba(128, 128, 128, 0.12) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
-}
-.amy-pill {
-  position: relative;
-  background:
-    linear-gradient(#1d212b, #1d212b) padding-box,
-    linear-gradient(90deg, #5b6df8, #c36bff, #ff8a5c, #3dd7c3, #5b6df8) border-box;
-  background-size: 100% 100%, 300% 100%;
-  border: 1.5px solid transparent;
-  animation: amy-glow 5s linear infinite;
-}
-.amy-text {
-  background: linear-gradient(90deg, #7d8bff, #d98cff 40%, #ffb27a 70%, #ffe6a5);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 .press {
   transition: transform 0.15s ease, background-color 0.2s ease, opacity 0.2s ease;
