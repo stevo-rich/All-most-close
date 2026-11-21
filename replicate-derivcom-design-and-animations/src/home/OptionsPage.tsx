@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   IconBell,
-  IconChevronRight,
+  IconArrowRight,
   IconEye,
   IconTradeCircle,
   IconTransfer,
@@ -9,6 +9,7 @@ import {
 } from "../icons";
 import { useToast } from "../ui";
 import riseFallImg from "../assets/risefall.jpg";
+import goldImg from "../assets/gold.jpg";
 import { fmtChange, fmtPrice, GREEN, RED, MARKETS, sparkPath, type Market } from "./markets";
 
 /* ------------------------------------------------------------------ */
@@ -185,10 +186,10 @@ function IconRefreshInline() {
 /* Market card                                                         */
 /* ------------------------------------------------------------------ */
 function CandleGlyph({ vol, small = false }: { vol: number; small?: boolean }) {
-  const h = small ? 34 : 46;
-  const w = small ? 48 : 62;
+  const w = small ? 40 : 46;
+  const h = w * (46 / 62);
   return (
-    <svg width={w} height={h} viewBox="0 0 62 46" aria-hidden="true">
+    <svg width={w} height={h} viewBox="0 0 62 46" className="shrink-0" aria-hidden="true">
       {[
         { x: 4, top: 20, bot: 40, up: true },
         { x: 14, top: 17, bot: 37, up: true },
@@ -216,8 +217,16 @@ function CandleGlyph({ vol, small = false }: { vol: number; small?: boolean }) {
 function Sparkline({ series, change }: { series: number[]; change: number }) {
   const up = change >= 0;
   return (
-    <svg width="100" height="34" viewBox="0 0 100 34" className="shrink-0" aria-hidden="true">
-      <path d={sparkPath(series, 100, 34, 2)} fill="none" stroke={up ? GREEN : RED} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 84 30" className="h-[30px] w-full min-w-0" preserveAspectRatio="none" aria-hidden="true">
+      <path
+        d={sparkPath(series, 84, 30, 2)}
+        fill="none"
+        stroke={up ? GREEN : RED}
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
     </svg>
   );
 }
@@ -227,15 +236,20 @@ function MarketCard({ m, onPick }: { m: Market; onPick: (m: Market) => void }) {
   return (
     <button
       onClick={() => onPick(m)}
-      className="press anim-fade-up flex flex-col rounded-[18px] bg-[#f4f5f6] p-3.5 text-left transition-colors hover:bg-[#eef0f2]"
+      className="press anim-fade-up flex min-w-0 flex-col rounded-[16px] bg-[#f4f5f6] px-3 pb-3 pt-2.5 text-left transition-colors hover:bg-[#eef0f2]"
     >
-      <CandleGlyph vol={m.vol} />
-      <span className="mt-3.5 text-[15.5px] leading-[1.35] text-[#181c25]">{m.name}</span>
-      <span className="mt-2.5 text-[23px] font-bold leading-tight tracking-tight text-[#181c25]">{fmtPrice(m.price)}</span>
-      <span className="mt-3 flex items-center justify-between gap-1">
-        <Sparkline series={m.series} change={m.change} />
-        <span className="shrink-0 text-[14px] font-medium" style={{ color: up ? GREEN : RED }}>
-          {fmtChange(m.change)} <span className="text-[13px] text-[#6c717b]">(5m)</span>
+      <CandleGlyph vol={m.vol} small />
+      <span className="mt-2 block text-[14.5px] leading-[1.3] text-[#181c25]">{m.name}</span>
+      <span className="mt-2 block truncate text-[20px] font-bold leading-tight tracking-tight text-[#181c25]">
+        {fmtPrice(m.price)}
+      </span>
+      <span className="mt-2 flex items-center gap-1.5">
+        <span className="min-w-0 flex-1">
+          <Sparkline series={m.series} change={m.change} />
+        </span>
+        <span className="shrink-0 whitespace-nowrap text-[12.5px] font-medium leading-none" style={{ color: up ? GREEN : RED }}>
+          {fmtChange(m.change)}
+          <span className="ml-1 text-[11.5px] text-[#6c717b]">(5m)</span>
         </span>
       </span>
     </button>
@@ -354,6 +368,26 @@ const TRADE_GROUPS: { id: string; label: string; kinds: { kind: Glyph; label: st
 ];
 
 /* ------------------------------------------------------------------ */
+/* Featured slides                                                     */
+/* ------------------------------------------------------------------ */
+const FEATURES = [
+  {
+    id: "risefall",
+    img: riseFallImg,
+    title: "Rise / Fall",
+    text: "Predict whether the market price will rise or fall by the end of your contract.",
+    chips: ["100+ markets", "From 1 USD"],
+  },
+  {
+    id: "gold",
+    img: goldImg,
+    title: "Trade on Gold",
+    text: "Predict whether gold prices will rise or fall. Trade one of the world's most popular commodities, available 24/5.",
+    chips: ["24/5 trading", "From 1 USD"],
+  },
+];
+
+/* ------------------------------------------------------------------ */
 /* Page                                                                */
 /* ------------------------------------------------------------------ */
 export function OptionsPage({
@@ -377,7 +411,23 @@ export function OptionsPage({
   const [account, setAccount] = useState<OptionsAccount>("real");
   const [localHidden, setLocalHidden] = useState(false);
   const [group, setGroup] = useState("deriv-trader");
+  const [featIdx, setFeatIdx] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
+  const featRef = useRef<HTMLDivElement>(null);
+
+  const scrollToFeature = (i: number) => {
+    const el = featRef.current;
+    const child = el?.children[i] as HTMLElement | undefined;
+    if (el && child) el.scrollTo({ left: child.offsetLeft - el.offsetLeft, behavior: "smooth" });
+  };
+
+  const onFeatScroll = () => {
+    const el = featRef.current;
+    if (!el) return;
+    const step = el.clientWidth + 12; // card width + gap
+    const i = Math.max(0, Math.min(FEATURES.length - 1, Math.round(el.scrollLeft / step)));
+    if (i !== featIdx) setFeatIdx(i);
+  };
 
   const hide = hidden || localHidden;
   const shown = MARKETS.slice(0, 5);
@@ -405,7 +455,7 @@ export function OptionsPage({
       {/* Most traded markets */}
       <section className="px-4 pt-7">
         <h2 className="text-[22px] font-bold tracking-tight text-[#181c25]">Most traded markets</h2>
-        <div className="mt-4 grid grid-cols-2 gap-3.5">
+        <div className="mt-4 grid grid-cols-2 items-stretch gap-3">
           {shown.map((m) => (
             <MarketCard
               key={m.vol}
@@ -421,43 +471,68 @@ export function OptionsPage({
               scroller.current?.scrollIntoView({ behavior: "smooth", block: "start" });
               toast("Showing all markets");
             }}
-            className="press anim-fade-up flex min-h-[168px] flex-col items-center justify-center gap-3 rounded-[18px] bg-[#f4f5f6] text-[#181c25] hover:bg-[#eef0f2]"
+            className="press anim-fade-up flex min-h-[150px] min-w-0 flex-col items-center justify-center gap-3 rounded-[16px] bg-[#f4f5f6] text-[#181c25] hover:bg-[#eef0f2]"
             style={{ animationDelay: "220ms" }}
           >
-            <IconChevronRight size={26} strokeWidth={1.6} />
-            <span className="text-[15.5px]">View all</span>
+            <IconArrowRight size={24} strokeWidth={1.6} />
+            <span className="text-[15px]">View all</span>
           </button>
         </div>
       </section>
 
-      {/* Featured */}
+      {/* Featured — swipeable carousel with dot pagination */}
       <section className="mt-8 px-4">
         <h2 className="text-[22px] font-bold tracking-tight text-[#181c25]">Featured</h2>
         <div className="relative mt-4">
-          {/* stacked-card effect behind the main card */}
-          <div className="absolute inset-x-3 -top-2 h-6 rounded-t-[14px] border border-[#e3e5e8] bg-white" />
-          <div className="absolute inset-x-1.5 -top-1 h-6 rounded-t-[14px] border border-[#e3e5e8] bg-white" />
-          <article className="anim-fade-up relative overflow-hidden rounded-[16px] border border-[#e3e5e8] bg-white">
-            <img src={riseFallImg} alt="Rise and fall" className="h-[172px] w-full object-cover" />
-            <div className="px-4 pb-4 pt-4">
-              <h3 className="text-[21px] font-bold tracking-tight text-[#181c25]">Rise / Fall</h3>
-              <p className="mt-2 text-[15.5px] leading-[1.4] text-[#5c6470]">
-                Predict whether the market price will rise or fall by the end of your contract.
-              </p>
-              <div className="mt-5 flex items-center justify-between gap-3">
-                <div className="flex flex-wrap gap-2">
-                  <span className="rounded-md bg-[#eceef0] px-2.5 py-1.5 text-[13px] font-semibold text-[#3c4652]">100+ markets</span>
-                  <span className="rounded-md bg-[#eceef0] px-2.5 py-1.5 text-[13px] font-semibold text-[#3c4652]">From 1 USD</span>
+          {/* stacked-card effect behind the carousel */}
+          <div className="pointer-events-none absolute inset-x-3 -top-2 h-6 rounded-t-[14px] border border-[#e3e5e8] bg-white" />
+          <div className="pointer-events-none absolute inset-x-1.5 -top-1 h-6 rounded-t-[14px] border border-[#e3e5e8] bg-white" />
+          <div
+            ref={featRef}
+            onScroll={onFeatScroll}
+            className="hide-scroll relative flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-0"
+          >
+            {FEATURES.map((f) => (
+              <article
+                key={f.id}
+                className="flex w-full shrink-0 snap-center flex-col overflow-hidden rounded-[16px] border border-[#e3e5e8] bg-white"
+              >
+                <img src={f.img} alt={f.title} className="h-[164px] w-full shrink-0 object-cover" />
+                <div className="flex flex-1 flex-col px-4 pb-4 pt-3.5">
+                  <h3 className="text-[21px] font-bold tracking-tight text-[#181c25]">{f.title}</h3>
+                  <p className="mt-1.5 text-[15.5px] leading-[1.4] text-[#5c6470]">{f.text}</p>
+                  <div className="mt-auto flex items-end justify-between gap-3 pt-4">
+                    <div className="flex flex-wrap gap-2">
+                      {f.chips.map((c) => (
+                        <span key={c} className="rounded-md bg-[#eceef0] px-2.5 py-1.5 text-[13px] font-semibold text-[#3c4652]">
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => onOpenTrader(f.title)}
+                      className="press shrink-0 rounded-full border-[1.5px] border-[#181c25] px-4 py-[9px] text-[15px] font-bold text-[#181c25] hover:bg-[#181c25] hover:text-white"
+                    >
+                      Trade now
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => onOpenTrader("Rise / Fall")}
-                  className="press shrink-0 rounded-full border-[1.5px] border-[#181c25] px-4 py-[9px] text-[15px] font-bold text-[#181c25] hover:bg-[#181c25] hover:text-white"
-                >
-                  Trade now
-                </button>
-              </div>
-            </div>
-          </article>
+              </article>
+            ))}
+          </div>
+        </div>
+        {/* pagination dots */}
+        <div className="mt-3 flex items-center justify-center gap-2">
+          {FEATURES.map((f, i) => (
+            <button
+              key={f.id}
+              aria-label={`Featured slide ${i + 1}`}
+              onClick={() => scrollToFeature(i)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                i === featIdx ? "w-2 bg-[#3c4652]" : "w-2 bg-[#d3d7db]"
+              }`}
+            />
+          ))}
         </div>
       </section>
 

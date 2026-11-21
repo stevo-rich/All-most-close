@@ -26,7 +26,7 @@ import { Sheet, useToast } from "../ui";
 
 type BotTab = "dashboard" | "builder" | "chart" | "menu";
 type Account = "real" | "demo";
-type Tx = { id: number; entry: number; exit: number; stake: number; profit: number; rise: boolean };
+type Tx = { id: number; entry: number; exit: number; stake: number; profit: number; rise: boolean; contractId?: number };
 type Cfg = {
   symbol: string;
   tradeType: string;
@@ -93,6 +93,13 @@ function saveState(s: Store) {
 }
 
 const fmt = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/** "2026-11-21 13:37:40 GMT" stamp used by the bot Journal. */
+const journalStamp = () => {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())} GMT`;
+};
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const today = () => {
   const d = new Date();
@@ -161,6 +168,31 @@ function CandleBadge() {
         </g>
       ))}
     </svg>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Boot splash — "Initializing Deriv Bot account…"                     */
+/* ------------------------------------------------------------------ */
+function BootSplash() {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col bg-white">
+      <div className="flex h-14 shrink-0 items-start justify-start px-3 pt-3">
+        <DbLogo size={33} />
+      </div>
+      <div className="flex flex-1 flex-col items-center justify-center pb-24">
+        <div className="flex items-center gap-1.5">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <span
+              key={i}
+              className="h-[18px] w-[7px] rounded-full bg-[#9fb3bd]"
+              style={{ animation: "boot-pulse 1.1s ease-in-out infinite", animationDelay: `${i * 0.12}s` }}
+            />
+          ))}
+        </div>
+        <p className="mt-16 text-[16px] text-[#333]">Initializing Deriv Bot account...</p>
+      </div>
+    </div>
   );
 }
 
@@ -417,6 +449,85 @@ function MenuPage({ go, openReports, onHome }: { go: (t: BotTab) => void; openRe
 }
 
 /* ------------------------------------------------------------------ */
+/* Running-bot activity: the live contract card                         */
+/* ------------------------------------------------------------------ */
+function ActivityView({ tx, symbol, running }: { tx: Tx | null; symbol: string | null; running: boolean }) {
+  if (!symbol) return null;
+  const win = tx ? tx.profit > 0 : false;
+  const lost = tx ? tx.profit < 0 : false;
+  // contract value / payout derived from the stake, like bot.deriv.com
+  const stake = tx?.stake ?? 0;
+  const contractValue = tx ? Math.round(stake * 0.9018 * 100) / 100 : 0;
+  const payout = tx ? Math.round((stake + (stake * 0.9)) * 100) / 100 : 0;
+
+  return (
+    <div className="anim-fade-up px-2 pt-2">
+      {/* ticker row */}
+      <div className="flex items-center justify-between gap-2 px-1 pb-2">
+        <span className="flex min-w-0 items-center gap-1.5">
+          <CandleBadge />
+          <span className="truncate text-[13.5px] font-bold text-[#333]">{symbol}</span>
+        </span>
+        <span className="flex shrink-0 items-center gap-1.5 text-[14px] font-bold text-[#333]">
+          {tx?.rise === false ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" style={{ color: "#4bb4b3" }}>
+              <path d="M4 4 20 20M9 20h11V9" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" style={{ color: "#ff444f" }}>
+              <path d="M4 20 20 4M9 4h11v11" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+          {tx?.rise === false ? "Fall" : "Rise"}
+        </span>
+      </div>
+
+      {/* contract detail card */}
+      <div className="rounded-[4px] border border-[#e6e8ea] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+        <span className="inline-flex items-center justify-center rounded-[4px] bg-[#4bb4b3] px-2 py-[2px] text-[10px] font-bold uppercase tracking-wide text-white">
+          USD
+        </span>
+        <div className="mt-2.5 grid grid-cols-[1fr_1fr_auto] gap-x-3 gap-y-3">
+          <div>
+            <div className="text-[12px] leading-tight text-[#6c717b]">Total profit/loss:</div>
+            <div className="mt-0.5 flex items-center gap-1 text-[15px] font-bold" style={{ color: win ? "#4bb4b3" : "#ff444f" }}>
+              {tx ? `${tx.profit > 0 ? "" : ""}${fmt(tx.profit)}` : "0.00"}
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
+                <path d={win ? "M6 1.5 11 9H1L6 1.5Z" : "M6 10.5 1 3h10L6 10.5Z"} />
+              </svg>
+            </div>
+          </div>
+          <div>
+            <div className="text-[12px] leading-tight text-[#6c717b]">Contract value:</div>
+            <div className="mt-0.5 flex items-center gap-1 text-[15px] font-bold" style={{ color: lost ? "#ff444f" : "#333" }}>
+              {fmt(contractValue)}
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
+                <path d={lost ? "M6 10.5 1 3h10L6 10.5Z" : "M6 1.5 11 9H1L6 1.5Z"} />
+              </svg>
+            </div>
+          </div>
+          <div className="row-span-2 flex flex-col items-center justify-center pr-1">
+            <span className="text-[13px] text-[#333]">Tick 0</span>
+            <span className="mt-1.5 h-2.5 w-2.5 rounded-full bg-[#e6e8ea]" />
+          </div>
+          <div>
+            <div className="text-[12px] leading-tight text-[#6c717b]">Stake:</div>
+            <div className="mt-0.5 text-[15px] font-bold text-[#333]">{fmt(stake)}</div>
+          </div>
+          <div>
+            <div className="text-[12px] leading-tight text-[#6c717b]">Potential payout:</div>
+            <div className="mt-0.5 text-[15px] font-bold text-[#333]">{fmt(payout)}</div>
+          </div>
+        </div>
+        <div className="mt-4 border-t border-[#eceef0] pt-2.5 text-center text-[13px] text-[#6c717b]">
+          {running ? "Resale not offered" : "Contract closed"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Drawer: Summary / Transactions / Journal                            */
 /* ------------------------------------------------------------------ */
 function Totals({ txs, big }: { txs: Tx[]; big?: boolean }) {
@@ -453,6 +564,8 @@ function Drawer({
   tab,
   setTab,
   reset,
+  activeSymbol,
+  running,
 }: {
   open: boolean;
   setOpen: (o: boolean) => void;
@@ -461,6 +574,8 @@ function Drawer({
   tab: "Summary" | "Transactions" | "Journal";
   setTab: (t: "Summary" | "Transactions" | "Journal") => void;
   reset: () => void;
+  activeSymbol: string | null;
+  running: boolean;
 }) {
   const toast = useToast();
   return (
@@ -492,8 +607,14 @@ function Drawer({
         </div>
 
         {tab === "Summary" && (
-          <div className="flex-1 overflow-y-auto bg-[#f2f3f4]">
-            <Totals txs={txs} big />
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            {/* live activity for the current contract, with room to breathe */}
+            <div className="bg-[#fdeff1] px-2 pb-3 pt-1">
+              <ActivityView tx={txs[0] ?? null} symbol={activeSymbol} running={running} />
+            </div>
+            <div className="mt-auto bg-[#f2f3f4] pt-1">
+              <Totals txs={txs} big />
+            </div>
           </div>
         )}
 
@@ -552,14 +673,33 @@ function Drawer({
         )}
 
         {tab === "Journal" && (
-          <ul className="flex-1 overflow-y-auto px-4 py-2 text-[14px] text-[#333]">
-            {journal.map((j, i) => (
-              <li key={i} className="anim-fade-in border-b border-[#eceef0] py-2.5">
-                {j}
-              </li>
-            ))}
-            {journal.length === 0 && <li className="py-10 text-center text-[#8a8f99]">No journal entries yet.</li>}
-          </ul>
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3">
+              <button
+                onClick={() => toast("Journal downloaded (demo).")}
+                className="press rounded-[4px] border border-[#d6d9dd] px-5 py-[7px] text-[16px] font-bold text-[#b9bec4]"
+              >
+                Download
+              </button>
+              <button onClick={() => toast("Journal filters (demo).")} className="press flex items-center gap-2 px-2 text-[16px] text-[#333]">
+                Filters
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                  <path d="M3 6h18M6 12h12M10 18h4" />
+                </svg>
+              </button>
+            </div>
+            <ul className="min-h-0 flex-1 overflow-y-auto pb-2">
+              {journal.map((j, i) => (
+                <li key={i} className="anim-fade-in border-b border-[#eceef0] px-4 py-2.5">
+                  <p className="text-[14px] leading-snug" style={{ color: j.startsWith("Loss") ? "#e0313d" : j.startsWith("Profit") ? "#4bb4b3" : "#1668b3" }}>
+                    {j}
+                  </p>
+                  <p className="mt-1 text-[11.5px] text-[#8a8f99]">{journalStamp()}</p>
+                </li>
+              ))}
+              {journal.length === 0 && <li className="py-10 text-center text-[#8a8f99]">No journal entries yet.</li>}
+            </ul>
+          </div>
         )}
       </div>
     </div>
@@ -571,7 +711,14 @@ function Drawer({
 /* ------------------------------------------------------------------ */
 export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => void; initialTab?: BotTab }) {
   const toast = useToast();
+  const [booting, setBooting] = useState(true);
   const [tab, setTab] = useState<BotTab>(initialTab);
+
+  // Show the Deriv Bot initialising splash briefly, like bot.deriv.com
+  useEffect(() => {
+    const t = window.setTimeout(() => setBooting(false), 1600);
+    return () => window.clearTimeout(t);
+  }, []);
   const [account, setAccount] = useState<Account>("real");
   const [bal, setBal] = useState<{ real: number; demo: number }>(() => loadState().bal);
   const [acctMenu, setAcctMenu] = useState(false);
@@ -580,7 +727,8 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
   const [dTab, setDTab] = useState<"Summary" | "Transactions" | "Journal">("Transactions");
   const [txs, setTxs] = useState<Tx[]>(() => loadState().txs);
   const [journal, setJournal] = useState<string[]>([]);
-  const [zoom, setZoom] = useState(1);
+  const [activeSymbol, setActiveSymbol] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(0.8);
   const [quick, setQuick] = useState(false);
   const [cfg, setCfg] = useState<Cfg>(DEFAULT_CFG);
   const cfgRef = useRef(cfg);
@@ -634,6 +782,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
       }
     }
     setRunning(true);
+    setActiveSymbol(cfg.symbol);
     log(`Bot started on ${cfg.symbol}.`);
   };
 
@@ -649,10 +798,16 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
       const move = 0.15 + Math.random() * 0.6;
       const exit = entry + (win === rise ? move : -move);
       const profit = win ? Math.round(c.stake * 0.9 * 100) / 100 : -c.stake;
-      const tx: Tx = { id: idRef.current++, entry, exit, stake: c.stake, profit, rise };
+      const contractId = 4089100000 + Math.floor(Math.random() * 99999);
+      const tx: Tx = { id: idRef.current++, entry, exit, stake: c.stake, profit, rise, contractId };
       setTxs((t) => [tx, ...t]);
+      setActiveSymbol(c.symbol);
       setBal((b) => ({ ...b, [acc]: Math.max(0, Math.round((b[acc] + profit) * 100) / 100) }));
-      setJournal((j) => [`${new Date().toLocaleTimeString()}  Contract ${win ? "won" : "lost"}: ${profit > 0 ? "+" : ""}${fmt(profit)} USD`, ...j].slice(0, 60));
+      setJournal((j) => [
+        `${win ? "Profit" : "Loss"} amount: ${fmt(Math.abs(profit))} USD`,
+        `Bought! Contract purchased (ID: ${contractId})`,
+        ...j,
+      ].slice(0, 60));
     }, 2200);
     return () => window.clearInterval(id);
   }, [running]);
@@ -661,6 +816,32 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
     setTab(t);
     setAcctMenu(false);
   };
+
+  const lastTx = txs[0] ?? null;
+
+  // Progress of the current simulated contract (ticks toward the next settle)
+  const [runProgress, setRunProgress] = useState(0);
+  useEffect(() => {
+    if (!running) {
+      setRunProgress(0);
+      return;
+    }
+    setRunProgress(12);
+    const id = window.setInterval(() => {
+      setRunProgress((p) => (p >= 96 ? 12 : p + 14));
+    }, 400);
+    return () => window.clearInterval(id);
+  }, [running]);
+
+  const statusLabel = running
+    ? lastTx
+      ? "Contract bought"
+      : "Bot is starting"
+    : lastTx
+      ? lastTx.profit > 0
+        ? "Won"
+        : "Lost"
+      : "Bot is not running";
 
   const label = account === "real" ? "Real account" : "Demo account";
   const labelColor = account === "real" ? "#4bb4b3" : "#ffad3a";
@@ -674,6 +855,8 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
     ],
     [],
   );
+
+  if (booting) return <BootSplash />;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-white font-plex text-[#333]">
@@ -748,7 +931,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
               { i: <IconRedo size={27} />, f: () => toast("Redo") },
               { sep: true },
               { i: <IconZoomIn size={27} />, f: () => setZoom((z) => Math.min(1.6, +(z + 0.15).toFixed(2))) },
-              { i: <IconZoomOut size={27} />, f: () => setZoom((z) => Math.max(0.6, +(z - 0.15).toFixed(2))) },
+              { i: <IconZoomOut size={27} />, f: () => setZoom((z) => Math.max(0.45, +(z - 0.15).toFixed(2))) },
             ].map((b, k) =>
               "sep" in b ? (
                 <span key={k} className="my-2.5 h-px w-[18px] bg-[#c4c8cd]" />
@@ -761,31 +944,54 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
           </div>
         )}
 
-        <Drawer open={drawer} setOpen={setDrawer} txs={txs} journal={journal} tab={dTab} setTab={setDTab} reset={() => (setTxs([]), setJournal([]), toast("Transactions cleared."))} />
+        <Drawer
+          open={drawer}
+          setOpen={setDrawer}
+          txs={txs}
+          journal={journal}
+          tab={dTab}
+          setTab={setDTab}
+          reset={() => (setTxs([]), setJournal([]), toast("Transactions cleared."))}
+          activeSymbol={activeSymbol}
+          running={running}
+        />
       </div>
 
-      {/* Run panel */}
-      <div className="relative z-30 shrink-0 border-t border-[#e6e8ea] bg-white px-6 py-3">
+      {/* Run panel — progress strip + status */}
+      <div className="relative z-30 shrink-0 border-t border-[#e6e8ea] bg-white px-4 py-3">
         <div className="flex h-[42px] overflow-hidden rounded-[4px] border border-[#d6d9dd]">
           <button
             onClick={running ? () => stop() : start}
-            className={`press flex w-[83px] shrink-0 items-center justify-center gap-1.5 text-[17px] font-bold text-white transition-colors duration-300 ${running ? "bg-[#ff444f]" : "bg-[#4bb4b3] hover:bg-[#3fa3a2]"}`}
+            className={`press flex w-[83px] shrink-0 items-center justify-center gap-1.5 text-[17px] font-bold text-white transition-colors duration-300 ${
+              running ? "bg-[#ff444f]" : "bg-[#7fcfcb] hover:bg-[#71c3bf]"
+            }`}
             style={{ marginLeft: -1 }}
           >
-            {running ? <IconStop size={18} /> : <IconPlay size={22} />}
+            {running ? <IconStop size={18} /> : <IconPlay size={20} />}
             {running ? "Stop" : "Run"}
           </button>
-          <div className="relative flex flex-1 flex-col items-center justify-center px-3">
-            <span className="text-[15px] font-bold text-[#333]">{running ? "Bot is running" : "Bot is not running"}</span>
-            <div className="relative mt-1.5 h-[6px] w-full overflow-hidden rounded-full bg-[#dadcdf]">
+
+          {/* status area: label + thin progress bar, with breathing room */}
+          <div className="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-2 px-4">
+            <span
+              className="text-[15px] font-bold"
+              style={{ color: running ? "#333" : lastTx ? (lastTx.profit > 0 ? "#4bb4b3" : "#ff444f") : "#333" }}
+            >
+              {running ? (lastTx ? "Contract bought" : "Bot is starting") : statusLabel}
+            </span>
+            <div className="relative h-[5px] w-full overflow-hidden rounded-full bg-[#e6e8ea]">
               {running ? (
-                <span className="absolute inset-y-0 w-1/4 rounded-full bg-[#4bb4b3]" style={{ animation: "run-bar 1.4s ease-in-out infinite" }} />
-              ) : (
                 <>
-                  <span className="absolute left-1.5 top-1/2 h-[3px] w-[3px] -translate-y-1/2 rounded-full bg-black" />
-                  <span className="absolute left-1/2 top-1/2 h-[3px] w-[3px] -translate-y-1/2 rounded-full bg-black" />
-                  <span className="absolute right-1.5 top-1/2 h-[3px] w-[3px] -translate-y-1/2 rounded-full bg-black" />
+                  <span
+                    className="absolute inset-y-0 left-0 rounded-full bg-[#4bb4b3] transition-[width] duration-700 ease-out"
+                    style={{ width: `${runProgress}%` }}
+                  />
+                  <span className="absolute right-0 top-1/2 flex h-3 w-3 -translate-y-1/2 translate-x-1/3 items-center justify-center rounded-full bg-[#bfe3e1]">
+                    <span className="h-1 w-1 rounded-full bg-[#4bb4b3]" />
+                  </span>
                 </>
+              ) : (
+                <span className="absolute inset-y-0 left-0 w-full rounded-full bg-current opacity-[0.06]" />
               )}
             </div>
           </div>
@@ -825,8 +1031,10 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
                 key={q.n}
                 onClick={() => {
                   set({ stake: q.s, tradeType: "Up/Down", tradeType2: "Rise/Fall", contractType: "Both" });
+                  setZoom(0.7);
                   setQuick(false);
-                  toast(`${q.n} strategy loaded.`);
+                  go("builder");
+                  toast(`${q.n} strategy loaded — zoomed out to show both blocks.`);
                 }}
                 className="anim-fade-up w-full rounded-xl border border-[#e6e8ea] p-4 text-left transition-colors hover:border-[#ff444f] hover:bg-[#fff5f5]"
                 style={{ animationDelay: `${i * 60}ms` }}

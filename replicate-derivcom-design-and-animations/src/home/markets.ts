@@ -27,12 +27,12 @@ const seedSeries = (seed: number, trend: number, n = 26): number[] => {
 };
 
 export const MARKETS: Market[] = [
-  { vol: 10, name: "Volatility 10 (1s) Index", price: 9622.89, change: 0.02, series: seedSeries(11, 1.1) },
-  { vol: 100, name: "Volatility 100 (1s) Index", price: 1512.66, change: -0.24, series: seedSeries(7, -1.4) },
-  { vol: 25, name: "Volatility 25 (1s) Index", price: 885237.7, change: 0.09, series: seedSeries(23, 0.9) },
-  { vol: 75, name: "Volatility 75 (1s) Index", price: 4045.91, change: -0.14, series: seedSeries(31, -0.8) },
+  { vol: 10, name: "Volatility 10 (1s) Index", price: 9651.81, change: -0.01, series: seedSeries(11, -1.2) },
+  { vol: 100, name: "Volatility 100 (1s) Index", price: 1613.46, change: 0.09, series: seedSeries(7, 1.4) },
+  { vol: 25, name: "Volatility 25 (1s) Index", price: 883087.11, change: 0.04, series: seedSeries(23, 0.9) },
+  { vol: 50, name: "Volatility 50 (1s) Index", price: 214490.51, change: -0.07, series: seedSeries(31, -0.9) },
+  { vol: 75, name: "Volatility 75 (1s) Index", price: 4045.91, change: -0.14, series: seedSeries(43, -0.8) },
   { vol: 15, name: "Volatility 15 (1s) Index", price: 14574.24, change: 0.05, series: seedSeries(41, 0.7) },
-  { vol: 50, name: "Volatility 50 (1s) Index", price: 245783.11, change: 0.11, series: seedSeries(53, 1.0) },
   { vol: 5, name: "Volatility 5 (1s) Index", price: 1234.56, change: -0.06, series: seedSeries(59, -0.5) },
 ];
 

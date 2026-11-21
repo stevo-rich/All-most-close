@@ -43,13 +43,13 @@ export const IconExchange = (p: P) => (
   </Svg>
 );
 export const IconOptions = (p: P) => (
-  <svg width={p.size ?? 28} height={p.size ?? 28} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} {...p}>
-    {/* Rising arrow (left) */}
-    <path d="M3.5 19.5 10.5 12.5" />
-    <path d="M6 12.5h4.5V17" />
-    {/* Falling arrow (right) */}
-    <path d="M16.5 9.5 24.5 17.5" />
-    <path d="M20 17.5h4.5V13" />
+  // Two chunky diagonal arrows (rise up-right, fall down-left) with a gap —
+  // the Deriv "Options" tab glyph. Solid fill, colours from currentColor.
+  <svg width={p.size ?? 28} height={p.size ?? 28} viewBox="0 0 24 24" fill="currentColor" stroke="none" {...p}>
+    <path d="M13.91 7.97 L16.03 10.09 L14.05 12.07 L11.93 9.95 Z" />
+    <path d="M18.36 5.64 L16.52 11.16 L12.84 7.48 Z" />
+    <path d="M10.09 16.03 L7.97 13.91 L9.95 11.93 L12.07 14.05 Z" />
+    <path d="M5.64 18.36 L7.48 12.84 L11.16 16.52 Z" />
   </svg>
 );
 export const IconWallet = ({ filled, ...p }: P & { filled?: boolean }) => (
@@ -277,6 +277,13 @@ export const IconList = (p: P) => (
   <Svg {...p} strokeWidth={1.2}>
     <rect x="5" y="3.5" width="14" height="17" rx="1.5" />
     <path d="M8 8h8M8 11h8M8 14h8M8 17h5" />
+  </Svg>
+);
+
+export const IconArrowRight = (p: P) => (
+  <Svg {...p} strokeWidth={1.7}>
+    <path d="M4 12h15.5" />
+    <path d="M13.5 5.5 20 12l-6.5 6.5" />
   </Svg>
 );
 
