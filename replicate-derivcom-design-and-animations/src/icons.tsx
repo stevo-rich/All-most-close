@@ -173,18 +173,35 @@ export const IconArrowCircle = (p: P) => (
     <path d="m10 7.5 4.5 4.5-4.5 4.5" stroke="#fff" strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-export const IconSparkle = (p: P) => (
-  <svg width={p.size ?? 24} height={p.size ?? 24} viewBox="0 0 24 24" {...p}>
+/** Four-point sparkle cluster used by the Ask Amy pill. */
+export const IconSparkle = ({ size = 22, ...p }: P) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...p}>
     <defs>
-      <linearGradient id="sp" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#6c7cff" />
-        <stop offset="0.55" stopColor="#d58bff" />
-        <stop offset="1" stopColor="#ffb27a" />
+      <linearGradient id="spark-big" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#a58bff" />
+        <stop offset="55%" stopColor="#c98bff" />
+        <stop offset="100%" stopColor="#ffb6c8" />
+      </linearGradient>
+      <linearGradient id="spark-small" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#ffe9a3" />
+        <stop offset="100%" stopColor="#ffc46b" />
       </linearGradient>
     </defs>
-    <path d="M9.5 4 11 9l5 1.5-5 1.5-1.5 5L8 12 3 10.5 8 9l1.5-5Z" fill="url(#sp)" />
-    <path d="M18 12.5l.8 2.4 2.4.8-2.4.8-.8 2.4-.8-2.4-2.4-.8 2.4-.8.8-2.4Z" fill="url(#sp)" />
-    <path d="M17.5 3l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6.6-1.7Z" fill="url(#sp)" />
+    {/* large four-point star */}
+    <path
+      d="M9.5 2.5c.7 3.6 2.1 5 5.7 5.7-3.6.7-5 2.1-5.7 5.7-.7-3.6-2.1-5-5.7-5.7 3.6-.7 5-2.1 5.7-5.7Z"
+      fill="url(#spark-big)"
+    />
+    {/* small star, upper right */}
+    <path
+      d="M18 3.2c.35 1.75 1.05 2.45 2.8 2.8-1.75.35-2.45 1.05-2.8 2.8-.35-1.75-1.05-2.45-2.8-2.8 1.75-.35 2.45-1.05 2.8-2.8Z"
+      fill="url(#spark-small)"
+    />
+    {/* small star, lower left */}
+    <path
+      d="M16.6 15.4c.3 1.5.9 2.1 2.4 2.4-1.5.3-2.1.9-2.4 2.4-.3-1.5-.9-2.1-2.4-2.4 1.5-.3 2.1-.9 2.4-2.4Z"
+      fill="url(#spark-small)"
+    />
   </svg>
 );
 

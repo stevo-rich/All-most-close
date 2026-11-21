@@ -16,7 +16,7 @@ import {
   TileSmartTrader,
   TileTv,
 } from "../icons";
-import { Sheet } from "../ui";
+import { Sheet, useToast } from "../ui";
 import { HomeHeader } from "./HomeHeader";
 import { HomePage, type HomeTab } from "./HomePage";
 import { PortfolioPage } from "./PortfolioPage";
@@ -58,6 +58,7 @@ const SEARCH_ITEMS: { label: string; tab: HomeTab; icon: ReactNode }[] = [
 ];
 
 export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" | "chart" | "menu") => void }) {
+  const toast = useToast();
   const [tab, setTab] = useState<HomeTab>("home");
   const [prev, setPrev] = useState<HomeTab>("home");
   const [hidden, setHidden] = useState(false);
@@ -81,10 +82,11 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
   return (
     <>
       <div ref={scroller} className="flex-1 overflow-y-auto bg-white">
-        {tab !== "options" && (
+        {tab !== "options" && !isProfile && (
           <HomeHeader
             avatar={tab === "home" || tab === "cfds" || tab === "exchange"}
-            back={isProfile}
+            amy
+            onAmy={() => toast("Amy, your AI assistant, is a demo placeholder here.")}
             eye={!isProfile}
             unread={unread}
             balanceHidden={hidden}
