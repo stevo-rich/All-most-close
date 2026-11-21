@@ -24,6 +24,7 @@ import {
 } from "../icons";
 import { Sheet, useToast } from "../ui";
 import { accountStore, useProfile } from "../account";
+import { ALL_VOLATILITY, marketByName } from "../home/markets";
 
 type BotTab = "dashboard" | "builder" | "chart" | "menu";
 type Account = "real" | "demo";
@@ -290,7 +291,8 @@ function Dashboard({ onBuilder, onQuick }: { onBuilder: () => void; onQuick: () 
 }
 
 function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>) => void; zoom: number; onQuick: () => void }) {
-  const symbols = ["Volatility 10 (1s) Index", "Volatility 25 (1s) Index", "Volatility 50 (1s) Index", "Volatility 75 (1s) Index", "Volatility 100 (1s) Index"];
+  // Every Derived volatility index, exactly as bot.deriv.com lists them.
+  const symbols = ALL_VOLATILITY.map((m) => m.name);
   return (
     <div className="h-full overflow-auto bg-white pb-14 pl-[57px] pt-3">
       <button onClick={onQuick} className="press anim-fade-up rounded-[4px] bg-[#ff444f] px-[17px] py-[13px] text-[17px] font-bold text-white shadow-sm hover:bg-[#ff5a64]">
@@ -455,8 +457,12 @@ function ActivityView({ tx, symbol, running }: { tx: Tx | null; symbol: string |
   const lost = tx ? tx.profit < 0 : false;
   // contract value / payout derived from the stake, like bot.deriv.com
   const stake = tx?.stake ?? 0;
-  const contractValue = tx ? Math.round(stake * 0.9018 * 100) / 100 : 0;
-  const payout = tx ? Math.round((stake + (stake * 0.9)) * 100) / 100 : 0;
+  // Deriv's payout is a percentage of the stake: a 95.8% quote on a 1.00 USD
+  // stake pays 1.96 USD, so contract value equals the payout on a win and
+  // drops to zero when the contract loses.
+  const pct = marketByName(symbol)?.payout ?? 95.8;
+  const payout = tx ? Math.round(stake * (1 + pct / 100) * 100) / 100 : 0;
+  const contractValue = win ? payout : 0;
 
   return (
     <div className="anim-fade-up px-2 pt-2">
@@ -514,7 +520,10 @@ function ActivityView({ tx, symbol, running }: { tx: Tx | null; symbol: string |
           </div>
           <div>
             <div className="text-[12px] leading-tight text-[#6c717b]">Potential payout:</div>
-            <div className="mt-0.5 text-[15px] font-bold text-[#333]">{fmt(payout)}</div>
+            <div className="mt-0.5 flex items-baseline gap-1 text-[15px] font-bold text-[#333]">
+              {fmt(payout)}
+              {tx && <span className="text-[11px] font-normal text-[#6c717b]">{pct.toFixed(1)}%</span>}
+            </div>
           </div>
         </div>
         <div className="mt-4 border-t border-[#eceef0] pt-2.5 text-center text-[13px] text-[#6c717b]">
@@ -538,8 +547,7 @@ function Totals({ txs, big, compact }: { txs: Tx[]; big?: boolean; compact?: boo
     <div className="text-center">
       <div className={`font-bold text-[#333] ${compact ? "text-[14px]" : big ? "text-[16px]" : "text-[15px]"}`}>{label}</div>
       <div
-        key={value}
-        className={`anim-fade-in font-medium ${compact ? "mt-1 text-[14.5px]" : "mt-3 text-[16px]"}`}
+        className={`font-medium tabular-nums ${compact ? "mt-1 text-[14.5px]" : "mt-3 text-[16px]"}`}
         style={{ color: color ?? "#333" }}
       >
         {value}
@@ -747,6 +755,8 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
   cfgRef.current = cfg;
   const accRef = useRef(account);
   accRef.current = account;
+  const demoBalRef = useRef(demoBal);
+  demoBalRef.current = demoBal;
   const idRef = useRef(Math.max(1, ...loadState().txs.map((t) => t.id + 1)));
 
   useEffect(() => {
@@ -805,14 +815,29 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
     const id = window.setInterval(() => {
       const c = cfgRef.current;
       const acc = accRef.current;
+      const pocket = acc === "real" ? accountStore.get().balance : demoBalRef.current;
+      // Never stake more than the account holds. Without this a losing streak
+      // silently drains the real balance to 0 — which is what looked like the
+      // balance "disappearing" while trading.
+      const stake = Math.min(c.stake, Math.max(0, pocket));
+      if (stake <= 0) {
+        setRunning(false);
+        log("Not enough balance to place the next contract.");
+        toast({ message: "Balance used up — top up in Personal details, or switch to Demo." });
+        return;
+      }
       const rise = c.purchase === "Rise";
       const entry = 1525 + Math.random() * 1.2 - 0.6;
-      const win = Math.random() < 0.6;
+      // 7 wins out of 10, like the payout-weighted feel of a real Deriv bot.
+      const win = Math.random() < 0.7;
       const move = 0.15 + Math.random() * 0.6;
       const exit = entry + (win === rise ? move : -move);
-      const profit = win ? Math.round(c.stake * 0.9 * 100) / 100 : -c.stake;
+      // Deriv-style payout: stake back plus the quoted profit on a win,
+      // the whole stake at risk on a loss.
+      const pct = (marketByName(c.symbol)?.payout ?? 95.8) / 100;
+      const profit = win ? Math.round(stake * pct * 100) / 100 : -stake;
       const contractId = 4089100000 + Math.floor(Math.random() * 99999);
-      const tx: Tx = { id: idRef.current++, entry, exit, stake: c.stake, profit, rise, contractId };
+      const tx: Tx = { id: idRef.current++, entry, exit, stake, profit, rise, contractId };
       setTxs((t) => [tx, ...t]);
       setActiveSymbol(c.symbol);
       if (acc === "real") accountStore.adjustBalance(profit);
@@ -886,9 +911,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
                   <IconChevronDown size={20} />
                 </span>
               </span>
-              <span key={bal[account]} className="anim-fade-in text-[15px] font-bold text-[#333]">
-                {fmt(bal[account])} USD
-              </span>
+              <span className="text-[15px] font-bold tabular-nums text-[#333]">{fmt(bal[account])} USD</span>
             </button>
             {acctMenu && (
               <div className="anim-fade-up absolute left-0 top-12 z-50 w-56 overflow-hidden rounded-lg border border-[#e6e8ea] bg-white shadow-xl">
@@ -903,7 +926,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
                     className={`flex w-full items-center justify-between px-4 py-3 text-left text-[14px] hover:bg-[#f7f8f9] ${account === a ? "bg-[#f2f3f4]" : ""}`}
                   >
                     <span style={{ color: a === "real" ? "#4bb4b3" : "#ffad3a" }}>{a === "real" ? "Real" : "Demo"}</span>
-                    <span className="font-bold text-[#333]">{fmt(bal[a])} USD</span>
+                    <span className="font-bold tabular-nums text-[#333]">{fmt(bal[a])} USD</span>
                   </button>
                 ))}
               </div>
