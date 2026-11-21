@@ -41,6 +41,57 @@ type Cfg = {
   purchase: string;
 };
 
+/**
+ * The builder opens with the symbol chosen but trade type / contract type
+ * unselected, matching the reference bot.deriv.com screenshot.
+ */
+const DEFAULT_CFG: Cfg = {
+  symbol: "Volatility 100 (1s) Index",
+  tradeType: "",
+  tradeType2: "",
+  contractType: "",
+  candle: "1 minute",
+  restartBuySell: false,
+  restartLast: true,
+  durationUnit: "Ticks",
+  duration: 1,
+  stake: 1,
+  purchase: "Rise",
+};
+
+/* ------------------------------------------------------------------ */
+/* Local persistence so trades/balances survive closing the bot        */
+/* ------------------------------------------------------------------ */
+const STORE_KEY = "deriv-demo-bot-state-v1";
+
+type Store = { bal: { real: number; demo: number }; txs: Tx[] };
+
+function loadState(): Store {
+  const fallback: Store = { bal: { real: 0, demo: 10000 }, txs: [] };
+  try {
+    const raw = window.localStorage.getItem(STORE_KEY);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw) as Partial<Store>;
+    return {
+      bal: {
+        real: typeof parsed.bal?.real === "number" ? parsed.bal.real : fallback.bal.real,
+        demo: typeof parsed.bal?.demo === "number" ? parsed.bal.demo : fallback.bal.demo,
+      },
+      txs: Array.isArray(parsed.txs) ? parsed.txs.filter((t) => typeof t?.id === "number") : [],
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function saveState(s: Store) {
+  try {
+    window.localStorage.setItem(STORE_KEY, JSON.stringify({ bal: s.bal, txs: s.txs.slice(0, 50) }));
+  } catch {
+    /* storage unavailable — demo continues in memory */
+  }
+}
+
 const fmt = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const today = () => {
@@ -518,37 +569,29 @@ function Drawer({
 /* ------------------------------------------------------------------ */
 /* Root                                                                */
 /* ------------------------------------------------------------------ */
-export function BotApp({ onHome }: { onHome: () => void }) {
+export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => void; initialTab?: BotTab }) {
   const toast = useToast();
-  const [tab, setTab] = useState<BotTab>("dashboard");
+  const [tab, setTab] = useState<BotTab>(initialTab);
   const [account, setAccount] = useState<Account>("real");
-  const [bal, setBal] = useState({ real: 0, demo: 10000 });
+  const [bal, setBal] = useState<{ real: number; demo: number }>(() => loadState().bal);
   const [acctMenu, setAcctMenu] = useState(false);
   const [running, setRunning] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const [dTab, setDTab] = useState<"Summary" | "Transactions" | "Journal">("Transactions");
-  const [txs, setTxs] = useState<Tx[]>([]);
+  const [txs, setTxs] = useState<Tx[]>(() => loadState().txs);
   const [journal, setJournal] = useState<string[]>([]);
   const [zoom, setZoom] = useState(1);
   const [quick, setQuick] = useState(false);
-  const [cfg, setCfg] = useState<Cfg>({
-    symbol: "Volatility 100 (1s) Index",
-    tradeType: "",
-    tradeType2: "",
-    contractType: "",
-    candle: "1 minute",
-    restartBuySell: false,
-    restartLast: true,
-    durationUnit: "Ticks",
-    duration: 1,
-    stake: 1,
-    purchase: "Rise",
-  });
+  const [cfg, setCfg] = useState<Cfg>(DEFAULT_CFG);
   const cfgRef = useRef(cfg);
   cfgRef.current = cfg;
   const accRef = useRef(account);
   accRef.current = account;
-  const idRef = useRef(1);
+  const idRef = useRef(Math.max(1, ...loadState().txs.map((t) => t.id + 1)));
+
+  useEffect(() => {
+    saveState({ bal, txs });
+  }, [bal, txs]);
 
   const set = (p: Partial<Cfg>) => setCfg((c) => ({ ...c, ...p }));
   const log = (m: string) => setJournal((j) => [`${new Date().toLocaleTimeString()}  ${m}`, ...j].slice(0, 60));
@@ -572,9 +615,23 @@ export function BotApp({ onHome }: { onHome: () => void }) {
 
   const start = () => {
     const stake = cfg.stake;
-    if (bal[account] < stake) {
-      toast({ message: "Insufficient balance. Switch to the Demo account to run the bot." });
+    if (!stake || stake <= 0) {
+      toast({ message: "Set a stake greater than 0 to run the bot." });
       return;
+    }
+    // A real account starts at 0 USD, so fall back to the funded demo
+    // account instead of dead-ending — this is what makes trades runnable.
+    if (bal[account] < stake) {
+      if (bal.demo >= stake) {
+        setAccount("demo");
+        accRef.current = "demo";
+        toast({ message: "Not enough on the real account — switched to Demo so the bot can trade." });
+      } else {
+        setBal((b) => ({ ...b, demo: 10000 }));
+        accRef.current = "demo";
+        setAccount("demo");
+        toast({ message: "Demo balance topped up to 10,000.00 USD." });
+      }
     }
     setRunning(true);
     log(`Bot started on ${cfg.symbol}.`);

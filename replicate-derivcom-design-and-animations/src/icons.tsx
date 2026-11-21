@@ -43,13 +43,14 @@ export const IconExchange = (p: P) => (
   </Svg>
 );
 export const IconOptions = (p: P) => (
-  <Svg {...p}>
-    <path d="M10 5.5h8.5V14" />
-    <path d="M18.5 5.5 11 13" />
-    <path d="M14 18.5H5.5V10" />
-    <path d="M5.5 18.5 13 11" />
-    <path d="M3 8.5c1.5-2 3.5-3 5.5-3M21 15.5c-1.5 2-3.5 3-5.5 3" opacity={0} />
-  </Svg>
+  <svg width={p.size ?? 28} height={p.size ?? 28} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} {...p}>
+    {/* Rising arrow (left) */}
+    <path d="M3.5 19.5 10.5 12.5" />
+    <path d="M6 12.5h4.5V17" />
+    {/* Falling arrow (right) */}
+    <path d="M16.5 9.5 24.5 17.5" />
+    <path d="M20 17.5h4.5V13" />
+  </svg>
 );
 export const IconWallet = ({ filled, ...p }: P & { filled?: boolean }) => (
   <Svg {...p}>
@@ -276,6 +277,38 @@ export const IconList = (p: P) => (
   <Svg {...p} strokeWidth={1.2}>
     <rect x="5" y="3.5" width="14" height="17" rx="1.5" />
     <path d="M8 8h8M8 11h8M8 14h8M8 17h5" />
+  </Svg>
+);
+
+/* ---------- Markets / dashboard extras ---------- */
+
+/** Candlestick glyph inside a circle — the "Trade" action button */
+export const IconTradeCircle = (p: P) => (
+  <svg width={p.size ?? 28} height={p.size ?? 28} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeLinecap="round" {...p}>
+    <path d="M8 9.5v3M8 17.5v3M8 12.5h0M8 17.5h0" strokeWidth={1.6} />
+    <rect x="6.6" y="12.5" width="2.8" height="5" rx="0.7" fill="currentColor" stroke="none" />
+    <path d="M14 6.5v3M14 18.5v3" strokeWidth={1.6} />
+    <rect x="12.6" y="9.5" width="2.8" height="9" rx="0.7" fill="currentColor" stroke="none" />
+    <path d="M20 8.5v4M20 21v2.5" strokeWidth={1.6} />
+    <rect x="18.6" y="12.5" width="2.8" height="8.5" rx="0.7" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+/** Outline person with shoulders — avatar placeholder */
+export const IconUserCircle = (p: P) => (
+  <Svg {...p} strokeWidth={1.6}>
+    <circle cx="12" cy="8.5" r="3.4" />
+    <path d="M5 20.2c.9-3.6 3.6-5.4 7-5.4s6.1 1.8 7 5.4" />
+  </Svg>
+);
+
+/** Diagonal expand arrows — the "maximise chart" button */
+export const IconExpand = (p: P) => (
+  <Svg {...p} strokeWidth={1.7}>
+    <path d="M14 4h6v6" />
+    <path d="M20 4 13.5 10.5" />
+    <path d="M10 20H4v-6" />
+    <path d="M4 20l6.5-6.5" />
   </Svg>
 );
 

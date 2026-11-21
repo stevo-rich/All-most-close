@@ -20,6 +20,7 @@ import { Sheet } from "../ui";
 import { HomeHeader } from "./HomeHeader";
 import { HomePage, type HomeTab } from "./HomePage";
 import { PortfolioPage } from "./PortfolioPage";
+import { OptionsPage } from "./OptionsPage";
 import { ProductPage } from "./ProductPage";
 import { ProfileHero, ProfilePage } from "./ProfilePage";
 
@@ -56,7 +57,7 @@ const SEARCH_ITEMS: { label: string; tab: HomeTab; icon: ReactNode }[] = [
   { label: "Personal details", tab: "profile", icon: <IconSearch size={22} /> },
 ];
 
-export function HomeApp({ openBot }: { openBot: () => void }) {
+export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" | "chart" | "menu") => void }) {
   const [tab, setTab] = useState<HomeTab>("home");
   const [prev, setPrev] = useState<HomeTab>("home");
   const [hidden, setHidden] = useState(false);
@@ -80,25 +81,38 @@ export function HomeApp({ openBot }: { openBot: () => void }) {
   return (
     <>
       <div ref={scroller} className="flex-1 overflow-y-auto bg-white">
-        <HomeHeader
-          avatar={tab === "home" || tab === "cfds" || tab === "exchange" || tab === "options"}
-          back={isProfile}
-          eye={!isProfile}
-          unread={unread}
-          balanceHidden={hidden}
-          bg={headerBg}
-          onAvatar={() => go("profile")}
-          onBack={() => go(prev === "profile" ? "home" : prev)}
-          onSearch={() => setOverlay("search")}
-          onBell={() => setOverlay("bell")}
-          onToggleBalance={() => setHidden((h) => !h)}
-        />
+        {tab !== "options" && (
+          <HomeHeader
+            avatar={tab === "home" || tab === "cfds" || tab === "exchange"}
+            back={isProfile}
+            eye={!isProfile}
+            unread={unread}
+            balanceHidden={hidden}
+            bg={headerBg}
+            onAvatar={() => go("profile")}
+            onBack={() => go(prev === "profile" ? "home" : prev)}
+            onSearch={() => setOverlay("search")}
+            onBell={() => setOverlay("bell")}
+            onToggleBalance={() => setHidden((h) => !h)}
+          />
+        )}
         <div key={tab} className="page-enter">
           {tab === "home" && <HomePage balanceHidden={hidden} go={go} openMore={() => setOverlay("more")} />}
           {tab === "portfolio" && <PortfolioPage balanceHidden={hidden} />}
           {isProfile && <ProfilePage />}
-          {(tab === "cfds" || tab === "exchange" || tab === "options") && <ProductPage kind={tab} />}
+          {(tab === "cfds" || tab === "exchange") && <ProductPage kind={tab} />}
         </div>
+        {tab === "options" && (
+          <OptionsPage
+            onOpenTrader={() => openBot("builder")}
+            onOpenBot={() => openBot("builder")}
+            hidden={hidden}
+            unread={unread}
+            balance={0}
+            onBell={() => setOverlay("bell")}
+            onProfile={() => go("profile")}
+          />
+        )}
       </div>
 
       <nav className="relative z-30 flex h-[76px] shrink-0 border-t border-[#e6e8ea] bg-white px-1">
