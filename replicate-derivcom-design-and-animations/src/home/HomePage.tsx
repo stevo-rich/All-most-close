@@ -53,14 +53,14 @@ function Hero({ hidden }: { hidden: boolean }) {
 
   return (
     <section className="rounded-b-[32px] bg-[#181c25] px-4 pb-6 pt-1 text-white">
-      <button className="flex items-center gap-0.5 text-[13px] text-white/70">
+      <button className="flex items-center gap-0.5 text-[10px] text-white/70">
         Total value <IconChevronRight size={13} />
       </button>
       <div className="mt-1.5 flex items-end justify-between">
         <div>
           {loaded ? (
             <div className="anim-fade-in flex items-center gap-2.5">
-              <span className="text-[26px] font-bold leading-8 tracking-tight">{hidden ? "••••••" : fmtUsd(profile.balance)} USD</span>
+              <span className="text-[19.5px] font-bold leading-8 tracking-tight">{hidden ? "••••••" : fmtUsd(profile.balance)} USD</span>
               <button aria-label="Refresh" onClick={refresh} className="press text-white">
                 <span key={spin} className={`flex ${spin ? "anim-spin-once" : ""}`}>
                   <IconRefresh size={18} />
@@ -70,11 +70,11 @@ function Hero({ hidden }: { hidden: boolean }) {
           ) : (
             <div className="skeleton h-8 w-40 rounded-lg" />
           )}
-          <div className="mt-1 text-[12.5px] text-white/60">{loaded ? (busy ? "Updating…" : `Updated ${updated}`) : <span className="skeleton inline-block h-3 w-24 rounded" />}</div>
+          <div className="mt-1 text-[9.5px] text-white/60">{loaded ? (busy ? "Updating…" : `Updated ${updated}`) : <span className="skeleton inline-block h-3 w-24 rounded" />}</div>
         </div>
         <button
           onClick={() => toast("Deposits are unavailable right now. Try again shortly.")}
-          className="press rounded-full bg-[#ff444f] px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_6px_18px_rgba(255,68,79,.35)] hover:bg-[#ff5a64]"
+          className="press rounded-full bg-[#ff444f] px-6 py-2.5 text-[10.5px] font-bold text-white shadow-[0_6px_18px_rgba(255,68,79,.35)] hover:bg-[#ff5a64]"
         >
           Deposit
         </button>
@@ -91,17 +91,17 @@ function Accounts({ hidden, go }: { hidden: boolean; go: Props["go"] }) {
   const val = (v: string) => (hidden ? "••••" : v);
   return (
     <section className="mt-6">
-      <h2 className="px-4 text-[20px] font-bold tracking-tight">My trading accounts</h2>
+      <h2 className="px-4 text-[15px] font-bold tracking-tight">My trading accounts</h2>
       <div className="hide-scroll mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
         <button onClick={() => go("cfds")} className="press anim-fade-up flex min-w-[168px] flex-1 flex-col items-start rounded-3xl bg-[#f3f4f5] p-4 text-left hover:bg-[#ecedee]">
           <TileMt5 size={44} sub="SVG" />
-          <span className="mt-2 text-[12px] text-[#6c717b]">CFDs | Standard</span>
-          <span className="text-[15px] font-bold">{val(fmtUsd(profile.balance))} USD</span>
+          <span className="mt-2 text-[9px] text-[#6c717b]">CFDs | Standard</span>
+          <span className="text-[11px] font-bold">{val(fmtUsd(profile.balance))} USD</span>
         </button>
         <button onClick={() => go("options")} className="press anim-fade-up flex min-w-[168px] flex-1 flex-col items-start rounded-3xl bg-[#f3f4f5] p-4 text-left hover:bg-[#ecedee]" style={{ animationDelay: "80ms" }}>
           <TileOptions size={44} />
-          <span className="mt-2 text-[12px] text-[#6c717b]">Options</span>
-          <span className="text-[15px] font-bold">{val(fmtUsd(profile.balance))} USD</span>
+          <span className="mt-2 text-[9px] text-[#6c717b]">Options</span>
+          <span className="text-[11px] font-bold">{val(fmtUsd(profile.balance))} USD</span>
         </button>
       </div>
     </section>
@@ -129,7 +129,7 @@ function PromoCarousel() {
       text: "Trade the space giant with competitive leverage.",
       art: (
         <div className="flex h-full items-center justify-end pr-3">
-          <span className="text-[22px] font-black italic tracking-[0.18em] text-white" style={{ fontFamily: "Inter" }}>
+          <span className="text-[16.5px] font-black italic tracking-[0.18em] text-white" style={{ fontFamily: "Inter" }}>
             SPACEX
           </span>
         </div>
@@ -206,8 +206,8 @@ function PromoCarousel() {
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="z-10 w-[62%] pl-5 pr-1">
-              <h3 className="text-[16px] font-bold leading-[1.25]">{s.title}</h3>
-              <p className="mt-1.5 text-[13px] leading-[1.35] text-white/65">{s.text}</p>
+              <h3 className="text-[12px] font-bold leading-[1.25]">{s.title}</h3>
+              <p className="mt-1.5 text-[10px] leading-[1.35] text-white/65">{s.text}</p>
             </div>
             <div className="absolute inset-y-0 right-0 w-[42%]">{s.art}</div>
             <button
@@ -264,7 +264,7 @@ function Explore({ go, openMore }: Pick<Props, "go" | "openMore">) {
   ];
   return (
     <section className="mt-7 px-4">
-      <h2 className="text-[20px] font-bold tracking-tight">Explore Deriv</h2>
+      <h2 className="text-[15px] font-bold tracking-tight">Explore Deriv</h2>
       <div className="mt-4 grid grid-cols-3 gap-y-5">
         {items.map((it, i) => (
           <button
@@ -276,12 +276,12 @@ function Explore({ go, openMore }: Pick<Props, "go" | "openMore">) {
             <span className="relative flex h-[66px] w-[66px] items-center justify-center rounded-full bg-[#f3f3f4] shadow-[inset_0_-3px_8px_rgba(0,0,0,.05),0_6px_14px_rgba(0,0,0,.07)] transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-[inset_0_-3px_8px_rgba(0,0,0,.05),0_10px_18px_rgba(0,0,0,.12)] group-active:scale-90">
               <span className="transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">{it.icon}</span>
               {it.badge && (
-                <span className="anim-pop absolute -top-1 left-[46px] rounded-full bg-[#00c390] px-2 py-[3px] text-[12px] font-bold leading-none text-white" style={{ animationDelay: "700ms" }}>
+                <span className="anim-pop absolute -top-1 left-[46px] rounded-full bg-[#00c390] px-2 py-[3px] text-[9px] font-bold leading-none text-white" style={{ animationDelay: "700ms" }}>
                   {it.badge}
                 </span>
               )}
             </span>
-            <span className="mt-2 text-[14px] text-[#181c25]">{it.label}</span>
+            <span className="mt-2 text-[10.5px] text-[#181c25]">{it.label}</span>
           </button>
         ))}
       </div>
@@ -307,8 +307,8 @@ function WhatsNew() {
       <div className="overflow-hidden px-6">
         <div className="relative flex items-center gap-3 rounded-3xl bg-[#e8ebef] p-4 pl-6">
           <div className="flex-1">
-            <h3 className="text-[17px] font-semibold leading-tight text-[#181c25]">What's new in Deriv</h3>
-            <p className="mt-1 text-[14.5px] leading-[1.4] text-[#6c717b]">Explore a unified wallet, faster trading, and more.</p>
+            <h3 className="text-[13px] font-semibold leading-tight text-[#181c25]">What's new in Deriv</h3>
+            <p className="mt-1 text-[11px] leading-[1.4] text-[#6c717b]">Explore a unified wallet, faster trading, and more.</p>
           </div>
           <img src={whatsNewImg} alt="" className="h-[98px] w-[98px] shrink-0 rounded-xl object-cover" />
           <button
@@ -346,7 +346,7 @@ function Highlights({ go }: Pick<Props, "go">) {
   return (
     <section className="mt-8 pb-8">
       <div className="flex items-center justify-between px-4">
-        <h2 className="text-[20px] font-bold tracking-tight">Highlights</h2>
+        <h2 className="text-[15px] font-bold tracking-tight">Highlights</h2>
         <div className="flex overflow-hidden rounded-full bg-[#f3f3f4]">
           <button aria-label="Previous" disabled={pos.start} onClick={() => by(-1)} className="press flex h-8 w-10 items-center justify-center text-[#181c25] disabled:text-black/25">
             <IconChevronLeft size={16} strokeWidth={2} />
@@ -369,20 +369,20 @@ function Highlights({ go }: Pick<Props, "go">) {
               {c.img ? (
                 <img src={c.img} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-[34px] font-black text-white/90 transition-transform duration-700 group-hover:scale-110" style={{ background: c.gradient }}>
+                <div className="flex h-full w-full items-center justify-center text-[25.5px] font-black text-white/90 transition-transform duration-700 group-hover:scale-110" style={{ background: c.gradient }}>
                   {c.big}
                 </div>
               )}
               {c.badge && (
-                <span className="absolute left-2.5 top-2.5 -rotate-6 rounded-md bg-[#ff444f] px-1.5 py-0.5 text-[11px] font-black italic text-white shadow">{c.badge}</span>
+                <span className="absolute left-2.5 top-2.5 -rotate-6 rounded-md bg-[#ff444f] px-1.5 py-0.5 text-[8px] font-black italic text-white shadow">{c.badge}</span>
               )}
             </div>
             <div className="p-4 pb-5">
-              <h3 className="text-[20px] font-bold leading-tight text-[#181c25]">{c.title}</h3>
-              <p className="mt-2 h-[60px] text-[14px] leading-[1.45] text-[#6c717b]">{c.text}</p>
+              <h3 className="text-[15px] font-bold leading-tight text-[#181c25]">{c.title}</h3>
+              <p className="mt-2 h-[60px] text-[10.5px] leading-[1.45] text-[#6c717b]">{c.text}</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {c.tags.map((t) => (
-                  <span key={t} className="rounded-lg bg-[#e8e9eb] px-2 py-1 text-[13px] font-bold text-[#181c25]">
+                  <span key={t} className="rounded-lg bg-[#e8e9eb] px-2 py-1 text-[10px] font-bold text-[#181c25]">
                     {t}
                   </span>
                 ))}

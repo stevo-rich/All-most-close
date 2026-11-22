@@ -23,7 +23,7 @@ const METHODS = [
 function MethodGlyph({ kind }: { kind: "mpesa" | "crypto" | "card" }) {
   if (kind === "crypto")
     return (
-      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fff4e5] text-[20px] font-black text-[#f7931a]">₿</span>
+      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fff4e5] text-[15px] font-black text-[#f7931a]">₿</span>
     );
   if (kind === "card")
     return (
@@ -98,10 +98,10 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
                 <path d="m3.5 7 8.5 6 8.5-6" />
               </svg>
             </span>
-            <h2 className="anim-fade-up mt-5 text-[17px] font-bold leading-snug text-[#181c25]">
+            <h2 className="anim-fade-up mt-5 text-[13px] font-bold leading-snug text-[#181c25]">
               Confirm your identity to make a withdrawal.
             </h2>
-            <p className="anim-fade-up mt-2.5 max-w-[320px] text-[14px] leading-[1.5] text-[#5c6470]" style={{ animationDelay: "70ms" }}>
+            <p className="anim-fade-up mt-2.5 max-w-[320px] text-[10.5px] leading-[1.5] text-[#5c6470]" style={{ animationDelay: "70ms" }}>
               Hit the button below, and we'll email you a verification link.
               <br />
               <br />
@@ -128,22 +128,22 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
                 <path d="M16.5 4.2 19 6.7l3-3" stroke="#4bb4b3" strokeWidth="2" />
               </svg>
             </span>
-            <h2 className="anim-fade-up mt-5 text-[17px] font-bold text-[#181c25]">We've sent you an email.</h2>
-            <p className="anim-fade-up mt-2 max-w-[320px] text-[14px] leading-[1.5] text-[#5c6470]" style={{ animationDelay: "70ms" }}>
+            <h2 className="anim-fade-up mt-5 text-[13px] font-bold text-[#181c25]">We've sent you an email.</h2>
+            <p className="anim-fade-up mt-2 max-w-[320px] text-[10.5px] leading-[1.5] text-[#5c6470]" style={{ animationDelay: "70ms" }}>
               Please check your email for the verification link to complete the process.
             </p>
           </div>
 
           <div className="mx-auto mt-8 max-w-[320px]">
             <div className="rounded-[6px] border border-[#eceef0] p-4 text-center">
-              <div className="text-[13px] font-bold text-[#181c25]">Didn't receive the email?</div>
-              <p className="mt-1 text-[12.5px] leading-snug text-[#6c717b]">
+              <div className="text-[10px] font-bold text-[#181c25]">Didn't receive the email?</div>
+              <p className="mt-1 text-[9.5px] leading-snug text-[#6c717b]">
                 Check your spam or junk folder. If it's not there, try resending the email.
               </p>
               <button
                 onClick={() => countdown.start()}
                 disabled={countdown.running}
-                className="mt-3 text-[13px] font-bold text-[#ff444f] disabled:text-[#9aa1aa]"
+                className="mt-3 text-[10px] font-bold text-[#ff444f] disabled:text-[#9aa1aa]"
               >
                 {countdown.running ? `Resend email in ${countdown.left}s` : "Resend email"}
               </button>
@@ -152,11 +152,11 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
             {/* In the clone this stands in for clicking the emailed link. */}
             <button
               onClick={() => setStep("form")}
-              className="press mt-4 w-full rounded-full bg-[#181c25] py-3.5 text-[15px] font-bold text-white"
+              className="press mt-4 w-full rounded-full bg-[#181c25] py-3.5 text-[11px] font-bold text-white"
             >
               I've verified my email
             </button>
-            <p className="mt-2 text-center text-[11.5px] text-[#9aa1aa]">
+            <p className="mt-2 text-center text-[8.5px] text-[#9aa1aa]">
               Demo shortcut — in the real app this link arrives by email.
             </p>
           </div>
@@ -171,7 +171,7 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
         <div className="px-5 pb-10 pt-8">
           <div className="flex flex-col items-center">
             <SuccessTick tone="#ffad3a" />
-            <h2 className="anim-fade-up mt-4 text-center text-[17px] font-bold text-[#181c25]" style={{ animationDelay: "180ms" }}>
+            <h2 className="anim-fade-up mt-4 text-center text-[13px] font-bold text-[#181c25]" style={{ animationDelay: "180ms" }}>
               Your withdrawal is being processed
             </h2>
             <ReceiptAmount amount={fmtUsd(num)} tone="#181c25" />
@@ -216,7 +216,7 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
           </InlineMessage>
         </div>
 
-        <h3 className="mt-5 text-[15px] font-bold text-[#181c25]">Select withdrawal method</h3>
+        <h3 className="mt-5 text-[11px] font-bold text-[#181c25]">Select withdrawal method</h3>
         <div className="mt-2.5 space-y-2">
           {METHODS.map((m, i) => {
             const active = m.id === method;
@@ -231,8 +231,8 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
               >
                 <MethodGlyph kind={m.glyph} />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[14.5px] font-semibold text-[#181c25]">{m.name}</span>
-                  <span className="block text-[12px] text-[#6c717b]">{m.sub} · {m.eta}</span>
+                  <span className="block text-[11px] font-semibold text-[#181c25]">{m.name}</span>
+                  <span className="block text-[9px] text-[#6c717b]">{m.sub} · {m.eta}</span>
                 </span>
                 <span
                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
@@ -264,7 +264,7 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
               <button
                 key={p}
                 onClick={() => setAmount(((profile.balance * p) / 100).toFixed(2))}
-                className="step-in rounded-full border border-[#d6d9dd] py-2 text-[13px] font-semibold text-[#181c25] transition-colors hover:border-[#181c25]"
+                className="step-in rounded-full border border-[#d6d9dd] py-2 text-[10px] font-semibold text-[#181c25] transition-colors hover:border-[#181c25]"
                 style={{ animationDelay: `${i * 50}ms` }}
               >
                 {p}%

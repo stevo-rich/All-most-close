@@ -38,8 +38,8 @@ export function ProductPage({ kind }: { kind: keyof typeof DATA | string }) {
   return (
     <div>
       <section className="rounded-b-[32px] bg-[#181c25] px-4 pb-8 pt-2 text-white">
-        <h1 className="anim-fade-up text-[28px] font-bold tracking-tight">{d.title}</h1>
-        <p className="anim-fade-up mt-1.5 max-w-[300px] text-[14.5px] leading-snug text-white/65" style={{ animationDelay: "80ms" }}>
+        <h1 className="anim-fade-up text-[21px] font-bold tracking-tight">{d.title}</h1>
+        <p className="anim-fade-up mt-1.5 max-w-[300px] text-[11px] leading-snug text-white/65" style={{ animationDelay: "80ms" }}>
           {d.sub}
         </p>
       </section>
@@ -55,8 +55,8 @@ export function ProductPage({ kind }: { kind: keyof typeof DATA | string }) {
               {it.icon}
             </span>
             <span className="flex-1">
-              <span className="block text-[17px] font-semibold">{it.name}</span>
-              <span className="block text-[13.5px] leading-snug text-[#6c717b]">{it.desc}</span>
+              <span className="block text-[13px] font-semibold">{it.name}</span>
+              <span className="block text-[10px] leading-snug text-[#6c717b]">{it.desc}</span>
             </span>
             <IconChevronRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
           </button>

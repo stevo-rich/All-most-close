@@ -65,7 +65,7 @@ function OptionsHeader({
                   toast(a === "demo" ? "Switched to Demo account" : "Switched to Real account");
                 }
               }}
-              className={`relative flex-1 rounded-full py-2 text-[15.5px] font-semibold capitalize transition-all duration-300 ${
+              className={`relative flex-1 rounded-full py-2 text-[11.5px] font-semibold capitalize transition-all duration-300 ${
                 active ? "bg-white/[0.16] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,.06)]" : "text-white/55 hover:text-white/80"
               }`}
             >
@@ -94,7 +94,7 @@ function OptionsHeader({
       >
         <IconBell size={19} />
         {unread > 0 && (
-          <span className="anim-pop absolute -right-0.5 -top-0.5 flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-[#ff444f] px-1 text-[11.5px] font-bold leading-none text-white">
+          <span className="anim-pop absolute -right-0.5 -top-0.5 flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-[#ff444f] px-1 text-[8.5px] font-bold leading-none text-white">
             {unread}
           </span>
         )}
@@ -146,15 +146,15 @@ function BalanceHero({
       >
         {icon}
       </span>
-      <span className="text-[15px] text-white">{label}</span>
+      <span className="text-[11px] text-white">{label}</span>
     </button>
   );
 
   return (
     <section className="rounded-b-[30px] bg-[#181c25] px-5 pb-8 pt-2 text-white">
-      <p className="text-[15px] text-white/70">Total trading value</p>
+      <p className="text-[11px] text-white/70">Total trading value</p>
       <div className="mt-1 flex items-center gap-3">
-        <span className="text-[30px] font-bold leading-9 tracking-tight">
+        <span className="text-[22.5px] font-bold leading-9 tracking-tight">
           {hidden ? "••••••" : `${fmtPrice(balance)} USD`}
         </span>
         <button aria-label="Refresh" onClick={refresh} className="press text-white">
@@ -163,7 +163,7 @@ function BalanceHero({
           </span>
         </button>
       </div>
-      <p className="mt-1 text-[14px] text-white/55">{busy ? "Updating…" : `Updated ${updated}`}</p>
+      <p className="mt-1 text-[10.5px] text-white/55">{busy ? "Updating…" : `Updated ${updated}`}</p>
 
       <div className="mt-7 flex items-start justify-center gap-16">
         {action("Trade", <IconTradeCircle size={27} />, onTrade, true)}
@@ -240,17 +240,17 @@ function MarketCard({ m, onPick }: { m: Market; onPick: (m: Market) => void }) {
       className="press anim-fade-up flex min-w-0 flex-col rounded-[16px] bg-[#f4f5f6] px-3 pb-3 pt-2.5 text-left transition-colors hover:bg-[#eef0f2]"
     >
       <CandleGlyph vol={m.vol} small />
-      <span className="mt-2 block text-[14.5px] leading-[1.3] text-[#181c25]">{m.name}</span>
-      <span className="mt-2 block truncate text-[20px] font-bold leading-tight tracking-tight text-[#181c25]">
+      <span className="mt-2 block text-[11px] leading-[1.3] text-[#181c25]">{m.name}</span>
+      <span className="mt-2 block truncate text-[15px] font-bold leading-tight tracking-tight text-[#181c25]">
         {fmtPrice(m.price)}
       </span>
       <span className="mt-2 flex items-center gap-1.5">
         <span className="min-w-0 flex-1">
           <Sparkline series={m.series} change={m.change} />
         </span>
-        <span className="shrink-0 whitespace-nowrap text-[12.5px] font-medium leading-none" style={{ color: up ? GREEN : RED }}>
+        <span className="shrink-0 whitespace-nowrap text-[9.5px] font-medium leading-none" style={{ color: up ? GREEN : RED }}>
           {fmtChange(m.change)}
-          <span className="ml-1 text-[11.5px] text-[#6c717b]">(5m)</span>
+          <span className="ml-1 text-[8.5px] text-[#6c717b]">(5m)</span>
         </span>
       </span>
     </button>
@@ -263,7 +263,7 @@ function MarketCard({ m, onPick }: { m: Market; onPick: (m: Market) => void }) {
 function PlatformTile({ label, tone }: { label: string; tone: "red" | "navy" }) {
   return (
     <span
-      className="flex h-[54px] w-[54px] shrink-0 items-center justify-center text-[19px] font-extrabold text-white"
+      className="flex h-[54px] w-[54px] shrink-0 items-center justify-center text-[14px] font-extrabold text-white"
       style={{
         background: tone === "red" ? "linear-gradient(135deg,#ff5a64,#e5343f)" : "linear-gradient(135deg,#2b3a60,#1b2647)",
         borderRadius: "14px 18px 16px 14px",
@@ -458,7 +458,7 @@ export function OptionsPage({
 
       {/* Most traded markets */}
       <section className="px-4 pt-7">
-        <h2 className="text-[22px] font-bold tracking-tight text-[#181c25]">Most traded markets</h2>
+        <h2 className="text-[16.5px] font-bold tracking-tight text-[#181c25]">Most traded markets</h2>
         <div className="mt-4 grid grid-cols-2 items-stretch gap-3">
           {shown.map((m) => (
             <MarketCard
@@ -479,14 +479,14 @@ export function OptionsPage({
             style={{ animationDelay: "220ms" }}
           >
             <IconArrowRight size={24} strokeWidth={1.6} />
-            <span className="text-[15px]">View all</span>
+            <span className="text-[11px]">View all</span>
           </button>
         </div>
       </section>
 
       {/* Featured — swipeable carousel with dot pagination */}
       <section className="mt-8 px-4">
-        <h2 className="text-[22px] font-bold tracking-tight text-[#181c25]">Featured</h2>
+        <h2 className="text-[16.5px] font-bold tracking-tight text-[#181c25]">Featured</h2>
         <div className="relative mt-4">
           {/* stacked-card effect behind the carousel */}
           <div className="pointer-events-none absolute inset-x-3 -top-2 h-6 rounded-t-[14px] border border-[#e3e5e8] bg-white" />
@@ -503,19 +503,19 @@ export function OptionsPage({
               >
                 <img src={f.img} alt={f.title} className="h-[164px] w-full shrink-0 object-cover" />
                 <div className="flex flex-1 flex-col px-4 pb-4 pt-3.5">
-                  <h3 className="text-[21px] font-bold tracking-tight text-[#181c25]">{f.title}</h3>
-                  <p className="mt-1.5 text-[15.5px] leading-[1.4] text-[#5c6470]">{f.text}</p>
+                  <h3 className="text-[16px] font-bold tracking-tight text-[#181c25]">{f.title}</h3>
+                  <p className="mt-1.5 text-[11.5px] leading-[1.4] text-[#5c6470]">{f.text}</p>
                   <div className="mt-auto flex items-end justify-between gap-3 pt-4">
                     <div className="flex flex-wrap gap-2">
                       {f.chips.map((c) => (
-                        <span key={c} className="rounded-md bg-[#eceef0] px-2.5 py-1.5 text-[13px] font-semibold text-[#3c4652]">
+                        <span key={c} className="rounded-md bg-[#eceef0] px-2.5 py-1.5 text-[10px] font-semibold text-[#3c4652]">
                           {c}
                         </span>
                       ))}
                     </div>
                     <button
                       onClick={() => onOpenTrader(f.title)}
-                      className="press shrink-0 rounded-full border-[1.5px] border-[#181c25] px-4 py-[9px] text-[15px] font-bold text-[#181c25] hover:bg-[#181c25] hover:text-white"
+                      className="press shrink-0 rounded-full border-[1.5px] border-[#181c25] px-4 py-[9px] text-[11px] font-bold text-[#181c25] hover:bg-[#181c25] hover:text-white"
                     >
                       Trade now
                     </button>
@@ -542,7 +542,7 @@ export function OptionsPage({
 
       {/* Platforms */}
       <section className="px-4 pt-9">
-        <h2 className="text-[22px] font-bold tracking-tight text-[#181c25]">Platforms</h2>
+        <h2 className="text-[16.5px] font-bold tracking-tight text-[#181c25]">Platforms</h2>
         <div className="mt-4 space-y-3">
           {[
             { name: "Deriv Trader", desc: "Trade options on 100+ markets. No overnight swap fees.", tile: "DT", tone: "red" as const, on: () => onOpenTrader() },
@@ -557,8 +557,8 @@ export function OptionsPage({
             >
               <PlatformTile label={p.tile} tone={p.tone} />
               <span className="flex-1">
-                <span className="block text-[18px] font-bold text-[#181c25]">{p.name}</span>
-                <span className="mt-0.5 block text-[15px] leading-[1.35] text-[#5c6470]">{p.desc}</span>
+                <span className="block text-[13.5px] font-bold text-[#181c25]">{p.name}</span>
+                <span className="mt-0.5 block text-[11px] leading-[1.35] text-[#5c6470]">{p.desc}</span>
               </span>
             </button>
           ))}
@@ -567,13 +567,13 @@ export function OptionsPage({
 
       {/* Trade types */}
       <section className="px-4 pb-10 pt-9">
-        <h2 className="text-[22px] font-bold tracking-tight text-[#181c25]">Trade types</h2>
+        <h2 className="text-[16.5px] font-bold tracking-tight text-[#181c25]">Trade types</h2>
         <div className="hide-scroll mt-4 flex gap-2.5 overflow-x-auto pb-1">
           {TRADE_GROUPS.map((g) => (
             <button
               key={g.id}
               onClick={() => setGroup(g.id)}
-              className={`press shrink-0 rounded-full border px-4 py-2.5 text-[15.5px] transition-colors ${
+              className={`press shrink-0 rounded-full border px-4 py-2.5 text-[11.5px] transition-colors ${
                 group === g.id
                   ? "border-[#181c25] bg-[#181c25] font-semibold text-white"
                   : "border-[#d3d7db] bg-white text-[#181c25] hover:border-[#9aa1aa]"
@@ -595,7 +595,7 @@ export function OptionsPage({
               style={{ animationDelay: `${i * 45}ms` }}
             >
               <TradeGlyph kind={t.kind} />
-              <span className="line-clamp-1 w-full text-[14.5px] text-[#181c25]">{t.label}</span>
+              <span className="line-clamp-1 w-full text-[11px] text-[#181c25]">{t.label}</span>
             </button>
           ))}
         </div>

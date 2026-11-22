@@ -35,8 +35,8 @@ export function SuccessTick({ tone = "#4bb4b3", size = 72 }: { tone?: string; si
 export function ReceiptAmount({ amount, currency = "USD", tone = "#4bb4b3" }: { amount: string; currency?: string; tone?: string }) {
   return (
     <div className="mt-4 text-center">
-      <div className="anim-fade-up text-[26px] font-bold tabular-nums leading-none" style={{ color: tone }}>
-        {amount} <span className="text-[15px] font-semibold">{currency}</span>
+      <div className="anim-fade-up text-[19.5px] font-bold tabular-nums leading-none" style={{ color: tone }}>
+        {amount} <span className="text-[11px] font-semibold">{currency}</span>
       </div>
     </div>
   );
@@ -63,8 +63,8 @@ export function TransferRoute({
             <path d="M2.5 10.5h19" />
           </svg>
         </div>
-        <div className="mt-2 text-[13.5px] font-semibold text-[#181c25]">{from}</div>
-        {fromDetail && <div className="text-[11.5px] text-[#6c717b]">{fromDetail}</div>}
+        <div className="mt-2 text-[10px] font-semibold text-[#181c25]">{from}</div>
+        {fromDetail && <div className="text-[8.5px] text-[#6c717b]">{fromDetail}</div>}
       </div>
       <div className="step-in flex shrink-0 items-center justify-center text-[#4bb4b3]" style={{ animationDelay: "140ms" }}>
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -78,8 +78,8 @@ export function TransferRoute({
             <path d="M2.5 10.5h19" />
           </svg>
         </div>
-        <div className="mt-2 text-[13.5px] font-semibold text-[#181c25]">{to}</div>
-        {toDetail && <div className="text-[11.5px] text-[#6c717b]">{toDetail}</div>}
+        <div className="mt-2 text-[10px] font-semibold text-[#181c25]">{to}</div>
+        {toDetail && <div className="text-[8.5px] text-[#6c717b]">{toDetail}</div>}
       </div>
     </div>
   );
@@ -91,8 +91,8 @@ export function DateRows({ rows }: { rows: [string, ReactNode][] }) {
     <div className="mt-6 divide-y divide-[#eceef0] rounded-[6px] border border-[#eceef0]">
       {rows.map(([k, v], i) => (
         <div key={k} className="step-in flex items-start justify-between gap-4 px-3.5 py-3" style={{ animationDelay: `${260 + i * 60}ms` }}>
-          <span className="text-[13px] text-[#6c717b]">{k}</span>
-          <span className="text-right text-[13px] font-semibold text-[#181c25]">{v}</span>
+          <span className="text-[10px] text-[#6c717b]">{k}</span>
+          <span className="text-right text-[10px] font-semibold text-[#181c25]">{v}</span>
         </div>
       ))}
     </div>

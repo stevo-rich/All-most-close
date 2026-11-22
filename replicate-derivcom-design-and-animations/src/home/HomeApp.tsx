@@ -133,7 +133,7 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
               <span key={String(active)} className={`${active ? "nav-bounce text-[#ff444f]" : "text-[#181c25]"} transition-colors duration-300 group-hover:scale-105`}>
                 <NavIcon id={n.id} active={active} />
               </span>
-              <span className={`text-[13px] font-semibold transition-colors duration-300 ${active ? "text-[#ff444f]" : "text-[#181c25]"}`}>{n.label}</span>
+              <span className={`text-[10px] font-semibold transition-colors duration-300 ${active ? "text-[#ff444f]" : "text-[#181c25]"}`}>{n.label}</span>
             </button>
           );
         })}
@@ -157,14 +157,14 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search products and settings"
-              className="flex-1 bg-transparent text-[16px] outline-none"
+              className="flex-1 bg-transparent text-[12px] outline-none"
             />
             <button
               onClick={() => {
                 setOverlay(null);
                 setQuery("");
               }}
-              className="text-[15px] font-semibold text-[#ff444f]"
+              className="text-[11px] font-semibold text-[#ff444f]"
             >
               Cancel
             </button>
@@ -180,7 +180,7 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
                   className="flex w-full items-center gap-4 rounded-2xl px-3 py-3 text-left hover:bg-[#f5f5f5]"
                 >
                   <span className="flex h-10 w-10 items-center justify-center">{s.icon}</span>
-                  <span className="flex-1 text-[16px]">{s.label}</span>
+                  <span className="flex-1 text-[12px]">{s.label}</span>
                   <IconChevronRight size={16} />
                 </button>
               </li>
@@ -221,7 +221,7 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
                 <span className="flex h-[66px] w-[66px] items-center justify-center rounded-full bg-[#f3f3f4] shadow-[0_6px_14px_rgba(0,0,0,.07)] transition-transform duration-300 group-hover:scale-110 group-active:scale-90">
                   {x.i}
                 </span>
-                <span className="mt-2 text-[14px]">{x.l}</span>
+                <span className="mt-2 text-[10.5px]">{x.l}</span>
               </button>
             ))}
           </div>

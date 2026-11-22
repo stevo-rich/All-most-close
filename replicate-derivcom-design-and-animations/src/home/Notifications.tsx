@@ -134,7 +134,7 @@ export function NotificationsPanel({
             <button
               key={f.id}
               onClick={() => setFilter(f.id)}
-              className={`shrink-0 rounded-full border px-3 py-1.5 text-[12.5px] font-semibold transition-colors ${
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-[9.5px] font-semibold transition-colors ${
                 filter === f.id ? "border-[#181c25] bg-[#181c25] text-white" : "border-[#d6d9dd] text-[#5c6470]"
               }`}
             >
@@ -144,8 +144,8 @@ export function NotificationsPanel({
         </div>
         {unread > 0 && (
           <div className="mt-2 flex items-center justify-between">
-            <span className="text-[12px] font-semibold text-[#6c717b]">{unread} unread</span>
-            <button onClick={onMarkAll} className="text-[12.5px] font-bold text-[#ff444f]">
+            <span className="text-[9px] font-semibold text-[#6c717b]">{unread} unread</span>
+            <button onClick={onMarkAll} className="text-[9.5px] font-bold text-[#ff444f]">
               Mark all as read
             </button>
           </div>
@@ -157,7 +157,7 @@ export function NotificationsPanel({
           <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <path d="M12 3a6 6 0 0 0-6 6v4l-1.6 3.2h15.2L18 13V9a6 6 0 0 0-6-6ZM9.5 19a2.5 2.5 0 0 0 5 0" />
           </svg>
-          <p className="mt-2 text-[14px]">You're all caught up</p>
+          <p className="mt-2 text-[10.5px]">You're all caught up</p>
         </div>
       ) : (
         <ul className="space-y-2.5">
@@ -176,21 +176,21 @@ export function NotificationsPanel({
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="rounded-full px-1.5 py-[1px] text-[10px] font-bold uppercase tracking-wide" style={{ background: k.bg, color: k.tint }}>
+                      <span className="rounded-full px-1.5 py-[1px] text-[7.5px] font-bold uppercase tracking-wide" style={{ background: k.bg, color: k.tint }}>
                         {k.label}
                       </span>
                       {!n.read && <span className="h-1.5 w-1.5 rounded-full bg-[#ff444f]" />}
-                      <span className="ml-auto shrink-0 text-[11px] text-[#9aa1aa]">{n.time}</span>
+                      <span className="ml-auto shrink-0 text-[8px] text-[#9aa1aa]">{n.time}</span>
                     </div>
-                    <div className="mt-1.5 text-[14px] font-bold leading-snug text-[#181c25]">{n.title}</div>
-                    <div className="mt-0.5 text-[13px] leading-snug text-[#5c6470]">{n.body}</div>
+                    <div className="mt-1.5 text-[10.5px] font-bold leading-snug text-[#181c25]">{n.title}</div>
+                    <div className="mt-0.5 text-[10px] leading-snug text-[#5c6470]">{n.body}</div>
                     {n.action && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onAction?.(n);
                         }}
-                        className="mt-2 rounded-full bg-[#181c25] px-3 py-1.5 text-[12px] font-bold text-white"
+                        className="mt-2 rounded-full bg-[#181c25] px-3 py-1.5 text-[9px] font-bold text-white"
                       >
                         {n.action}
                       </button>

@@ -43,7 +43,7 @@ export function HomeHeader(p: Props) {
         </Circle>
       )}
       {p.avatar && (
-        <Circle label="Profile" onClick={p.onAvatar} className="text-[12px] font-semibold">
+        <Circle label="Profile" onClick={p.onAvatar} className="text-[9px] font-semibold">
           {p.initials ?? "JD"}
         </Circle>
       )}
@@ -62,7 +62,7 @@ export function HomeHeader(p: Props) {
           <span className="flex shrink-0" style={{ animation: "sparkle-twinkle 3s ease-in-out infinite" }}>
             <IconSparkle size={20} />
           </span>
-          <span className="amy-text whitespace-nowrap text-[17px] font-extrabold tracking-tight">Ask Amy</span>
+          <span className="amy-text whitespace-nowrap text-[13px] font-extrabold tracking-tight">Ask Amy</span>
         </button>
       )}
 
@@ -84,7 +84,7 @@ export function HomeHeader(p: Props) {
         {p.unread > 0 && (
           <span
             key={p.unread}
-            className="anim-pop absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#ff444f] px-1 text-[11px] font-bold leading-none text-white"
+            className="anim-pop absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#ff444f] px-1 text-[8px] font-bold leading-none text-white"
           >
             {p.unread}
           </span>

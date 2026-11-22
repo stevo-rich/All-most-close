@@ -22,7 +22,7 @@ const METHODS = [
 
 function Glyph({ kind }: { kind: "mpesa" | "agent" | "crypto" | "card" }) {
   if (kind === "crypto")
-    return <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#fff4e5] text-[22px] font-black text-[#f7931a]">₿</span>;
+    return <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#fff4e5] text-[16.5px] font-black text-[#f7931a]">₿</span>;
   if (kind === "card")
     return (
       <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef2f7]">
@@ -92,14 +92,14 @@ export function DepositFlow({ onClose }: { onClose: () => void }) {
             <span className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-[#ff444f] anim-spin-loop" />
             <Glyph kind={chosen.glyph} />
           </span>
-          <h2 className="mt-6 text-[17px] font-bold text-[#181c25]">Waiting for your payment</h2>
-          <p className="mt-2 max-w-[300px] text-[14px] leading-[1.5] text-[#5c6470]">
+          <h2 className="mt-6 text-[13px] font-bold text-[#181c25]">Waiting for your payment</h2>
+          <p className="mt-2 max-w-[300px] text-[10.5px] leading-[1.5] text-[#5c6470]">
             Complete the payment with {chosen.name}. We'll credit your account as soon as it's confirmed.
           </p>
           <div className="mt-6 w-full max-w-[300px] rounded-[6px] border border-[#eceef0] p-4">
-            <div className="text-[12px] text-[#6c717b]">Amount</div>
-            <div className="text-[19px] font-bold tabular-nums text-[#181c25]">{fmtUsd(num)} USD</div>
-            <div className="mt-1 text-[12.5px] text-[#6c717b]">≈ KES {fmtUsd(num * RATE)}</div>
+            <div className="text-[9px] text-[#6c717b]">Amount</div>
+            <div className="text-[14px] font-bold tabular-nums text-[#181c25]">{fmtUsd(num)} USD</div>
+            <div className="mt-1 text-[9.5px] text-[#6c717b]">≈ KES {fmtUsd(num * RATE)}</div>
           </div>
           <div className="mt-6 w-full max-w-[300px]">
             <GhostButton
@@ -119,11 +119,11 @@ export function DepositFlow({ onClose }: { onClose: () => void }) {
         <div className="px-5 pb-10 pt-8">
           <div className="flex flex-col items-center">
             <SuccessTick />
-            <h2 className="anim-fade-up mt-4 text-center text-[17px] font-bold text-[#181c25]" style={{ animationDelay: "180ms" }}>
+            <h2 className="anim-fade-up mt-4 text-center text-[13px] font-bold text-[#181c25]" style={{ animationDelay: "180ms" }}>
               Your deposit is successful
             </h2>
-            <div className="anim-fade-up mt-1.5 text-[26px] font-bold tabular-nums text-[#4bb4b3]" style={{ animationDelay: "230ms" }}>
-              +{fmtUsd(num)} <span className="text-[15px] font-semibold">USD</span>
+            <div className="anim-fade-up mt-1.5 text-[19.5px] font-bold tabular-nums text-[#4bb4b3]" style={{ animationDelay: "230ms" }}>
+              +{fmtUsd(num)} <span className="text-[11px] font-semibold">USD</span>
             </div>
           </div>
           <DateRows
@@ -151,10 +151,10 @@ export function DepositFlow({ onClose }: { onClose: () => void }) {
           <div className="flex items-center gap-3 rounded-[6px] border border-[#e6e8ea] p-3">
             <Glyph kind={chosen.glyph} />
             <span className="min-w-0 flex-1">
-              <span className="block text-[14.5px] font-semibold text-[#181c25]">{chosen.name}</span>
-              <span className="block text-[12px] text-[#6c717b]">{chosen.sub}</span>
+              <span className="block text-[11px] font-semibold text-[#181c25]">{chosen.name}</span>
+              <span className="block text-[9px] text-[#6c717b]">{chosen.sub}</span>
             </span>
-            <button onClick={() => setStep("methods")} className="shrink-0 text-[13px] font-bold text-[#ff444f]">
+            <button onClick={() => setStep("methods")} className="shrink-0 text-[10px] font-bold text-[#ff444f]">
               Change
             </button>
           </div>
@@ -177,7 +177,7 @@ export function DepositFlow({ onClose }: { onClose: () => void }) {
                 <button
                   key={v}
                   onClick={() => setAmount(String(v))}
-                  className="step-in rounded-full border border-[#d6d9dd] py-2 text-[13px] font-semibold text-[#181c25] transition-colors hover:border-[#181c25]"
+                  className="step-in rounded-full border border-[#d6d9dd] py-2 text-[10px] font-semibold text-[#181c25] transition-colors hover:border-[#181c25]"
                   style={{ animationDelay: `${i * 50}ms` }}
                 >
                   {v} USD
@@ -213,7 +213,7 @@ export function DepositFlow({ onClose }: { onClose: () => void }) {
           </InlineMessage>
         </div>
 
-        <h3 className="mt-5 text-[15px] font-bold text-[#181c25]">Select a payment method</h3>
+        <h3 className="mt-5 text-[11px] font-bold text-[#181c25]">Select a payment method</h3>
         <div className="mt-2.5 space-y-2">
           {METHODS.map((m, i) => (
             <button
@@ -228,15 +228,15 @@ export function DepositFlow({ onClose }: { onClose: () => void }) {
             >
               <Glyph kind={m.glyph} />
               <span className="min-w-0 flex-1">
-                <span className="block text-[14.5px] font-semibold text-[#181c25]">{m.name}</span>
-                <span className="block text-[12px] text-[#6c717b]">{m.sub}</span>
+                <span className="block text-[11px] font-semibold text-[#181c25]">{m.name}</span>
+                <span className="block text-[9px] text-[#6c717b]">{m.sub}</span>
               </span>
-              <span className="shrink-0 rounded-full bg-[#f2f3f4] px-2 py-1 text-[11px] font-semibold text-[#5c6470]">{m.tag}</span>
+              <span className="shrink-0 rounded-full bg-[#f2f3f4] px-2 py-1 text-[8px] font-semibold text-[#5c6470]">{m.tag}</span>
             </button>
           ))}
         </div>
 
-        <p className="mt-4 text-center text-[11.5px] text-[#9aa1aa]">Payments are simulated in this demo.</p>
+        <p className="mt-4 text-center text-[8.5px] text-[#9aa1aa]">Payments are simulated in this demo.</p>
       </div>
     </CashierScreen>
   );

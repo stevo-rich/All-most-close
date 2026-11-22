@@ -74,10 +74,10 @@ export function TransferFlow({ onClose }: { onClose: () => void }) {
         <div className="px-5 pb-10 pt-8">
           <div className="flex flex-col items-center">
             <SuccessTick />
-            <h2 className="anim-fade-up mt-4 text-center text-[17px] font-bold text-[#181c25]" style={{ animationDelay: "180ms" }}>
+            <h2 className="anim-fade-up mt-4 text-center text-[13px] font-bold text-[#181c25]" style={{ animationDelay: "180ms" }}>
               Your funds have been transferred
             </h2>
-            <div className="anim-fade-up mt-1.5 text-[24px] font-bold tabular-nums text-[#4bb4b3]" style={{ animationDelay: "230ms" }}>
+            <div className="anim-fade-up mt-1.5 text-[18px] font-bold tabular-nums text-[#4bb4b3]" style={{ animationDelay: "230ms" }}>
               {fmtUsd(move)} USD
             </div>
           </div>
@@ -117,7 +117,7 @@ export function TransferFlow({ onClose }: { onClose: () => void }) {
                 <path d="M12 3.5 21 19H3l9-15.5ZM12 9.5v4M12 16.5v.2" />
               </svg>
             </span>
-            <h2 className="mt-4 text-[17px] font-bold text-[#ff444f]">Check transfer information</h2>
+            <h2 className="mt-4 text-[13px] font-bold text-[#ff444f]">Check transfer information</h2>
           </div>
 
           <div className="mt-5 divide-y divide-[#eceef0] rounded-[6px] border border-[#eceef0]">
@@ -128,13 +128,13 @@ export function TransferFlow({ onClose }: { onClose: () => void }) {
               ["Transfer fee", "0.00 USD"],
             ].map(([k, v], i) => (
               <div key={k} className="step-in flex items-start justify-between gap-4 px-3.5 py-3" style={{ animationDelay: `${i * 60}ms` }}>
-                <span className="text-[13px] text-[#6c717b]">{k}</span>
-                <span className="text-right text-[13px] font-semibold text-[#181c25]">{v}</span>
+                <span className="text-[10px] text-[#6c717b]">{k}</span>
+                <span className="text-right text-[10px] font-semibold text-[#181c25]">{v}</span>
               </div>
             ))}
           </div>
 
-          <ul className="mt-4 space-y-1.5 text-[12.5px] leading-snug text-[#ff444f]">
+          <ul className="mt-4 space-y-1.5 text-[9.5px] leading-snug text-[#ff444f]">
             <li className="flex gap-2">
               <span className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-[#ff444f]" />
               Please ensure all details are correct before making your transfer.
@@ -147,7 +147,7 @@ export function TransferFlow({ onClose }: { onClose: () => void }) {
 
           <label className="mt-5 flex cursor-pointer items-start gap-2.5">
             <input type="checkbox" className="mt-[3px] h-4 w-4 accent-[#ff444f]" />
-            <span className="text-[13px] leading-snug text-[#181c25]">I confirm that I have verified the transfer information.</span>
+            <span className="text-[10px] leading-snug text-[#181c25]">I confirm that I have verified the transfer information.</span>
           </label>
 
           <div className="mt-6 space-y-2.5">
@@ -164,7 +164,7 @@ export function TransferFlow({ onClose }: { onClose: () => void }) {
   return (
     <CashierScreen title="Transfer" onClose={onClose}>
       <div className="px-5 pb-10 pt-4">
-        <h2 className="text-[16px] font-bold text-[#181c25]">Transfer between your accounts in Deriv</h2>
+        <h2 className="text-[12px] font-bold text-[#181c25]">Transfer between your accounts in Deriv</h2>
         <div className="mt-3">
           <InlineMessage type="info">
             Transfers within accounts are only available for trading, not withdrawals. To withdraw funds, use the same
@@ -208,7 +208,7 @@ export function TransferFlow({ onClose }: { onClose: () => void }) {
               <button
                 key={p}
                 onClick={() => setAmount(((from.balance * p) / 100).toFixed(2))}
-                className="step-in rounded-full border border-[#d6d9dd] py-2 text-[13px] font-semibold text-[#181c25] transition-colors hover:border-[#181c25]"
+                className="step-in rounded-full border border-[#d6d9dd] py-2 text-[10px] font-semibold text-[#181c25] transition-colors hover:border-[#181c25]"
                 style={{ animationDelay: `${i * 50}ms` }}
               >
                 {p}%

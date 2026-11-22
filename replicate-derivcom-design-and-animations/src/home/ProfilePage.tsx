@@ -53,7 +53,7 @@ function SettingsHeader({ onBack, onSearch, unread, onBell }: { onBack: () => vo
       >
         <IconBell size={18} />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#ff444f] px-1 text-[11px] font-bold leading-none text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#ff444f] px-1 text-[8px] font-bold leading-none text-white">
             {unread}
           </span>
         )}
@@ -86,9 +86,9 @@ function Row({
       <button onClick={onClick} className="group flex w-full items-center gap-5 py-[19px] text-left transition-colors hover:bg-black/[0.02]">
         <span className="flex w-7 shrink-0 justify-center text-[#181c25]">{icon}</span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[18px] leading-snug text-[#181c25]">{label}</span>
+          <span className="block text-[13.5px] leading-snug text-[#181c25]">{label}</span>
           {sub && (
-            <span className={`mt-1 block text-[15.5px] leading-snug ${warning ? "text-[#b8860b]" : "text-[#8a8f99]"}`}>{sub}</span>
+            <span className={`mt-1 block text-[11.5px] leading-snug ${warning ? "text-[#b8860b]" : "text-[#8a8f99]"}`}>{sub}</span>
           )}
         </span>
         {info && (
@@ -107,7 +107,7 @@ function Row({
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="px-4 pt-8">
-      <h2 className="text-[21px] font-bold tracking-tight text-[#181c25]">{title}</h2>
+      <h2 className="text-[16px] font-bold tracking-tight text-[#181c25]">{title}</h2>
       <ul className="mt-2">{children}</ul>
     </section>
   );
@@ -131,13 +131,13 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="block text-[16px] text-[#333]">{label}</span>
+      <span className="block text-[12px] text-[#333]">{label}</span>
       <span className="mt-2 flex items-center gap-2 rounded-xl border border-[#e0e2e6] bg-white px-4 py-[15px] focus-within:border-[#181c25]">
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="min-w-0 flex-1 bg-transparent text-[17px] text-[#181c25] outline-none placeholder:text-[#b5b9c2]"
+          className="min-w-0 flex-1 bg-transparent text-[13px] text-[#181c25] outline-none placeholder:text-[#b5b9c2]"
         />
         {suffix}
       </span>
@@ -167,10 +167,10 @@ const Flag = ({ country }: { country: string }) => {
 function CountrySelect({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <label className="block">
-      <span className="block text-[16px] text-[#333]">{label}</span>
+      <span className="block text-[12px] text-[#333]">{label}</span>
       <span className="relative mt-2 flex items-center gap-3 rounded-xl border border-[#e0e2e6] bg-white px-4 py-[15px]">
         <Flag country={value} />
-        <span className="flex-1 text-[17px] text-[#181c25]">{value}</span>
+        <span className="flex-1 text-[13px] text-[#181c25]">{value}</span>
         <span className="text-[#6c717b]">
           <IconChevronDown size={18} />
         </span>
@@ -231,7 +231,7 @@ export function PersonalDetails({ onBack, unread, onBell }: { onBack: () => void
         <button aria-label="Notifications" onClick={onBell} className="press relative flex h-9 w-9 items-center justify-center rounded-full bg-[#f2f3f4]">
           <IconBell size={18} />
           {unread > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#ff444f] px-1 text-[11px] font-bold leading-none text-white">
+            <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#ff444f] px-1 text-[8px] font-bold leading-none text-white">
               {unread}
             </span>
           )}
@@ -239,7 +239,7 @@ export function PersonalDetails({ onBack, unread, onBell }: { onBack: () => void
       </div>
 
       <div className="px-4 pb-40">
-        <h1 className="text-[32px] font-extrabold tracking-tight text-[#181c25]">Personal details</h1>
+        <h1 className="text-[24px] font-extrabold tracking-tight text-[#181c25]">Personal details</h1>
 
         <div className="mt-7 space-y-5">
           <Field label="First name" value={draft.firstName} onChange={(v) => set({ firstName: v })} />
@@ -262,10 +262,10 @@ export function PersonalDetails({ onBack, unread, onBell }: { onBack: () => void
           {/* Balance — feeds the real account everywhere */}
           <div className="mt-2 rounded-2xl border border-[#e0e2e6] bg-[#f7f8f9] p-4">
             <div className="flex items-center justify-between">
-              <span className="text-[16px] font-bold text-[#181c25]">Account balance</span>
-              <span className="rounded-full bg-[#181c25] px-2.5 py-1 text-[11.5px] font-bold uppercase tracking-wide text-white">Real</span>
+              <span className="text-[12px] font-bold text-[#181c25]">Account balance</span>
+              <span className="rounded-full bg-[#181c25] px-2.5 py-1 text-[8.5px] font-bold uppercase tracking-wide text-white">Real</span>
             </div>
-            <p className="mt-1 text-[13.5px] leading-snug text-[#6c717b]">
+            <p className="mt-1 text-[10px] leading-snug text-[#6c717b]">
               Sets the real account balance used on Home, Options and in Deriv Bot trading.
             </p>
             <span className="mt-3 flex items-center gap-2 rounded-xl border border-[#e0e2e6] bg-white px-4 py-[13px] focus-within:border-[#181c25]">
@@ -274,16 +274,16 @@ export function PersonalDetails({ onBack, unread, onBell }: { onBack: () => void
                 value={balanceText}
                 onChange={(e) => setBalanceText(e.target.value.replace(/[^0-9.,]/g, ""))}
                 placeholder="0.00"
-                className="min-w-0 flex-1 bg-transparent text-[20px] font-bold text-[#181c25] outline-none placeholder:text-[#b5b9c2]"
+                className="min-w-0 flex-1 bg-transparent text-[15px] font-bold text-[#181c25] outline-none placeholder:text-[#b5b9c2]"
               />
-              <span className="text-[15px] font-bold text-[#6c717b]">USD</span>
+              <span className="text-[11px] font-bold text-[#6c717b]">USD</span>
             </span>
             <div className="mt-2.5 flex gap-2">
               {[100, 500, 1000, 5000].map((v) => (
                 <button
                   key={v}
                   onClick={() => setBalanceText(fmtUsd(v))}
-                  className="press flex-1 rounded-lg bg-[#eceef0] py-1.5 text-[13px] font-semibold text-[#3c4652] hover:bg-[#e2e5e8]"
+                  className="press flex-1 rounded-lg bg-[#eceef0] py-1.5 text-[10px] font-semibold text-[#3c4652] hover:bg-[#e2e5e8]"
                 >
                   {v.toLocaleString()}
                 </button>
@@ -298,7 +298,7 @@ export function PersonalDetails({ onBack, unread, onBell }: { onBack: () => void
         <button
           onClick={submit}
           disabled={!dirty}
-          className={`press w-full rounded-full py-[15px] text-[18px] font-bold transition-colors ${
+          className={`press w-full rounded-full py-[15px] text-[13.5px] font-bold transition-colors ${
             dirty ? "bg-[#ff444f] text-white hover:bg-[#ff5a64]" : "cursor-not-allowed bg-[#ffd0d3] text-white"
           }`}
         >
@@ -335,7 +335,7 @@ export function ProfilePage({ unread = 2, onBell, onBack }: { unread?: number; o
         <div className="anim-pop flex h-[92px] w-[92px] items-center justify-center rounded-full bg-[#3a4150]">
           <IconUserFilled size={44} className="text-white" />
         </div>
-        <h1 className="anim-fade-up mt-5 px-6 text-center text-[23px] font-extrabold uppercase leading-tight tracking-tight">
+        <h1 className="anim-fade-up mt-5 px-6 text-center text-[17px] font-extrabold uppercase leading-tight tracking-tight">
           {fullName(profile) || "Your name"}
         </h1>
         <button
@@ -348,7 +348,7 @@ export function ProfilePage({ unread = 2, onBell, onBack }: { unread?: number; o
           className="press anim-fade-up mt-4 flex items-center gap-3 rounded-full bg-white/[0.09] px-5 py-2.5 hover:bg-white/[0.14]"
           style={{ animationDelay: "180ms" }}
         >
-          <span className="font-mono text-[15px] tracking-[0.12em] text-[#c9ccd3]">019e....3014</span>
+          <span className="font-mono text-[11px] tracking-[0.12em] text-[#c9ccd3]">019e....3014</span>
           <span className={`transition-colors ${copied ? "text-[#00c390]" : "text-[#c9ccd3]"}`}>
             <IconCopy size={17} />
           </span>
@@ -360,8 +360,8 @@ export function ProfilePage({ unread = 2, onBell, onBack }: { unread?: number; o
         <div className="anim-fade-up px-5 pt-6">
           <div className="relative flex h-[145px] items-center overflow-hidden rounded-[20px] bg-[#f2f3f4]">
             <div className="z-10 pl-6">
-              <h3 className="text-[19px] font-bold tracking-tight text-[#181c25]">Deriv is on mobile</h3>
-              <button onClick={() => soon("App download")} className="press mt-2 flex items-center gap-2.5 text-[16px] text-[#181c25]">
+              <h3 className="text-[14px] font-bold tracking-tight text-[#181c25]">Deriv is on mobile</h3>
+              <button onClick={() => soon("App download")} className="press mt-2 flex items-center gap-2.5 text-[12px] text-[#181c25]">
                 Get the Deriv app <IconArrowCircle size={25} />
               </button>
             </div>
@@ -436,7 +436,7 @@ export function ProfilePage({ unread = 2, onBell, onBack }: { unread?: number; o
       <div className="px-4 pb-10 pt-8">
         <button
           onClick={() => toast("Demo clone — log out is not available.")}
-          className="press w-full rounded-full border-[1.5px] border-[#181c25] py-[14px] text-[19px] font-semibold text-[#181c25] hover:bg-[#181c25] hover:text-white"
+          className="press w-full rounded-full border-[1.5px] border-[#181c25] py-[14px] text-[14px] font-semibold text-[#181c25] hover:bg-[#181c25] hover:text-white"
         >
           Log out
         </button>

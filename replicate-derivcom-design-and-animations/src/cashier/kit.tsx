@@ -40,7 +40,7 @@ export function CashierScreen({
             <path d="M15 19 8 12l7-7" />
           </svg>
         </button>
-        <h1 className="min-w-0 flex-1 truncate text-[17px] font-bold text-white">{title}</h1>
+        <h1 className="min-w-0 flex-1 truncate text-[13px] font-bold text-white">{title}</h1>
         {right}
         <button
           onClick={onClose}
@@ -73,9 +73,9 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center px-6 py-10 text-center">
       {icon && <div className="anim-pop mb-5">{icon}</div>}
-      <h2 className="anim-fade-up text-[17px] font-bold leading-snug text-[#181c25]">{title}</h2>
+      <h2 className="anim-fade-up text-[13px] font-bold leading-snug text-[#181c25]">{title}</h2>
       {description && (
-        <div className="anim-fade-up mt-2.5 max-w-[320px] text-[14px] leading-[1.5] text-[#5c6470]" style={{ animationDelay: "70ms" }}>
+        <div className="anim-fade-up mt-2.5 max-w-[320px] text-[10.5px] leading-[1.5] text-[#5c6470]" style={{ animationDelay: "70ms" }}>
           {description}
         </div>
       )}
@@ -83,7 +83,7 @@ export function EmptyState({
         <button
           onClick={action.onClick}
           disabled={action.disabled}
-          className="press anim-fade-up relative mt-6 w-full max-w-[320px] overflow-hidden rounded-full bg-[#ff444f] py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-[#ff5a64] disabled:opacity-50"
+          className="press anim-fade-up relative mt-6 w-full max-w-[320px] overflow-hidden rounded-full bg-[#ff444f] py-3.5 text-[11px] font-bold text-white transition-colors hover:bg-[#ff5a64] disabled:opacity-50"
           style={{ animationDelay: "130ms" }}
         >
           {action.label}
@@ -93,7 +93,7 @@ export function EmptyState({
         <button
           onClick={secondary.onClick}
           disabled={secondary.disabled}
-          className="press mt-3 text-[14px] font-semibold text-[#ff444f] disabled:text-[#9aa1aa]"
+          className="press mt-3 text-[10.5px] font-semibold text-[#ff444f] disabled:text-[#9aa1aa]"
         >
           {secondary.label}
         </button>
@@ -120,7 +120,7 @@ export function InlineMessage({
   return (
     <div className="anim-fade-up flex gap-2.5 rounded-[6px] p-3" style={{ background: tones.bg }}>
       <span className="mt-[3px] h-3 w-1 shrink-0 rounded-full" style={{ background: tones.bar }} />
-      <div className="text-[13px] leading-[1.45]" style={{ color: tones.text }}>
+      <div className="text-[10px] leading-[1.45]" style={{ color: tones.text }}>
         {title && <div className="font-bold">{title}</div>}
         {children}
       </div>
@@ -161,7 +161,7 @@ export function Field({
           className="pointer-events-none absolute left-3 origin-left bg-white px-1 transition-all duration-200"
           style={{
             top: lifted ? -7 : 14,
-            fontSize: lifted ? 11 : 15,
+            fontSize: lifted ? 8 : 11,
             color: error ? "#ff444f" : focus ? "#181c25" : "#6c717b",
           }}
         >
@@ -176,15 +176,15 @@ export function Field({
             onFocus={() => setFocus(true)}
             onBlur={() => setFocus(false)}
             onChange={(e) => onChange(e.target.value.replace(/[^\d.]/g, ""))}
-            className="h-[50px] w-full bg-transparent px-4 text-[16px] font-semibold text-[#181c25] outline-none disabled:text-[#9aa1aa]"
+            className="h-[50px] w-full bg-transparent px-4 text-[12px] font-semibold text-[#181c25] outline-none disabled:text-[#9aa1aa]"
           />
-          {suffix && <span className="shrink-0 pr-4 text-[14px] font-semibold text-[#6c717b]">{suffix}</span>}
+          {suffix && <span className="shrink-0 pr-4 text-[10.5px] font-semibold text-[#6c717b]">{suffix}</span>}
         </div>
       </div>
       {error ? (
-        <p className="mt-1.5 pl-1 text-[12.5px] text-[#ff444f]">{error}</p>
+        <p className="mt-1.5 pl-1 text-[9.5px] text-[#ff444f]">{error}</p>
       ) : (
-        hint && <div className="mt-1.5 pl-1 text-[12.5px] text-[#6c717b]">{hint}</div>
+        hint && <div className="mt-1.5 pl-1 text-[9.5px] text-[#6c717b]">{hint}</div>
       )}
     </div>
   );
@@ -205,7 +205,7 @@ export function PrimaryButton({
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className="press relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-[#ff444f] py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-[#ff5a64] disabled:cursor-not-allowed disabled:bg-[#e6e8ea] disabled:text-[#9aa1aa]"
+      className="press relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-[#ff444f] py-3.5 text-[11px] font-bold text-white transition-colors hover:bg-[#ff5a64] disabled:cursor-not-allowed disabled:bg-[#e6e8ea] disabled:text-[#9aa1aa]"
     >
       {loading ? <Spinner /> : children}
     </button>
@@ -217,7 +217,7 @@ export function GhostButton({ children, onClick, disabled }: { children: ReactNo
     <button
       onClick={onClick}
       disabled={disabled}
-      className="press w-full rounded-full border border-[#d6d9dd] py-3.5 text-[15px] font-bold text-[#181c25] transition-colors hover:bg-[#f5f5f5] disabled:opacity-50"
+      className="press w-full rounded-full border border-[#d6d9dd] py-3.5 text-[11px] font-bold text-[#181c25] transition-colors hover:bg-[#f5f5f5] disabled:opacity-50"
     >
       {children}
     </button>
@@ -268,13 +268,13 @@ export function AccountSelect({
       >
         <Pocket tone={selected?.tone ?? "navy"} />
         <span className="min-w-0 flex-1">
-          <span className="block text-[11px] uppercase tracking-wide text-[#6c717b]">{label}</span>
-          <span className="block truncate text-[14.5px] font-semibold text-[#181c25]">
+          <span className="block text-[8px] uppercase tracking-wide text-[#6c717b]">{label}</span>
+          <span className="block truncate text-[11px] font-semibold text-[#181c25]">
             {selected ? selected.text : "Select an account"}
           </span>
         </span>
         {selected && (
-          <span className="shrink-0 text-[13px] font-semibold tabular-nums text-[#5c6470]">{selected.balance.toFixed(2)}</span>
+          <span className="shrink-0 text-[10px] font-semibold tabular-nums text-[#5c6470]">{selected.balance.toFixed(2)}</span>
         )}
         <IconChevronDown size={16} className={`shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
@@ -288,7 +288,7 @@ export function AccountSelect({
           >
             {groups.map((g) => (
               <div key={g}>
-                <div className="px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wide text-[#9aa1aa]">{g}</div>
+                <div className="px-3 pb-1 pt-2 text-[8px] font-bold uppercase tracking-wide text-[#9aa1aa]">{g}</div>
                 {options
                   .filter((o) => o.group === g)
                   .map((o) => {
@@ -304,10 +304,10 @@ export function AccountSelect({
                       >
                         <Pocket tone={o.tone} />
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[14.5px] font-semibold text-[#181c25]">{o.text}</span>
-                          <span className="block truncate text-[12px] text-[#6c717b]">{o.detail}</span>
+                          <span className="block truncate text-[11px] font-semibold text-[#181c25]">{o.text}</span>
+                          <span className="block truncate text-[9px] text-[#6c717b]">{o.detail}</span>
                         </span>
-                        <span className="shrink-0 text-[13px] font-semibold tabular-nums text-[#5c6470]">{o.balance.toFixed(2)}</span>
+                        <span className="shrink-0 text-[10px] font-semibold tabular-nums text-[#5c6470]">{o.balance.toFixed(2)}</span>
                       </button>
                     );
                   })}
@@ -316,7 +316,7 @@ export function AccountSelect({
           </div>
         </>
       )}
-      {error && <p className="mt-1.5 pl-1 text-[12.5px] text-[#ff444f]">{error}</p>}
+      {error && <p className="mt-1.5 pl-1 text-[9.5px] text-[#ff444f]">{error}</p>}
     </div>
   );
 }
@@ -342,7 +342,7 @@ export function StatusPill({ status }: { status: "pending" | "processed" | "reje
   }[status];
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-bold"
+      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-bold"
       style={{ background: map.bg, color: map.color }}
     >
       <span

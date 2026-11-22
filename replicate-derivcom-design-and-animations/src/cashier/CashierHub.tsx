@@ -66,9 +66,9 @@ export function CashierHub({
     <CashierScreen title="Cashier" onClose={onClose}>
       <div className="px-4 pb-10 pt-4">
         <div className="rounded-[10px] bg-[#181c25] px-4 py-4 text-white">
-          <div className="text-[12px] text-white/60">Available balance</div>
-          <div className="mt-0.5 text-[24px] font-bold tabular-nums">{fmtUsd(profile.balance)} USD</div>
-          <div className="mt-1 flex items-center gap-1.5 text-[11.5px] text-white/55">
+          <div className="text-[9px] text-white/60">Available balance</div>
+          <div className="mt-0.5 text-[18px] font-bold tabular-nums">{fmtUsd(profile.balance)} USD</div>
+          <div className="mt-1 flex items-center gap-1.5 text-[8.5px] text-white/55">
             <span className="h-1.5 w-1.5 rounded-full bg-[#4bb4b3]" />
             Options · Real account
           </div>
@@ -89,8 +89,8 @@ export function CashierHub({
                 {it.glyph}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[15px] font-bold text-[#181c25]">{it.title}</span>
-                <span className="block text-[12.5px] leading-snug text-[#6c717b]">{it.sub}</span>
+                <span className="block text-[11px] font-bold text-[#181c25]">{it.title}</span>
+                <span className="block text-[9.5px] leading-snug text-[#6c717b]">{it.sub}</span>
               </span>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9aa1aa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                 <path d="m9 5 7 7-7 7" />
@@ -100,8 +100,8 @@ export function CashierHub({
         </div>
 
         <div className="mt-4 rounded-[8px] bg-[#f5f5f5] p-3.5">
-          <div className="text-[12.5px] font-bold text-[#181c25]">Transaction history</div>
-          <p className="mt-1 text-[12px] leading-snug text-[#6c717b]">
+          <div className="text-[9.5px] font-bold text-[#181c25]">Transaction history</div>
+          <p className="mt-1 text-[9px] leading-snug text-[#6c717b]">
             Your deposits, withdrawals and transfers appear here as soon as they're authorised.
           </p>
         </div>

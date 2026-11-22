@@ -111,8 +111,8 @@ const today = () => {
 function Sel({ value, options, onChange, placeholder = "" }: { value: string; options: string[]; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <label className="blk-field relative cursor-pointer">
-      <span className="min-w-[2px] text-[14px] text-[#333]">{value || placeholder}</span>
-      <span className="text-[8px] leading-none text-black">▼</span>
+      <span className="min-w-[2px] text-[10.5px] text-[#333]">{value || placeholder}</span>
+      <span className="text-[7px] leading-none text-black">▼</span>
       <select value={value} onChange={(e) => onChange(e.target.value)} className="absolute inset-0 h-full w-full cursor-pointer opacity-0">
         {!value && <option value="" />}
         {options.map((o) => (
@@ -132,7 +132,7 @@ function Num({ value, onChange, w = 40 }: { value: number; onChange: (n: number)
       min={1}
       value={value}
       onChange={(e) => onChange(Math.max(0, Number(e.target.value)))}
-      className="blk-field text-center text-[14px] text-[#333] outline-none focus:border-[#ff444f]"
+      className="blk-field text-center text-[10.5px] text-[#333] outline-none focus:border-[#ff444f]"
       style={{ width: w + 24 }}
     />
   );
@@ -140,13 +140,13 @@ function Num({ value, onChange, w = 40 }: { value: number; onChange: (n: number)
 
 function Row({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`flex w-max items-center gap-1.5 whitespace-nowrap rounded-[3px] bg-[#e5e7ea] px-2 py-[7px] text-[14.5px] text-[#333] ${className}`}>{children}</div>
+    <div className={`flex w-max items-center gap-1.5 whitespace-nowrap rounded-[3px] bg-[#e5e7ea] px-2 py-[7px] text-[11px] text-[#333] ${className}`}>{children}</div>
   );
 }
 
 function Check({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <button onClick={() => onChange(!checked)} className="flex h-5 w-5 items-center justify-center rounded-[4px] bg-white text-[15px] font-bold leading-none transition-transform active:scale-90">
+    <button onClick={() => onChange(!checked)} className="flex h-5 w-5 items-center justify-center rounded-[4px] bg-white text-[11px] font-bold leading-none transition-transform active:scale-90">
       {checked ? "✓" : ""}
     </button>
   );
@@ -189,7 +189,7 @@ function BootSplash() {
             />
           ))}
         </div>
-        <p className="mt-16 text-[16px] text-[#333]">Initializing Deriv Bot account...</p>
+        <p className="mt-16 text-[12px] text-[#333]">Initializing Deriv Bot account...</p>
       </div>
     </div>
   );
@@ -256,26 +256,26 @@ function Dashboard({ onBuilder, onQuick }: { onBuilder: () => void; onQuick: () 
   ];
   return (
     <div className="px-4 pb-6 pt-5">
-      <p className="anim-fade-up max-w-[330px] text-[15px] leading-[1.45] text-[#333]">Import a bot from your computer or Google Drive, build it from scratch, or start with a quick strategy.</p>
+      <p className="anim-fade-up max-w-[330px] text-[11px] leading-[1.45] text-[#333]">Import a bot from your computer or Google Drive, build it from scratch, or start with a quick strategy.</p>
       <div className="mt-10 grid grid-cols-4 gap-3">
         {tiles.map((t, i) => (
           <button key={t.label} onClick={t.on} className="group anim-fade-up flex flex-col items-center" style={{ animationDelay: `${i * 70}ms` }}>
             <span className="flex h-[65px] w-[65px] items-center justify-center rounded-xl bg-[#f2f3f4] transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-md group-active:scale-90">
               <span className="origin-center scale-[0.72]">{t.icon}</span>
             </span>
-            <span className="mt-2.5 whitespace-nowrap text-[15px] text-[#333]">{t.label}</span>
+            <span className="mt-2.5 whitespace-nowrap text-[11px] text-[#333]">{t.label}</span>
           </button>
         ))}
       </div>
 
-      <h2 className="mt-12 text-[18px] font-bold text-[#333]">Your bots:</h2>
-      <div className="mt-5 grid grid-cols-[1.35fr_1.1fr_1.25fr_28px] border-b border-[#e6e8ea] pb-3 text-[15px] font-bold text-[#333]">
+      <h2 className="mt-12 text-[13.5px] font-bold text-[#333]">Your bots:</h2>
+      <div className="mt-5 grid grid-cols-[1.35fr_1.1fr_1.25fr_28px] border-b border-[#e6e8ea] pb-3 text-[11px] font-bold text-[#333]">
         <span>Bot name</span>
         <span>Last modified</span>
         <span>Status</span>
         <span />
       </div>
-      <div className="anim-fade-up grid grid-cols-[1.35fr_1.1fr_1.25fr_28px] items-center border-b border-[#e6e8ea] py-3.5 text-[15px] text-[#333] transition-colors hover:bg-[#f9fafb]">
+      <div className="anim-fade-up grid grid-cols-[1.35fr_1.1fr_1.25fr_28px] items-center border-b border-[#e6e8ea] py-3.5 text-[11px] text-[#333] transition-colors hover:bg-[#f9fafb]">
         <span>Untitled Bot</span>
         <span>{today()}</span>
         <span className="flex items-center gap-2">
@@ -295,13 +295,13 @@ function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>)
   const symbols = ALL_VOLATILITY.map((m) => m.name);
   return (
     <div className="h-full overflow-auto bg-white pb-14 pl-[57px] pt-3">
-      <button onClick={onQuick} className="press anim-fade-up rounded-[4px] bg-[#ff444f] px-[17px] py-[13px] text-[17px] font-bold text-white shadow-sm hover:bg-[#ff5a64]">
+      <button onClick={onQuick} className="press anim-fade-up rounded-[4px] bg-[#ff444f] px-[17px] py-[13px] text-[13px] font-bold text-white shadow-sm hover:bg-[#ff5a64]">
         Quick strategy
       </button>
       <div style={{ transform: `scale(${zoom})`, transformOrigin: "0 0", transition: "transform .25s ease" }} className="mt-4 ml-[18px] w-[243px]">
         {/* Block 1 */}
         <div className="anim-fade-up rounded-[3px] bg-[#074f6f] pb-5 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]" style={{ animationDelay: "60ms" }}>
-          <div className="flex items-center gap-3 px-3 py-[11px] text-[17px]">
+          <div className="flex items-center gap-3 px-3 py-[11px] text-[13px]">
             <IconList size={20} />
             1. Trade parameters
           </div>
@@ -337,9 +337,9 @@ function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>)
               <Check checked={cfg.restartLast} onChange={(v) => set({ restartLast: v })} />
             </Row>
           </div>
-          <div className="px-3 pb-2.5 pt-3.5 text-[17px]">Run once at start:</div>
+          <div className="px-3 pb-2.5 pt-3.5 text-[13px]">Run once at start:</div>
           <div className="h-7 w-[60px] rounded-[3px] bg-[#e5e7ea] ml-3.5" />
-          <div className="px-3 pb-2.5 pt-3.5 text-[17px]">Trade options:</div>
+          <div className="px-3 pb-2.5 pt-3.5 text-[13px]">Trade options:</div>
           <div className="pl-3.5">
             <Row>
               Duration:
@@ -353,7 +353,7 @@ function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>)
 
         {/* Block 2 */}
         <div className="anim-fade-up mt-16 rounded-[3px] bg-[#074f6f] pb-5 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]" style={{ animationDelay: "140ms" }}>
-          <div className="flex items-center gap-3 px-3 py-[11px] text-[17px]">
+          <div className="flex items-center gap-3 px-3 py-[11px] text-[13px]">
             <IconBasket size={20} />
             2. Purchase conditions
           </div>
@@ -403,8 +403,8 @@ function LiveChart({ symbol }: { symbol: string }) {
   return (
     <div className="flex h-full flex-col bg-white">
       <div className="flex items-center justify-between border-b border-[#e6e8ea] px-4 py-3">
-        <span className="text-[15px] font-bold">{symbol}</span>
-        <span className="text-[15px] font-bold text-[#4bb4b3]">{last.c.toFixed(2)}</span>
+        <span className="text-[11px] font-bold">{symbol}</span>
+        <span className="text-[11px] font-bold text-[#4bb4b3]">{last.c.toFixed(2)}</span>
       </div>
       <svg viewBox="0 0 340 300" className="w-full flex-1 px-2" preserveAspectRatio="none">
         {[0, 1, 2, 3, 4].map((i) => (
@@ -439,7 +439,7 @@ function MenuPage({ go, openReports, onHome }: { go: (t: BotTab) => void; openRe
     <ul className="px-4 pt-3">
       {items.map(([l, f], i) => (
         <li key={l} className="anim-fade-up border-b border-[#e6e8ea]" style={{ animationDelay: `${i * 50}ms` }}>
-          <button onClick={f} className="flex w-full items-center justify-between py-4 text-left text-[16px] text-[#333] hover:text-[#ff444f]">
+          <button onClick={f} className="flex w-full items-center justify-between py-4 text-left text-[12px] text-[#333] hover:text-[#ff444f]">
             {l}
           </button>
         </li>
@@ -470,9 +470,9 @@ function ActivityView({ tx, symbol, running }: { tx: Tx | null; symbol: string |
       <div className="flex items-center justify-between gap-2 px-1 pb-2">
         <span className="flex min-w-0 items-center gap-1.5">
           <CandleBadge />
-          <span className="truncate text-[13.5px] font-bold text-[#333]">{symbol}</span>
+          <span className="truncate text-[10px] font-bold text-[#333]">{symbol}</span>
         </span>
-        <span className="flex shrink-0 items-center gap-1.5 text-[14px] font-bold text-[#333]">
+        <span className="flex shrink-0 items-center gap-1.5 text-[10.5px] font-bold text-[#333]">
           {tx?.rise === false ? (
             <svg width="16" height="16" viewBox="0 0 24 24" style={{ color: "#4bb4b3" }}>
               <path d="M4 4 20 20M9 20h11V9" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -488,13 +488,13 @@ function ActivityView({ tx, symbol, running }: { tx: Tx | null; symbol: string |
 
       {/* contract detail card */}
       <div className="rounded-[4px] border border-[#e6e8ea] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
-        <span className="inline-flex items-center justify-center rounded-[4px] bg-[#4bb4b3] px-2 py-[2px] text-[10px] font-bold uppercase tracking-wide text-white">
+        <span className="inline-flex items-center justify-center rounded-[4px] bg-[#4bb4b3] px-2 py-[2px] text-[7.5px] font-bold uppercase tracking-wide text-white">
           USD
         </span>
         <div className="mt-2.5 grid grid-cols-[1fr_1fr_auto] gap-x-3 gap-y-3">
           <div>
-            <div className="text-[12px] leading-tight text-[#6c717b]">Total profit/loss:</div>
-            <div className="mt-0.5 flex items-center gap-1 text-[15px] font-bold" style={{ color: win ? "#4bb4b3" : "#ff444f" }}>
+            <div className="text-[9px] leading-tight text-[#6c717b]">Total profit/loss:</div>
+            <div className="mt-0.5 flex items-center gap-1 text-[11px] font-bold" style={{ color: win ? "#4bb4b3" : "#ff444f" }}>
               {tx ? `${tx.profit > 0 ? "" : ""}${fmt(tx.profit)}` : "0.00"}
               <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
                 <path d={win ? "M6 1.5 11 9H1L6 1.5Z" : "M6 10.5 1 3h10L6 10.5Z"} />
@@ -502,8 +502,8 @@ function ActivityView({ tx, symbol, running }: { tx: Tx | null; symbol: string |
             </div>
           </div>
           <div>
-            <div className="text-[12px] leading-tight text-[#6c717b]">Contract value:</div>
-            <div className="mt-0.5 flex items-center gap-1 text-[15px] font-bold" style={{ color: lost ? "#ff444f" : "#333" }}>
+            <div className="text-[9px] leading-tight text-[#6c717b]">Contract value:</div>
+            <div className="mt-0.5 flex items-center gap-1 text-[11px] font-bold" style={{ color: lost ? "#ff444f" : "#333" }}>
               {fmt(contractValue)}
               <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
                 <path d={lost ? "M6 10.5 1 3h10L6 10.5Z" : "M6 1.5 11 9H1L6 1.5Z"} />
@@ -511,22 +511,22 @@ function ActivityView({ tx, symbol, running }: { tx: Tx | null; symbol: string |
             </div>
           </div>
           <div className="row-span-2 flex flex-col items-center justify-center pr-1">
-            <span className="text-[13px] text-[#333]">Tick 0</span>
+            <span className="text-[10px] text-[#333]">Tick 0</span>
             <span className="mt-1.5 h-2.5 w-2.5 rounded-full bg-[#e6e8ea]" />
           </div>
           <div>
-            <div className="text-[12px] leading-tight text-[#6c717b]">Stake:</div>
-            <div className="mt-0.5 text-[15px] font-bold text-[#333]">{fmt(stake)}</div>
+            <div className="text-[9px] leading-tight text-[#6c717b]">Stake:</div>
+            <div className="mt-0.5 text-[11px] font-bold text-[#333]">{fmt(stake)}</div>
           </div>
           <div>
-            <div className="text-[12px] leading-tight text-[#6c717b]">Potential payout:</div>
-            <div className="mt-0.5 flex items-baseline gap-1 text-[15px] font-bold text-[#333]">
+            <div className="text-[9px] leading-tight text-[#6c717b]">Potential payout:</div>
+            <div className="mt-0.5 flex items-baseline gap-1 text-[11px] font-bold text-[#333]">
               {fmt(payout)}
-              {tx && <span className="text-[11px] font-normal text-[#6c717b]">{pct.toFixed(1)}%</span>}
+              {tx && <span className="text-[8px] font-normal text-[#6c717b]">{pct.toFixed(1)}%</span>}
             </div>
           </div>
         </div>
-        <div className="mt-4 border-t border-[#eceef0] pt-2.5 text-center text-[13px] text-[#6c717b]">
+        <div className="mt-4 border-t border-[#eceef0] pt-2.5 text-center text-[10px] text-[#6c717b]">
           {running ? "Resale not offered" : "Contract closed"}
         </div>
       </div>
@@ -545,9 +545,9 @@ function Totals({ txs, big, compact }: { txs: Tx[]; big?: boolean; compact?: boo
   const pl = txs.reduce((a, t) => a + t.profit, 0);
   const cell = (label: string, value: string, color?: string) => (
     <div className="text-center">
-      <div className={`font-bold text-[#333] ${compact ? "text-[14px]" : big ? "text-[16px]" : "text-[15px]"}`}>{label}</div>
+      <div className={`font-bold text-[#333] ${compact ? "text-[10.5px]" : big ? "text-[12px]" : "text-[11px]"}`}>{label}</div>
       <div
-        className={`font-medium tabular-nums ${compact ? "mt-1 text-[14.5px]" : "mt-3 text-[16px]"}`}
+        className={`font-medium tabular-nums ${compact ? "mt-1 text-[11px]" : "mt-3 text-[12px]"}`}
         style={{ color: color ?? "#333" }}
       >
         {value}
@@ -604,13 +604,13 @@ function Drawer({
           {open ? <IconChevronDown size={30} strokeWidth={2} /> : <IconChevronUp size={30} strokeWidth={2} />}
         </button>
         {open && (
-          <button onClick={reset} className="press anim-fade-in absolute right-4 rounded-[4px] border border-[#999] px-4 py-[3px] text-[15px] font-bold text-[#333]">
+          <button onClick={reset} className="press anim-fade-in absolute right-4 rounded-[4px] border border-[#999] px-4 py-[3px] text-[11px] font-bold text-[#333]">
             Reset
           </button>
         )}
       </div>
       <div className="pointer-events-auto flex min-h-0 flex-1 flex-col">
-        <div className="relative flex h-[41px] shrink-0 border-b border-[#e6e8ea] text-[16px]">
+        <div className="relative flex h-[41px] shrink-0 border-b border-[#e6e8ea] text-[12px]">
           {(["Summary", "Transactions", "Journal"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)} className={`flex-1 transition-colors ${tab === t ? "font-bold text-[#333]" : "text-[#555]"}`}>
               {t}
@@ -637,21 +637,21 @@ function Drawer({
         {tab === "Transactions" && (
           <div className="flex min-h-0 flex-1 flex-col">
             <div className="flex shrink-0 gap-3 border-b border-[#e6e8ea] px-4 py-2.5">
-              <button onClick={() => toast("Download started (demo).")} className="press rounded-[4px] border border-[#999] px-5 py-[7px] text-[16px] font-bold text-[#333]">
+              <button onClick={() => toast("Download started (demo).")} className="press rounded-[4px] border border-[#999] px-5 py-[7px] text-[12px] font-bold text-[#333]">
                 Download
               </button>
-              <button onClick={() => toast("Contract detail view (demo).")} className="press rounded-[4px] border border-[#999] px-5 py-[7px] text-[16px] font-bold text-[#333]">
+              <button onClick={() => toast("Contract detail view (demo).")} className="press rounded-[4px] border border-[#999] px-5 py-[7px] text-[12px] font-bold text-[#333]">
                 View Detail
               </button>
             </div>
-            <div className="grid shrink-0 grid-cols-[1.1fr_1.5fr_1.5fr] border-b border-[#e6e8ea] px-5 py-3 text-[15px] font-bold text-[#333]">
+            <div className="grid shrink-0 grid-cols-[1.1fr_1.5fr_1.5fr] border-b border-[#e6e8ea] px-5 py-3 text-[11px] font-bold text-[#333]">
               <span>Type</span>
               <span>Entry/Exit spot</span>
               <span className="text-right">Buy price and P/L</span>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto">
               {txs.map((t) => (
-                <div key={t.id} className="anim-fade-up grid grid-cols-[1.1fr_1.5fr_1.5fr] items-center border-b border-[#e6e8ea] px-4 py-2 text-[15.5px] text-[#333]">
+                <div key={t.id} className="anim-fade-up grid grid-cols-[1.1fr_1.5fr_1.5fr] items-center border-b border-[#e6e8ea] px-4 py-2 text-[11.5px] text-[#333]">
                   <span className="flex items-center gap-4">
                     <CandleBadge />
                     <svg width="22" height="22" viewBox="0 0 24 24" className="rotate-0" style={{ color: t.rise ? "#ff444f" : "#4bb4b3" }}>
@@ -677,11 +677,11 @@ function Drawer({
                   </span>
                 </div>
               ))}
-              {txs.length === 0 && <p className="px-4 py-10 text-center text-[15px] text-[#8a8f99]">No transactions or activity yet.</p>}
+              {txs.length === 0 && <p className="px-4 py-10 text-center text-[11px] text-[#8a8f99]">No transactions or activity yet.</p>}
             </div>
             <div className="shrink-0 border-t border-[#e6e8ea] bg-[#f2f3f4] pt-1.5">
               <div className="pr-5 text-right">
-                <span className="cursor-help border-b border-dotted border-[#333] text-[13.5px] text-[#333]">What's this?</span>
+                <span className="cursor-help border-b border-dotted border-[#333] text-[10px] text-[#333]">What's this?</span>
               </div>
               <Totals txs={txs} compact />
             </div>
@@ -693,11 +693,11 @@ function Drawer({
             <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3">
               <button
                 onClick={() => toast("Journal downloaded (demo).")}
-                className="press rounded-[4px] border border-[#d6d9dd] px-5 py-[7px] text-[16px] font-bold text-[#b9bec4]"
+                className="press rounded-[4px] border border-[#d6d9dd] px-5 py-[7px] text-[12px] font-bold text-[#b9bec4]"
               >
                 Download
               </button>
-              <button onClick={() => toast("Journal filters (demo).")} className="press flex items-center gap-2 px-2 text-[16px] text-[#333]">
+              <button onClick={() => toast("Journal filters (demo).")} className="press flex items-center gap-2 px-2 text-[12px] text-[#333]">
                 Filters
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                   <path d="M3 6h18M6 12h12M10 18h4" />
@@ -707,10 +707,10 @@ function Drawer({
             <ul className="min-h-0 flex-1 overflow-y-auto pb-2">
               {journal.map((j, i) => (
                 <li key={i} className="anim-fade-in border-b border-[#eceef0] px-4 py-2.5">
-                  <p className="text-[14px] leading-snug" style={{ color: j.startsWith("Loss") ? "#e0313d" : j.startsWith("Profit") ? "#4bb4b3" : "#1668b3" }}>
+                  <p className="text-[10.5px] leading-snug" style={{ color: j.startsWith("Loss") ? "#e0313d" : j.startsWith("Profit") ? "#4bb4b3" : "#1668b3" }}>
                     {j}
                   </p>
-                  <p className="mt-1 text-[11.5px] text-[#8a8f99]">{journalStamp()}</p>
+                  <p className="mt-1 text-[8.5px] text-[#8a8f99]">{journalStamp()}</p>
                 </li>
               ))}
               {journal.length === 0 && <li className="py-10 text-center text-[#8a8f99]">No journal entries yet.</li>}
@@ -905,13 +905,13 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
           <DbLogo size={33} />
           <div className="relative">
             <button onClick={() => setAcctMenu((o) => !o)} className="flex flex-col items-start leading-tight">
-              <span className="flex items-center gap-1.5 text-[15px]" style={{ color: labelColor }}>
+              <span className="flex items-center gap-1.5 text-[11px]" style={{ color: labelColor }}>
                 {label}
                 <span className={`transition-transform duration-300 ${acctMenu ? "rotate-180" : ""}`} style={{ color: "#333" }}>
                   <IconChevronDown size={20} />
                 </span>
               </span>
-              <span className="text-[15px] font-bold tabular-nums text-[#333]">{fmt(bal[account])} USD</span>
+              <span className="text-[11px] font-bold tabular-nums text-[#333]">{fmt(bal[account])} USD</span>
             </button>
             {acctMenu && (
               <div className="anim-fade-up absolute left-0 top-12 z-50 w-56 overflow-hidden rounded-lg border border-[#e6e8ea] bg-white shadow-xl">
@@ -923,7 +923,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
                       setAccount(a);
                       setAcctMenu(false);
                     }}
-                    className={`flex w-full items-center justify-between px-4 py-3 text-left text-[14px] hover:bg-[#f7f8f9] ${account === a ? "bg-[#f2f3f4]" : ""}`}
+                    className={`flex w-full items-center justify-between px-4 py-3 text-left text-[10.5px] hover:bg-[#f7f8f9] ${account === a ? "bg-[#f2f3f4]" : ""}`}
                   >
                     <span style={{ color: a === "real" ? "#4bb4b3" : "#ffad3a" }}>{a === "real" ? "Real" : "Demo"}</span>
                     <span className="font-bold tabular-nums text-[#333]">{fmt(bal[a])} USD</span>
@@ -933,7 +933,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
             )}
           </div>
         </div>
-        <button onClick={() => toast("Deposits are unavailable right now. Try again shortly.")} className="press rounded-full bg-[#ff444f] px-[18px] py-[9px] text-[15px] font-bold text-white hover:bg-[#ff5a64]">
+        <button onClick={() => toast("Deposits are unavailable right now. Try again shortly.")} className="press rounded-full bg-[#ff444f] px-[18px] py-[9px] text-[11px] font-bold text-white hover:bg-[#ff5a64]">
           Deposit
         </button>
       </header>
@@ -999,7 +999,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
         <div className="flex h-[42px] overflow-hidden rounded-[4px] border border-[#d6d9dd]">
           <button
             onClick={running ? () => stop() : start}
-            className={`press flex w-[83px] shrink-0 items-center justify-center gap-1.5 text-[17px] font-bold text-white transition-colors duration-300 ${
+            className={`press flex w-[83px] shrink-0 items-center justify-center gap-1.5 text-[13px] font-bold text-white transition-colors duration-300 ${
               running ? "bg-[#ff444f]" : "bg-[#7fcfcb] hover:bg-[#71c3bf]"
             }`}
             style={{ marginLeft: -1 }}
@@ -1011,7 +1011,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
           {/* status area: label + thin progress bar, with breathing room */}
           <div className="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-2 px-4">
             <span
-              className="text-[15px] font-bold"
+              className="text-[11px] font-bold"
               style={{ color: running ? "#333" : lastTx ? (lastTx.profit > 0 ? "#4bb4b3" : "#ff444f") : "#333" }}
             >
               {running ? (lastTx ? "Contract bought" : "Bot is starting") : statusLabel}
@@ -1043,7 +1043,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
             <button
               key={n.id}
               onClick={() => (n.id === "home" ? onHome() : go(n.id as BotTab))}
-              className={`press relative flex flex-1 flex-col items-center justify-center gap-1 text-[14.5px] transition-colors duration-300 ${active ? "text-[#ff444f]" : "text-[#333]"}`}
+              className={`press relative flex flex-1 flex-col items-center justify-center gap-1 text-[11px] transition-colors duration-300 ${active ? "text-[#ff444f]" : "text-[#333]"}`}
             >
               <span key={String(active)} className={active ? "nav-bounce" : ""}>
                 {n.icon}
@@ -1057,7 +1057,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
 
       {quick && (
         <Sheet title="Quick strategy" onClose={() => setQuick(false)}>
-          <p className="mb-3 text-[14px] text-[#6c717b]">Pick a preset to load into the builder.</p>
+          <p className="mb-3 text-[10.5px] text-[#6c717b]">Pick a preset to load into the builder.</p>
           <div className="space-y-2.5">
             {[
               { n: "Martingale", d: "Increase stake after a loss to recover.", s: 2 },
@@ -1076,8 +1076,8 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
                 className="anim-fade-up w-full rounded-xl border border-[#e6e8ea] p-4 text-left transition-colors hover:border-[#ff444f] hover:bg-[#fff5f5]"
                 style={{ animationDelay: `${i * 60}ms` }}
               >
-                <div className="text-[16px] font-bold">{q.n}</div>
-                <div className="text-[13.5px] text-[#6c717b]">{q.d}</div>
+                <div className="text-[12px] font-bold">{q.n}</div>
+                <div className="text-[10px] text-[#6c717b]">{q.d}</div>
               </button>
             ))}
           </div>

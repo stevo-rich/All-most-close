@@ -107,15 +107,15 @@ export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?:
               <path d="M15 19 8 12l7-7" />
             </svg>
           </button>
-          <span className="flex-1 truncate text-[15px] font-bold">Deriv Trader</span>
-          <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[12px] font-semibold">
+          <span className="flex-1 truncate text-[11px] font-bold">Deriv Trader</span>
+          <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-semibold">
             <span className="h-1.5 w-1.5 rounded-full bg-[#4bb4b3]" />
             Options
           </span>
         </div>
         <div className="flex items-baseline justify-between px-4 pb-3">
-          <span className="text-[12px] text-white/60">Balance</span>
-          <span className="text-[17px] font-bold tabular-nums">{fmtUsd(profile.balance)} USD</span>
+          <span className="text-[9px] text-white/60">Balance</span>
+          <span className="text-[13px] font-bold tabular-nums">{fmtUsd(profile.balance)} USD</span>
         </div>
       </header>
 
@@ -126,7 +126,7 @@ export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?:
             <select
               value={sym}
               onChange={(e) => setSym(e.target.value)}
-              className="min-w-0 flex-1 truncate bg-transparent text-[14.5px] font-bold text-[#181c25] outline-none"
+              className="min-w-0 flex-1 truncate bg-transparent text-[11px] font-bold text-[#181c25] outline-none"
             >
               {ALL_VOLATILITY.map((m) => (
                 <option key={m.name} value={m.name}>
@@ -134,11 +134,11 @@ export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?:
                 </option>
               ))}
             </select>
-            <span className="shrink-0 text-[15px] font-bold tabular-nums text-[#181c25]">
+            <span className="shrink-0 text-[11px] font-bold tabular-nums text-[#181c25]">
               {tick.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
-          <div className="mt-1 flex items-center gap-2 text-[11.5px] text-[#6c717b]">
+          <div className="mt-1 flex items-center gap-2 text-[8.5px] text-[#6c717b]">
             <span className="flex items-center gap-1">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#4bb4b3]" />
               Live · tick {active.tick}
@@ -155,8 +155,8 @@ export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?:
         {/* stake + payout */}
         <div className="mt-2 bg-white px-4 py-3">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] text-[#6c717b]">Stake</span>
-            <span className="text-[13px] font-semibold tabular-nums text-[#181c25]">
+            <span className="text-[10px] text-[#6c717b]">Stake</span>
+            <span className="text-[10px] font-semibold tabular-nums text-[#181c25]">
               {fmtUsd(stake)} USD · payout {fmtUsd(payout)} USD
             </span>
           </div>
@@ -178,28 +178,28 @@ export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?:
               <div className="flex items-center gap-3">
                 <Spinner size={20} />
                 <div className="flex-1">
-                  <div className="text-[13.5px] font-bold text-[#181c25]">Contract open</div>
-                  <div className="text-[12px] text-[#6c717b]">Waiting for the next ticks to settle…</div>
+                  <div className="text-[10px] font-bold text-[#181c25]">Contract open</div>
+                  <div className="text-[9px] text-[#6c717b]">Waiting for the next ticks to settle…</div>
                 </div>
-                <span className="text-[13px] font-semibold tabular-nums text-[#6c717b]">{fmtUsd(stake)}</span>
+                <span className="text-[10px] font-semibold tabular-nums text-[#6c717b]">{fmtUsd(stake)}</span>
               </div>
             )}
             {(phase === "won" || phase === "lost") && (
               <div className="flex items-center gap-3">
                 <SuccessTick tone={phase === "won" ? "#4bb4b3" : "#ff444f"} size={44} />
                 <div className="flex-1">
-                  <div className="text-[13.5px] font-bold" style={{ color: phase === "won" ? "#0f5655" : "#8c1d25" }}>
+                  <div className="text-[10px] font-bold" style={{ color: phase === "won" ? "#0f5655" : "#8c1d25" }}>
                     {phase === "won" ? "Contract won" : "Contract lost"}
                   </div>
-                  <div className="text-[12px] text-[#6c717b]">{active.name} · {active.payout.toFixed(1)}% payout</div>
+                  <div className="text-[9px] text-[#6c717b]">{active.name} · {active.payout.toFixed(1)}% payout</div>
                 </div>
-                <span className="text-[15px] font-bold tabular-nums" style={{ color: phase === "won" ? "#4bb4b3" : "#ff444f" }}>
+                <span className="text-[11px] font-bold tabular-nums" style={{ color: phase === "won" ? "#4bb4b3" : "#ff444f" }}>
                   {PIPS(profit)}
                 </span>
               </div>
             )}
             {phase !== "open" && (
-              <button onClick={() => setPhase("idle")} className="press mt-3 w-full rounded-full border border-[#d6d9dd] py-2 text-[13px] font-bold">
+              <button onClick={() => setPhase("idle")} className="press mt-3 w-full rounded-full border border-[#d6d9dd] py-2 text-[10px] font-bold">
                 New trade
               </button>
             )}
@@ -215,19 +215,19 @@ export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?:
             disabled={phase === "buying" || phase === "open"}
             className="press flex flex-col items-center rounded-[8px] bg-[#4bb4b3] py-3 text-white transition-colors hover:brightness-105 disabled:opacity-50"
           >
-            <span className="text-[15px] font-bold">Rise</span>
-            <span className="text-[12px] font-semibold opacity-90">{fmtUsd(payout)} USD</span>
+            <span className="text-[11px] font-bold">Rise</span>
+            <span className="text-[9px] font-semibold opacity-90">{fmtUsd(payout)} USD</span>
           </button>
           <button
             onClick={() => buy(false)}
             disabled={phase === "buying" || phase === "open"}
             className="press flex flex-col items-center rounded-[8px] bg-[#ff444f] py-3 text-white transition-colors hover:brightness-105 disabled:opacity-50"
           >
-            <span className="text-[15px] font-bold">Fall</span>
-            <span className="text-[12px] font-semibold opacity-90">{fmtUsd(payout)} USD</span>
+            <span className="text-[11px] font-bold">Fall</span>
+            <span className="text-[9px] font-semibold opacity-90">{fmtUsd(payout)} USD</span>
           </button>
         </div>
-        <div className="mt-2 flex items-center justify-between text-[11px] text-[#9aa1aa]">
+        <div className="mt-2 flex items-center justify-between text-[8px] text-[#9aa1aa]">
           <span>Rise/Fall · {active.name}</span>
           <span>Stake {fmtUsd(stake)} USD</span>
         </div>

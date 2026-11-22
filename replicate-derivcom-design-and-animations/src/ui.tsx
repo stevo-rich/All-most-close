@@ -124,12 +124,12 @@ export function ToastProvider({ children, bottom = 96 }: { children: ReactNode; 
                 >
                   <span className="mt-[2px] shrink-0 opacity-90">{k.icon}</span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[13.5px] font-semibold leading-snug">{t.message}</span>
-                    {t.detail && <span className="mt-0.5 block text-[12px] opacity-85">{t.detail}</span>}
+                    <span className="block text-[10px] font-semibold leading-snug">{t.message}</span>
+                    {t.detail && <span className="mt-0.5 block text-[9px] opacity-85">{t.detail}</span>}
                   </span>
                   {t.action && (
                     <button
-                      className="shrink-0 text-[13px] font-bold underline underline-offset-2"
+                      className="shrink-0 text-[10px] font-bold underline underline-offset-2"
                       onClick={() => {
                         t.action!.onClick();
                         dismiss(t.id);
@@ -171,7 +171,7 @@ export function Sheet({
       >
         <div className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-black/15" />
         <div className="flex items-center justify-between px-5 pb-2 pt-3">
-          <h3 className="text-[18px] font-bold">{title}</h3>
+          <h3 className="text-[13.5px] font-bold">{title}</h3>
           <button onClick={onClose} className="press flex h-8 w-8 items-center justify-center rounded-full bg-black/5">
             <IconClose size={18} />
           </button>

@@ -20,7 +20,7 @@ function ActionButton({ label, children, primary, onClick, i }: { label: string;
       >
         {children}
       </span>
-      <span className="text-[14px] text-white">{label}</span>
+      <span className="text-[10.5px] text-white">{label}</span>
     </button>
   );
 }
@@ -38,18 +38,18 @@ function Overview({ onDeposit }: { onDeposit: () => void }) {
   return (
     <>
       <section className="-mt-8 rounded-b-[32px] bg-[#f5f5f5] px-4 pb-6 pt-14">
-        <h2 className="text-[20px] font-bold tracking-tight text-[#181c25]">Make your first deposit</h2>
-        <p className="mt-1 text-[15px] text-[#8a8f99]">Deposit in crypto or your local currency, instantly.</p>
+        <h2 className="text-[15px] font-bold tracking-tight text-[#181c25]">Make your first deposit</h2>
+        <p className="mt-1 text-[11px] text-[#8a8f99]">Deposit in crypto or your local currency, instantly.</p>
         <div className="hide-scroll -mx-4 mt-4 flex gap-2 overflow-x-auto px-4">
           <Card onClick={demo} className="anim-fade-up flex h-[110px] w-[137px] shrink-0 flex-col items-center justify-between rounded-3xl bg-[#ebebeb] px-3 pb-3 pt-4 hover:bg-[#e3e3e3]">
-            <span className="text-[20px] font-extrabold tracking-tight">
+            <span className="text-[15px] font-extrabold tracking-tight">
               <span className="text-[#7b3fa0]">Dusu</span>
               <span className="text-[#f5b800]">Pay</span>
             </span>
-            <span className="text-[14px] font-semibold">Mobile Money</span>
+            <span className="text-[10.5px] font-semibold">Mobile Money</span>
           </Card>
           <Card onClick={demo} className="anim-fade-up flex h-[110px] w-[137px] shrink-0 flex-col items-center justify-between rounded-3xl bg-[#ebebeb] px-3 pb-3 pt-4 hover:bg-[#e3e3e3]" >
-            <span className="flex items-center gap-1 text-[10px] font-bold leading-[10px]">
+            <span className="flex items-center gap-1 text-[7.5px] font-bold leading-[10px]">
               <svg width="22" height="22" viewBox="0 0 24 24">
                 <rect x="3" y="8" width="18" height="12" rx="2" fill="#111" />
                 <rect x="6" y="4" width="12" height="5" rx="1" fill="#111" />
@@ -59,25 +59,25 @@ function Overview({ onDeposit }: { onDeposit: () => void }) {
               <br />
               Agent
             </span>
-            <span className="text-[14px] font-semibold">Payment Agent</span>
+            <span className="text-[10.5px] font-semibold">Payment Agent</span>
           </Card>
           <Card onClick={demo} className="anim-fade-up flex h-[110px] w-[137px] shrink-0 flex-col items-center justify-between rounded-3xl bg-[#ebebeb] px-3 pb-3 pt-4 hover:bg-[#e3e3e3]">
-            <span className="text-[18px] font-extrabold tracking-tight">
+            <span className="text-[13.5px] font-extrabold tracking-tight">
               <span className="text-[#3a9d23]">m</span>
               <span className="text-[#e11d2a]">-</span>
               <span className="text-[#3a9d23]">PESA</span>
             </span>
-            <span className="text-[14px] font-semibold">MPESA</span>
+            <span className="text-[10.5px] font-semibold">MPESA</span>
           </Card>
           <Card onClick={demo} className="anim-fade-up flex h-[110px] w-[137px] shrink-0 flex-col items-center justify-between rounded-3xl bg-[#ebebeb] px-3 pb-3 pt-4 hover:bg-[#e3e3e3]">
-            <span className="text-[24px] font-black text-[#f7931a]">₿</span>
-            <span className="text-[14px] font-semibold">Crypto</span>
+            <span className="text-[18px] font-black text-[#f7931a]">₿</span>
+            <span className="text-[10.5px] font-semibold">Crypto</span>
           </Card>
         </div>
       </section>
 
       <section className="px-4 pb-8 pt-8">
-        <h2 className="text-[20px] font-bold tracking-tight">Other payment methods</h2>
+        <h2 className="text-[15px] font-bold tracking-tight">Other payment methods</h2>
         <div className="mt-4 space-y-3">
           {[
             { t: "USD", d: "Fund via bank, card, e-wallet, and crypto." },
@@ -89,8 +89,8 @@ function Overview({ onDeposit }: { onDeposit: () => void }) {
                 <IconDollar size={34} />
               </span>
               <span>
-                <span className="block text-[20px] leading-6 text-[#181c25]">{m.t}</span>
-                <span className="block text-[14px] text-[#6c717b]">{m.d}</span>
+                <span className="block text-[15px] leading-6 text-[#181c25]">{m.t}</span>
+                <span className="block text-[10.5px] text-[#6c717b]">{m.d}</span>
               </span>
             </Card>
           ))}
@@ -122,11 +122,11 @@ function Placeholder({ tab }: { tab: string }) {
   };
   return (
     <section className="space-y-3 px-4 py-6">
-      <h2 className="text-[20px] font-bold">{tab}</h2>
+      <h2 className="text-[15px] font-bold">{tab}</h2>
       {(rows[tab] ?? []).map(([a, b], i) => (
         <div key={a} className="anim-fade-up rounded-3xl bg-[#f5f5f5] p-5" style={{ animationDelay: `${i * 70}ms` }}>
-          <div className="text-[17px] font-semibold">{a}</div>
-          <div className="text-[14px] text-[#6c717b]">{b}</div>
+          <div className="text-[13px] font-semibold">{a}</div>
+          <div className="text-[10.5px] text-[#6c717b]">{b}</div>
         </div>
       ))}
     </section>
@@ -160,7 +160,7 @@ export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
                 refs.current[t] = el;
               }}
               onClick={() => setTab(t)}
-              className={`pb-2 text-[18px] transition-colors duration-300 ${tab === t ? "text-white" : "text-[#8a8f99] hover:text-white/80"}`}
+              className={`pb-2 text-[13.5px] transition-colors duration-300 ${tab === t ? "text-white" : "text-[#8a8f99] hover:text-white/80"}`}
             >
               {t}
             </button>
@@ -171,10 +171,10 @@ export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
         {tab === "Overview" && (
           <>
             <div className="mt-6 px-6">
-              <div className="text-[15px] text-[#b5b9c2]">Estimated total value</div>
+              <div className="text-[11px] text-[#b5b9c2]">Estimated total value</div>
               <div className="mt-0.5 flex items-center gap-3">
                 {loaded ? (
-                  <span className="anim-fade-in text-[26px] font-bold tracking-tight">{balanceHidden ? "••••••" : fmtUsd(profile.balance)} USD</span>
+                  <span className="anim-fade-in text-[19.5px] font-bold tracking-tight">{balanceHidden ? "••••••" : fmtUsd(profile.balance)} USD</span>
                 ) : (
                   <span className="skeleton h-8 w-36 rounded-lg" />
                 )}
@@ -184,7 +184,7 @@ export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
                   </span>
                 </button>
               </div>
-              <div className="text-[15px] text-[#b5b9c2]">Updated 1 min ago</div>
+              <div className="text-[11px] text-[#b5b9c2]">Updated 1 min ago</div>
             </div>
             <div className="mt-6 grid grid-cols-3 px-2">
               <ActionButton i={0} primary label="Deposit" onClick={() => open("deposit")}>
