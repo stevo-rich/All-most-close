@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  IconBell,
   IconCfds,
   IconChevronRight,
   IconExchange,
@@ -17,12 +16,18 @@ import {
   TileTv,
 } from "../icons";
 import { Sheet, useToast } from "../ui";
+import { type CashierRoute } from "../cashier/CashierHub";
+import { DepositFlow } from "../cashier/DepositFlow";
+import { WithdrawFlow } from "../cashier/WithdrawFlow";
+import { TransferFlow } from "../cashier/TransferFlow";
+import { DTraderPage } from "../cashier/DTraderPage";
 import { HomeHeader } from "./HomeHeader";
 import { HomePage, type HomeTab } from "./HomePage";
 import { PortfolioPage } from "./PortfolioPage";
 import { OptionsPage } from "./OptionsPage";
 import { ProductPage } from "./ProductPage";
 import { ProfilePage } from "./ProfilePage";
+import { NotificationsPanel, SEED_NOTIFICATIONS, type Notif } from "./Notifications";
 
 const NAV: { id: HomeTab; label: string }[] = [
   { id: "home", label: "Home" },
@@ -62,9 +67,11 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
   const [tab, setTab] = useState<HomeTab>("home");
   const [prev, setPrev] = useState<HomeTab>("home");
   const [hidden, setHidden] = useState(false);
-  const [unread, setUnread] = useState(2);
+  const [notifs, setNotifs] = useState<Notif[]>(SEED_NOTIFICATIONS);
+  const unread = notifs.filter((n) => !n.read).length;
   const [overlay, setOverlay] = useState<null | "search" | "bell" | "more">(null);
   const [query, setQuery] = useState("");
+  const [cashier, setCashier] = useState<CashierRoute>(null);
   const scroller = useRef<HTMLDivElement>(null);
 
   const go = (t: HomeTab) => {
@@ -106,8 +113,9 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
         </div>
         {tab === "options" && (
           <OptionsPage
-            onOpenTrader={() => openBot("builder")}
+            onOpenTrader={() => setCashier("trader")}
             onOpenBot={() => openBot("builder")}
+            onTransfer={() => setCashier("transfer")}
             hidden={hidden}
             unread={unread}
             balance={0}
@@ -130,6 +138,15 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
           );
         })}
       </nav>
+
+      {cashier && (
+        <div className="absolute inset-0 z-[55]">
+          {cashier === "deposit" && <DepositFlow onClose={() => setCashier(null)} />}
+          {cashier === "withdraw" && <WithdrawFlow onClose={() => setCashier(null)} />}
+          {cashier === "transfer" && <TransferFlow onClose={() => setCashier(null)} />}
+          {cashier === "trader" && <DTraderPage onClose={() => setCashier(null)} />}
+        </div>
+      )}
 
       {overlay === "search" && (
         <div className="anim-fade-in absolute inset-0 z-50 flex flex-col bg-white">
@@ -173,25 +190,19 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
       )}
 
       {overlay === "bell" && (
-        <Sheet title="Notifications" onClose={() => setOverlay(null)}>
-          {unread === 0 && (
-            <div className="flex flex-col items-center py-10 text-[#8a8f99]">
-              <IconBell size={40} />
-              <p className="mt-2 text-[15px]">You're all caught up</p>
-            </div>
-          )}
-          {unread > 0 && (
-            <ul className="space-y-3">
-              {["Welcome to Deriv — this is a demo notification.", "New: ANT CFDs are now available to explore."].slice(0, unread).map((n, i) => (
-                <li key={n} className="anim-fade-up rounded-2xl bg-[#f5f5f5] p-4 text-[14.5px]" style={{ animationDelay: `${i * 70}ms` }}>
-                  {n}
-                </li>
-              ))}
-              <button onClick={() => setUnread(0)} className="press w-full rounded-full bg-[#181c25] py-3 text-[15px] font-bold text-white">
-                Mark all as read
-              </button>
-            </ul>
-          )}
+        <Sheet title="Notifications" onClose={() => setOverlay(null)} full>
+          <NotificationsPanel
+            items={notifs}
+            onRead={(id) => setNotifs((l) => l.map((n) => (n.id === id ? { ...n, read: true } : n)))}
+            onDismiss={(id) => setNotifs((l) => l.filter((n) => n.id !== id))}
+            onMarkAll={() => setNotifs((l) => l.map((n) => ({ ...n, read: true })))}
+            onAction={(n) => {
+              if (n.kind === "promo" || n.kind === "announcement") {
+                setOverlay(null);
+                go("options");
+              }
+            }}
+          />
         </Sheet>
       )}
 

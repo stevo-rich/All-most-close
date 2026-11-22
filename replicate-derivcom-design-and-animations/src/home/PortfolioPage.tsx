@@ -1,7 +1,12 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { IconDollar, IconMinus, IconPlus, IconRefresh, IconTransfer } from "../icons";
-import { useLoaded, useToast } from "../ui";
+import { useLoaded } from "../ui";
 import { fmtUsd, useProfile } from "../account";
+import { CashierHub, type CashierRoute } from "../cashier/CashierHub";
+import { DepositFlow } from "../cashier/DepositFlow";
+import { WithdrawFlow } from "../cashier/WithdrawFlow";
+import { TransferFlow } from "../cashier/TransferFlow";
+import { DTraderPage } from "../cashier/DTraderPage";
 
 const TABS = ["Overview", "Wallet", "Partners", "Trading", "P2P"] as const;
 
@@ -28,8 +33,8 @@ function Card({ children, onClick, className = "" }: { children: ReactNode; onCl
   );
 }
 
-function Overview({ toast }: { toast: (m: string) => void }) {
-  const demo = () => toast("Payments are unavailable right now. Try again shortly.");
+function Overview({ onDeposit }: { onDeposit: () => void }) {
+  const demo = onDeposit;
   return (
     <>
       <section className="-mt-8 rounded-b-[32px] bg-[#f5f5f5] px-4 pb-6 pt-14">
@@ -130,11 +135,11 @@ function Placeholder({ tab }: { tab: string }) {
 
 export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
   const { profile } = useProfile();
+  const [route, setRoute] = useState<CashierRoute>(null);
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [ind, setInd] = useState({ left: 0, width: 0 });
   const loaded = useLoaded(600);
-  const toast = useToast();
   const [spin, setSpin] = useState(0);
 
   useLayoutEffect(() => {
@@ -142,7 +147,7 @@ export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
     if (el) setInd({ left: el.offsetLeft, width: el.offsetWidth });
   }, [tab]);
 
-  const demo = () => toast("Transactions are unavailable right now. Try again shortly.");
+  const open = (r: Exclude<CashierRoute, null>) => setRoute(r);
 
   return (
     <div>
@@ -182,13 +187,13 @@ export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
               <div className="text-[15px] text-[#b5b9c2]">Updated 1 min ago</div>
             </div>
             <div className="mt-6 grid grid-cols-3 px-2">
-              <ActionButton i={0} primary label="Deposit" onClick={demo}>
+              <ActionButton i={0} primary label="Deposit" onClick={() => open("deposit")}>
                 <IconPlus size={26} />
               </ActionButton>
-              <ActionButton i={1} label="Transfer" onClick={demo}>
+              <ActionButton i={1} label="Transfer" onClick={() => open("transfer")}>
                 <IconTransfer size={26} />
               </ActionButton>
-              <ActionButton i={2} label="Withdraw" onClick={demo}>
+              <ActionButton i={2} label="Withdraw" onClick={() => open("withdraw")}>
                 <IconMinus size={26} />
               </ActionButton>
             </div>
@@ -197,8 +202,18 @@ export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
       </section>
 
       <div key={tab} className="page-enter relative z-[1]">
-        {tab === "Overview" ? <Overview toast={toast} /> : <Placeholder tab={tab} />}
+        {tab === "Overview" ? <Overview onDeposit={() => open("deposit")} /> : <Placeholder tab={tab} />}
       </div>
+
+      {route && (
+        <div className="absolute inset-0 z-50">
+          {route === "deposit" && <DepositFlow onClose={() => setRoute(null)} />}
+          {route === "withdraw" && <WithdrawFlow onClose={() => setRoute(null)} />}
+          {route === "transfer" && <TransferFlow onClose={() => setRoute(null)} />}
+          {route === "trader" && <DTraderPage onClose={() => setRoute(null)} />}
+          {route === "hub" && <CashierHub onClose={() => setRoute(null)} onGo={(r) => setRoute(r)} />}
+        </div>
+      )}
     </div>
   );
 }

@@ -399,6 +399,7 @@ export function OptionsPage({
   onBell,
   onProfile,
   balance,
+  onTransfer,
 }: {
   onOpenTrader: (market?: string) => void;
   onOpenBot: () => void;
@@ -407,6 +408,7 @@ export function OptionsPage({
   onBell: () => void;
   onProfile: () => void;
   balance: number;
+  onTransfer?: () => void;
 }) {
   const toast = useToast();
   const [account, setAccount] = useState<OptionsAccount>("real");
@@ -451,7 +453,7 @@ export function OptionsPage({
         hidden={hide}
         balance={account === "demo" ? 10000 : Math.max(balance, profile.balance)}
         onTrade={() => onOpenTrader()}
-        onTransfer={() => toast("Demo clone — transfers are not available.")}
+        onTransfer={() => (onTransfer ? onTransfer() : toast("Transfers are unavailable right now."))}
       />
 
       {/* Most traded markets */}
