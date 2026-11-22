@@ -91,7 +91,7 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
       <div ref={scroller} className="flex-1 overflow-y-auto bg-white">
         {tab !== "options" && !isProfile && (
           <HomeHeader
-            avatar={tab === "home" || tab === "cfds" || tab === "exchange"}
+            avatar={tab !== "portfolio"}
             amy
             onAmy={() => toast("Amy, your AI assistant, is a demo placeholder here.")}
             eye={!isProfile}
@@ -143,7 +143,9 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
         <div className="absolute inset-0 z-[55]">
           {cashier === "deposit" && <DepositFlow onClose={() => setCashier(null)} />}
           {cashier === "withdraw" && <WithdrawFlow onClose={() => setCashier(null)} />}
-          {cashier === "transfer" && <TransferFlow onClose={() => setCashier(null)} />}
+          {cashier === "transfer" && (
+            <TransferFlow onClose={() => setCashier(null)} onStartTrading={() => setCashier("trader")} />
+          )}
           {cashier === "trader" && <DTraderPage onClose={() => setCashier(null)} />}
         </div>
       )}

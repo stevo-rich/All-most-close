@@ -43,16 +43,23 @@ export function HomeHeader(p: Props) {
         </Circle>
       )}
 
+      {/* Profile-information button pinned to the far left. */}
+      {p.avatar && (
+        <Circle label="Profile" onClick={p.onAvatar} className="text-[12px] font-semibold">
+          {p.initials ?? "JG"}
+        </Circle>
+      )}
+
       <Circle label="Search" onClick={p.onSearch}>
         <IconSearch size={17} />
       </Circle>
 
-      {/* Ask Amy sits centred-left next to search, with the profile/eye/bell
-          group pushed to the right edge — the arrangement on the real app. */}
+      {/* Ask Amy is absolutely centred against the header, not floated in the
+          flex flow, so it stays in the middle whatever sits either side. */}
       {p.amy && (
         <button
           onClick={p.onAmy}
-          className="amy-pill press anim-fade-in ml-1 flex h-9 shrink-0 items-center gap-1.5 px-4"
+          className="amy-pill press anim-fade-in absolute left-1/2 flex h-9 -translate-x-1/2 items-center gap-1.5 px-4"
           aria-label="Ask Amy"
         >
           <span className="flex shrink-0" style={{ animation: "sparkle-twinkle 3s ease-in-out infinite" }}>
@@ -63,12 +70,6 @@ export function HomeHeader(p: Props) {
       )}
 
       <div className="flex-1" />
-
-      {p.avatar && (
-        <Circle label="Profile" onClick={p.onAvatar} className="text-[9px] font-semibold">
-          {p.initials ?? "JD"}
-        </Circle>
-      )}
 
       {p.eye && (
         <Circle label="Toggle balance" onClick={p.onToggleBalance}>

@@ -129,6 +129,17 @@ function Overview({ onDeposit }: { onDeposit: () => void }) {
             <span className="text-[14px] tabular-nums text-[#181c25]">{fmtUsd(profile.balance)} USD</span>
           </div>
           <div className="h-px bg-[#eceef0]" />
+          <div className="anim-fade-up flex items-center gap-3.5" style={{ animationDelay: "40ms" }}>
+            <span className="flex h-[30px] w-[30px] items-center justify-center rounded-[7px] bg-[#181c25]">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2.5" y="6" width="19" height="13" rx="2.5" />
+                <path d="M2.5 10.5h19M16 15h2.5" />
+              </svg>
+            </span>
+            <span className="flex-1 text-[15px] text-[#181c25]">Wallet</span>
+            <span className="text-[14px] tabular-nums text-[#181c25]">{fmtUsd(profile.wallet)} USD</span>
+          </div>
+          <div className="h-px bg-[#eceef0]" />
           <div className="anim-fade-up flex items-center gap-3.5" style={{ animationDelay: "70ms" }}>
             <span className="flex h-[30px] w-[30px] flex-col items-center justify-center overflow-hidden rounded-[7px] bg-[#1c2b4a]">
               <span className="text-[4.5px] font-bold leading-none text-white">MTS</span>
@@ -271,7 +282,7 @@ export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
         <div className="absolute inset-0 z-50">
           {route === "deposit" && <DepositFlow onClose={() => setRoute(null)} />}
           {route === "withdraw" && <WithdrawFlow onClose={() => setRoute(null)} />}
-          {route === "transfer" && <TransferFlow onClose={() => setRoute(null)} />}
+          {route === "transfer" && <TransferFlow onClose={() => setRoute(null)} onStartTrading={() => setRoute("trader")} />}
           {route === "trader" && <DTraderPage onClose={() => setRoute(null)} />}
           {route === "hub" && <CashierHub onClose={() => setRoute(null)} onGo={(r) => setRoute(r)} />}
         </div>

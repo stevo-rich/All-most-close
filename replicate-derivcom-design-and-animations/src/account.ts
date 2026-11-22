@@ -14,8 +14,10 @@ export type Profile = {
   country: string;
   citizenship: string;
   nickname: string;
-  /** Real account balance in USD */
+  /** Real account balance in USD — the trading (Options) balance */
   balance: number;
+  /** Wallet balance in USD — where deposits land before moving to trading */
+  wallet: number;
   email: string;
   phone: string;
 };
@@ -30,6 +32,7 @@ export const DEFAULT_PROFILE: Profile = {
   citizenship: "Kenya",
   nickname: "client_mq88g8gax6il",
   balance: 0,
+  wallet: 0,
   email: "stephengachuhi178@gmail.com",
   phone: "+254106135124",
 };
@@ -43,6 +46,7 @@ const read = (): Profile => {
       ...DEFAULT_PROFILE,
       ...p,
       balance: typeof p.balance === "number" && Number.isFinite(p.balance) ? Math.max(0, p.balance) : 0,
+      wallet: typeof p.wallet === "number" && Number.isFinite(p.wallet) ? Math.max(0, p.wallet) : 0,
     };
   } catch {
     return DEFAULT_PROFILE;
@@ -73,6 +77,8 @@ export const accountStore = {
   set: (patch: Partial<Profile>) => write({ ...get(), ...patch }),
   setBalance: (balance: number) => write({ ...get(), balance: Math.max(0, Math.round(balance * 100) / 100) }),
   adjustBalance: (delta: number) => write({ ...get(), balance: Math.max(0, Math.round((get().balance + delta) * 100) / 100) }),
+  setWallet: (wallet: number) => write({ ...get(), wallet: Math.max(0, Math.round(wallet * 100) / 100) }),
+  adjustWallet: (delta: number) => write({ ...get(), wallet: Math.max(0, Math.round((get().wallet + delta) * 100) / 100) }),
 };
 
 /** Subscribe a component to profile + balance changes. */
@@ -91,8 +97,9 @@ export function useProfile() {
 
   const save = useCallback((patch: Partial<Profile>) => accountStore.set(patch), []);
   const setBalance = useCallback((n: number) => accountStore.setBalance(n), []);
+  const setWallet = useCallback((n: number) => accountStore.setWallet(n), []);
 
-  return { profile, save, setBalance };
+  return { profile, save, setBalance, setWallet };
 }
 
 export const fullName = (p: Profile) => `${p.firstName} ${p.lastName}`.trim();
