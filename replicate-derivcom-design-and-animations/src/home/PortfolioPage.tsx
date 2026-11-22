@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { IconDollar, IconMinus, IconPlus, IconRefresh, IconTransfer } from "../icons";
+import { IconMinus, IconPlus, IconRefresh, IconTransfer } from "../icons";
 import { useLoaded } from "../ui";
 import { fmtUsd, useProfile } from "../account";
 import { CashierHub, type CashierRoute } from "../cashier/CashierHub";
@@ -33,68 +33,130 @@ function Card({ children, onClick, className = "" }: { children: ReactNode; onCl
   );
 }
 
+function PayIcon({ kind }: { kind: "usd" | "p2p" | "crypto" }) {
+  return (
+    <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border-[1.6px] border-[#181c25] text-[#181c25]">
+      {kind === "usd" && (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M12 7.5v9M14.6 9.6c-.5-.8-1.4-1.2-2.6-1.2-1.5 0-2.6.7-2.6 1.9 0 1.3 1.2 1.8 2.6 2 1.5.3 2.7.8 2.7 2.1 0 1.2-1.1 1.9-2.7 1.9-1.3 0-2.2-.5-2.7-1.3" />
+        </svg>
+      )}
+      {kind === "p2p" && (
+        <span className="text-[9px] font-extrabold tracking-tight">P2P</span>
+      )}
+      {kind === "crypto" && (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M9.5 15.5v-7h3a2.1 2.1 0 0 1 0 4.2h-3M11.2 6.5v1.6M11.2 15.5v1.8" />
+        </svg>
+      )}
+    </span>
+  );
+}
+
 function Overview({ onDeposit }: { onDeposit: () => void }) {
-  const demo = onDeposit;
+  const { profile } = useProfile();
+  const [tab3, setTab3] = useState(false);
   return (
     <>
-      <section className="-mt-8 rounded-b-[32px] bg-[#f5f5f5] px-4 pb-6 pt-14">
+      <section className="bg-white px-4 pb-6 pt-5">
         <h2 className="text-[15px] font-bold tracking-tight text-[#181c25]">Make your first deposit</h2>
-        <p className="mt-1 text-[11px] text-[#8a8f99]">Deposit in crypto or your local currency, instantly.</p>
-        <div className="hide-scroll -mx-4 mt-4 flex gap-2 overflow-x-auto px-4">
-          <Card onClick={demo} className="anim-fade-up flex h-[110px] w-[137px] shrink-0 flex-col items-center justify-between rounded-3xl bg-[#ebebeb] px-3 pb-3 pt-4 hover:bg-[#e3e3e3]">
+        <p className="mt-1 text-[11.5px] text-[#8a8f99]">Deposit in crypto or your local currency, instantly.</p>
+        <div className="hide-scroll -mx-4 mt-4 flex gap-2.5 overflow-x-auto px-4">
+          <Card onClick={onDeposit} className="anim-fade-up flex h-[108px] w-[137px] shrink-0 flex-col items-center justify-between rounded-[14px] bg-[#f2f2f2] px-3 pb-3.5 pt-5 hover:bg-[#e9e9e9]">
             <span className="text-[15px] font-extrabold tracking-tight">
               <span className="text-[#7b3fa0]">Dusu</span>
               <span className="text-[#f5b800]">Pay</span>
             </span>
-            <span className="text-[10.5px] font-semibold">Mobile Money</span>
+            <span className="text-[12px] font-bold text-[#181c25]">Mobile Money</span>
           </Card>
-          <Card onClick={demo} className="anim-fade-up flex h-[110px] w-[137px] shrink-0 flex-col items-center justify-between rounded-3xl bg-[#ebebeb] px-3 pb-3 pt-4 hover:bg-[#e3e3e3]" >
-            <span className="flex items-center gap-1 text-[7.5px] font-bold leading-[10px]">
-              <svg width="22" height="22" viewBox="0 0 24 24">
+          <Card onClick={onDeposit} className="anim-fade-up flex h-[108px] w-[137px] shrink-0 flex-col items-center justify-between rounded-[14px] bg-[#f2f2f2] px-3 pb-3.5 pt-5 hover:bg-[#e9e9e9]">
+            <span className="flex items-center gap-1 text-[7.5px] font-bold leading-[10px] text-[#181c25]">
+              <svg width="21" height="21" viewBox="0 0 24 24">
                 <rect x="3" y="8" width="18" height="12" rx="2" fill="#111" />
                 <rect x="6" y="4" width="12" height="5" rx="1" fill="#111" />
-                <circle cx="14" cy="14" r="2.5" fill="#ebebeb" />
+                <circle cx="14" cy="14" r="2.5" fill="#f2f2f2" />
               </svg>
-              Payment
-              <br />
-              Agent
+              Payment Agent
             </span>
-            <span className="text-[10.5px] font-semibold">Payment Agent</span>
+            <span className="text-[12px] font-bold text-[#181c25]">Payment Agent</span>
           </Card>
-          <Card onClick={demo} className="anim-fade-up flex h-[110px] w-[137px] shrink-0 flex-col items-center justify-between rounded-3xl bg-[#ebebeb] px-3 pb-3 pt-4 hover:bg-[#e3e3e3]">
-            <span className="text-[13.5px] font-extrabold tracking-tight">
+          <Card onClick={onDeposit} className="anim-fade-up flex h-[108px] w-[137px] shrink-0 flex-col items-center justify-between rounded-[14px] bg-[#f2f2f2] px-3 pb-3.5 pt-5 hover:bg-[#e9e9e9]">
+            <span className="text-[14px] font-extrabold tracking-tight">
               <span className="text-[#3a9d23]">m</span>
               <span className="text-[#e11d2a]">-</span>
               <span className="text-[#3a9d23]">PESA</span>
             </span>
-            <span className="text-[10.5px] font-semibold">MPESA</span>
-          </Card>
-          <Card onClick={demo} className="anim-fade-up flex h-[110px] w-[137px] shrink-0 flex-col items-center justify-between rounded-3xl bg-[#ebebeb] px-3 pb-3 pt-4 hover:bg-[#e3e3e3]">
-            <span className="text-[18px] font-black text-[#f7931a]">₿</span>
-            <span className="text-[10.5px] font-semibold">Crypto</span>
+            <span className="text-[12px] font-bold text-[#181c25]">MPESA</span>
           </Card>
         </div>
       </section>
 
-      <section className="px-4 pb-8 pt-8">
-        <h2 className="text-[15px] font-bold tracking-tight">Other payment methods</h2>
-        <div className="mt-4 space-y-3">
+      <section className="px-4 pb-2 pt-5">
+        <h2 className="text-[15px] font-bold tracking-tight text-[#181c25]">Other payment methods</h2>
+        <div className="mt-3.5 space-y-2.5">
           {[
-            { t: "USD", d: "Fund via bank, card, e-wallet, and crypto." },
-            { t: "Crypto", d: "Deposit BTC, ETH, USDT and more." },
-            { t: "Deriv P2P", d: "Buy USD from other Deriv users." },
+            { t: "USD", d: "Fund via bank, card, e-wallet, and crypto.", k: "usd" as const },
+            { t: "P2P", d: "Buy and sell USD with other traders. Deposit and withdraw in your local currency.", k: "p2p" as const },
+            { t: "Crypto", d: "Quickly fund your account with USDT, USDC, and more.", k: "crypto" as const },
           ].map((m, i) => (
-            <Card key={m.t} onClick={demo} className="anim-fade-up flex w-full items-center gap-4 rounded-3xl bg-[#f5f5f5] p-5 hover:bg-[#eeeeee]">
-              <span style={{ animationDelay: `${i * 70}ms` }} className="text-[#181c25]">
-                <IconDollar size={34} />
-              </span>
-              <span>
-                <span className="block text-[15px] leading-6 text-[#181c25]">{m.t}</span>
-                <span className="block text-[10.5px] text-[#6c717b]">{m.d}</span>
+            <Card
+              key={m.t}
+              onClick={onDeposit}
+              className="anim-fade-up flex w-full items-center gap-4 rounded-[16px] bg-[#f5f5f5] px-4 py-4 text-left hover:bg-[#eeeeee]"
+            >
+              <PayIcon kind={m.k} />
+              <span className="min-w-0 flex-1" style={{ animationDelay: `${i * 70}ms` }}>
+                <span className="block text-[16px] leading-[1.35] text-[#181c25]">{m.t}</span>
+                <span className="mt-0.5 block text-[11.5px] leading-[1.45] text-[#8a8f99]">{m.d}</span>
               </span>
             </Card>
           ))}
         </div>
+      </section>
+
+      <section className="px-4 pb-6 pt-6">
+        <h2 className="text-[15px] font-bold tracking-tight text-[#181c25]">Trading</h2>
+        <div className="mt-4 space-y-3">
+          <div className="anim-fade-up flex items-center gap-3.5">
+            <span className="flex h-[30px] w-[30px] items-center justify-center rounded-[7px] bg-[#ff444f]">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 19V9m5 10V5m5 14v-8m5 8V7" />
+              </svg>
+            </span>
+            <span className="flex-1 text-[15px] text-[#181c25]">Options</span>
+            <span className="text-[14px] tabular-nums text-[#181c25]">{fmtUsd(profile.balance)} USD</span>
+          </div>
+          <div className="h-px bg-[#eceef0]" />
+          <div className="anim-fade-up flex items-center gap-3.5" style={{ animationDelay: "70ms" }}>
+            <span className="flex h-[30px] w-[30px] flex-col items-center justify-center overflow-hidden rounded-[7px] bg-[#1c2b4a]">
+              <span className="text-[4.5px] font-bold leading-none text-white">MTS</span>
+              <span className="mt-[2px] rounded-[1px] bg-[#2d6bd8] px-[3px] text-[4.5px] font-bold leading-[6px] text-white">STD</span>
+            </span>
+            <span className="flex-1 text-[15px] text-[#181c25]">Standard</span>
+            <span className="text-[14px] tabular-nums text-[#181c25]">0.00 USD</span>
+          </div>
+        </div>
+
+        <div className="relative mt-8 flex items-center justify-center">
+          <span className="absolute inset-x-6 -top-3 h-[26px] rounded-t-[14px] border border-[#eceef0] border-b-transparent bg-white" />
+          <button
+            onClick={() => setTab3((v) => !v)}
+            className="press relative flex w-[268px] items-center justify-center gap-2.5 rounded-full border border-[#eceef0] bg-white py-[13px] text-[14px] text-[#181c25] shadow-[0_2px_10px_rgba(0,0,0,.05)]"
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 8h13l-3-3M20 16H7l3 3" />
+            </svg>
+            View all transactions
+          </button>
+        </div>
+
+        {tab3 && (
+          <div className="anim-fade-up mt-3 rounded-[14px] bg-[#f5f5f5] p-4 text-[11.5px] text-[#6c717b]">
+            No transactions yet. Deposits, withdrawals and trades will appear here.
+          </div>
+        )}
       </section>
     </>
   );

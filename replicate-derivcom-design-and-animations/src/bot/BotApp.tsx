@@ -16,6 +16,7 @@ import {
   IconPuzzle,
   IconRedo,
   IconRefresh,
+  IconRestart,
   IconSave,
   IconStop,
   IconUndo,
@@ -41,6 +42,7 @@ type Cfg = {
   duration: number;
   stake: number;
   purchase: string;
+  prediction: number;
 };
 
 /**
@@ -59,6 +61,7 @@ const DEFAULT_CFG: Cfg = {
   duration: 1,
   stake: 1,
   purchase: "Rise",
+  prediction: 1,
 };
 
 /* ------------------------------------------------------------------ */
@@ -294,15 +297,24 @@ function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>)
   // Every Derived volatility index, exactly as bot.deriv.com lists them.
   const symbols = ALL_VOLATILITY.map((m) => m.name);
   return (
-    <div className="h-full overflow-auto bg-white pb-14 pl-[57px] pt-3">
-      <button onClick={onQuick} className="press anim-fade-up rounded-[4px] bg-[#ff444f] px-[17px] py-[13px] text-[13px] font-bold text-white shadow-sm hover:bg-[#ff5a64]">
+    <div className="relative h-full overflow-auto bg-white pb-20 pl-[57px] pt-3">
+      <button onClick={onQuick} className="press anim-fade-up rounded-[4px] bg-[#ff444f] px-[22px] py-[15px] text-[17px] font-bold text-white shadow-sm hover:bg-[#ff5a64]">
         Quick strategy
       </button>
-      <div style={{ transform: `scale(${zoom})`, transformOrigin: "0 0", transition: "transform .25s ease" }} className="mt-4 ml-[18px] w-[243px]">
-        {/* Block 1 */}
-        <div className="anim-fade-up rounded-[3px] bg-[#074f6f] pb-5 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]" style={{ animationDelay: "60ms" }}>
-          <div className="flex items-center gap-3 px-3 py-[11px] text-[13px]">
-            <IconList size={20} />
+
+      {/* The canvas is wider than the screen so block 4 peeks in from the
+          right, exactly as bot.deriv.com shows it. */}
+      <div
+        style={{ transform: `scale(${zoom})`, transformOrigin: "0 0", transition: "transform .25s ease" }}
+        className="relative mt-8 ml-[18px] h-[560px] w-[760px]"
+      >
+        {/* Block 1 — Trade parameters */}
+        <div
+          className="anim-fade-up absolute left-0 top-0 w-[238px] rounded-[3px] bg-[#074f6f] pb-5 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]"
+          style={{ animationDelay: "60ms" }}
+        >
+          <div className="flex items-center gap-3 px-3 py-[10px] text-[12.5px]">
+            <IconList size={18} />
             1. Trade parameters
           </div>
           <div className="space-y-px pl-3.5">
@@ -316,13 +328,13 @@ function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>)
             </Row>
             <Row>
               Trade Type:
-              <Sel value={cfg.tradeType} options={["Up/Down", "Even/Odd", "Over/Under"]} onChange={(v) => set({ tradeType: v })} />
+              <Sel value={cfg.tradeType} options={["Up/Down", "Digits", "Even/Odd", "Over/Under"]} onChange={(v) => set({ tradeType: v })} />
               <span>&gt;</span>
-              <Sel value={cfg.tradeType2} options={["Rise/Fall", "Higher/Lower"]} onChange={(v) => set({ tradeType2: v })} />
+              <Sel value={cfg.tradeType2} options={["Rise/Fall", "Over/Under", "Higher/Lower"]} onChange={(v) => set({ tradeType2: v })} />
             </Row>
             <Row>
               Contract Type:
-              <Sel value={cfg.contractType} options={["Both", "Rise", "Fall"]} onChange={(v) => set({ contractType: v })} />
+              <Sel value={cfg.contractType} options={["Both", "Rise", "Fall", "Over", "Under"]} onChange={(v) => set({ contractType: v })} />
             </Row>
             <Row>
               Default Candle Interval:
@@ -337,35 +349,81 @@ function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>)
               <Check checked={cfg.restartLast} onChange={(v) => set({ restartLast: v })} />
             </Row>
           </div>
-          <div className="px-3 pb-2.5 pt-3.5 text-[13px]">Run once at start:</div>
-          <div className="h-7 w-[60px] rounded-[3px] bg-[#e5e7ea] ml-3.5" />
-          <div className="px-3 pb-2.5 pt-3.5 text-[13px]">Trade options:</div>
+
+          <div className="px-3 pb-2 pt-3 text-[12.5px]">Run once at start:</div>
+          <div className="ml-3.5 h-8 w-[64px] rounded-[3px] bg-[#0b5f83]" />
+
+          <div className="px-3 pb-2 pt-3 text-[12.5px]">Trade options:</div>
           <div className="pl-3.5">
             <Row>
               Duration:
               <Sel value={cfg.durationUnit} options={["Ticks", "Seconds", "Minutes"]} onChange={(v) => set({ durationUnit: v })} />
-              <Num value={cfg.duration} onChange={(n) => set({ duration: n })} w={14} />
+              <Num value={cfg.duration} onChange={(n) => set({ duration: n })} w={16} />
               Stake: USD
-              <Num value={cfg.stake} onChange={(n) => set({ stake: n })} w={14} />
+              <Sel value="1-3-2-6 Trade Amount" options={["1-3-2-6 Trade Amount", "Martingale", "Flat"]} onChange={() => {}} />
+              Prediction:
+              <Num value={cfg.prediction} onChange={(n) => set({ prediction: n })} w={16} />
             </Row>
           </div>
         </div>
 
-        {/* Block 2 */}
-        <div className="anim-fade-up mt-16 rounded-[3px] bg-[#074f6f] pb-5 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]" style={{ animationDelay: "140ms" }}>
-          <div className="flex items-center gap-3 px-3 py-[11px] text-[13px]">
-            <IconBasket size={20} />
+        {/* Block 2 — Purchase conditions */}
+        <div
+          className="anim-fade-up absolute left-0 top-[306px] w-[238px] rounded-[3px] bg-[#074f6f] pb-5 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]"
+          style={{ animationDelay: "140ms" }}
+        >
+          <div className="flex items-center gap-3 px-3 py-[10px] text-[12.5px]">
+            <IconBasket size={18} />
             2. Purchase conditions
           </div>
           <div className="pl-3.5">
             <Row>
               Purchase
-              <Sel value={cfg.purchase} options={["Rise", "Fall"]} onChange={(v) => set({ purchase: v })} />
+              <Sel value={cfg.purchase} options={["Rise", "Fall", "Over", "Under"]} onChange={(v) => set({ purchase: v })} />
               <span className="w-5" />
             </Row>
           </div>
         </div>
-        <div className="h-24" />
+
+        {/* Block 4 — Restart trading conditions, clipped at the right edge */}
+        <div
+          className="anim-fade-up absolute left-[430px] top-[398px] w-[240px] rounded-[3px] bg-[#074f6f] pb-3 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]"
+          style={{ animationDelay: "220ms" }}
+        >
+          <div className="flex items-center gap-3 px-3 py-[10px] text-[12.5px]">
+            <IconRestart size={18} />
+            4. Restart trading conditions
+          </div>
+          <div className="pl-3.5">
+            <Row>if</Row>
+            <Row>
+              <Sel value="1-3-2-6 Trade Again After Purchase" options={["1-3-2-6 Trade Again After Purchase"]} onChange={() => {}} />
+              <span className="text-[11px]">:</span>
+              <Num value={cfg.duration} onChange={(n) => set({ duration: n })} w={16} />
+            </Row>
+            <Row>Trade again</Row>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className="flex h-[15px] w-[15px] items-center justify-center rounded-full bg-[#e6e8ea] text-[9px] font-bold text-[#333]">i</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Function pills under the blocks, like the generated helper functions */}
+        <div className="absolute left-[18px] top-[368px] space-y-2">
+          {[
+            "function 1-3-2-6 Core Functionality (1-3-2-6:resultsW…)",
+            "function 1-3-2-6 Trade Amount ()",
+            "function 1-3-2-6 Trade Again After Purchase (1-3-2-6:profit, 1-3-2-6:results_win)",
+          ].map((f, i) => (
+            <div
+              key={f}
+              className="anim-fade-up w-[318px] truncate rounded-[3px] bg-[#f2f3f4] px-2.5 py-[7px] text-[11px] text-[#333] shadow-[0_1px_2px_rgba(0,0,0,.08)]"
+              style={{ animationDelay: `${300 + i * 70}ms` }}
+            >
+              {f}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -994,44 +1052,58 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
         />
       </div>
 
-      {/* Run panel — progress strip + status */}
-      <div className="relative z-30 shrink-0 border-t border-[#e6e8ea] bg-white px-4 py-3">
-        <div className="flex h-[42px] overflow-hidden rounded-[4px] border border-[#d6d9dd]">
+      {/* Collapse handle, as on bot.deriv.com */}
+      <button
+        onClick={() => setDrawer((d) => !d)}
+        aria-label="Toggle transactions"
+        className="press relative z-30 flex h-[38px] shrink-0 items-center justify-center border-t border-[#eceef0] bg-white text-[#333]"
+      >
+        <span className={`transition-transform duration-300 ${drawer ? "" : "rotate-180"}`}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m6 14 6-6 6 6" />
+          </svg>
+        </span>
+      </button>
+
+      {/* Run panel — teal Run button, status, tick track */}
+      <div className="relative z-30 shrink-0 bg-white px-4 pb-3">
+        <div className="flex h-[52px] overflow-hidden rounded-[4px] border border-[#d6d9dd] bg-white">
           <button
             onClick={running ? () => stop() : start}
-            className={`press flex w-[83px] shrink-0 items-center justify-center gap-1.5 text-[13px] font-bold text-white transition-colors duration-300 ${
-              running ? "bg-[#ff444f]" : "bg-[#7fcfcb] hover:bg-[#71c3bf]"
+            className={`press flex w-[96px] shrink-0 items-center justify-center gap-2 text-[15px] font-bold text-white transition-colors duration-300 ${
+              running ? "bg-[#ff444f]" : "bg-[#57b8b3] hover:bg-[#4daba6]"
             }`}
-            style={{ marginLeft: -1 }}
           >
-            {running ? <IconStop size={18} /> : <IconPlay size={20} />}
+            {running ? <IconStop size={17} /> : <IconPlay size={19} />}
             {running ? "Stop" : "Run"}
           </button>
 
-          {/* status area: label + thin progress bar, with breathing room */}
-          <div className="relative flex min-w-0 flex-1 flex-col items-center justify-center gap-2 px-4">
+          <div className="relative flex min-w-0 flex-1 flex-col items-center justify-center px-4">
             <span
-              className="text-[11px] font-bold"
+              className="text-[13.5px] font-bold"
               style={{ color: running ? "#333" : lastTx ? (lastTx.profit > 0 ? "#4bb4b3" : "#ff444f") : "#333" }}
             >
               {running ? (lastTx ? "Contract bought" : "Bot is starting") : statusLabel}
             </span>
-            <div className="relative h-[5px] w-full overflow-hidden rounded-full bg-[#e6e8ea]">
-              {running ? (
-                <>
-                  <span
-                    className="absolute inset-y-0 left-0 rounded-full bg-[#4bb4b3] transition-[width] duration-700 ease-out"
-                    style={{ width: `${runProgress}%` }}
-                  />
-                  <span className="absolute right-0 top-1/2 flex h-3 w-3 -translate-y-1/2 translate-x-1/3 items-center justify-center rounded-full bg-[#bfe3e1]">
-                    <span className="h-1 w-1 rounded-full bg-[#4bb4b3]" />
-                  </span>
-                </>
-              ) : (
-                <span className="absolute inset-y-0 left-0 w-full rounded-full bg-current opacity-[0.06]" />
-              )}
-            </div>
           </div>
+        </div>
+
+        {/* The tick track under the panel: a thin rail with tick markers. */}
+        <div className="relative mt-2.5 h-[7px]">
+          <span className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-[#e6e8ea]" />
+          {running && (
+            <span
+              className="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-[#4bb4b3] transition-[width] duration-700 ease-out"
+              style={{ width: `${runProgress}%` }}
+            />
+          )}
+          {[0, 50, 100].map((pct) => (
+            <span
+              key={pct}
+              className="absolute top-1/2 h-[7px] w-[2.5px] -translate-y-1/2 rounded-full"
+              style={{ left: `calc(${pct}% - 1px)`, background: running ? "#4bb4b3" : "#9aa1aa" }}
+            />
+          ))}
         </div>
       </div>
 

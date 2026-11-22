@@ -249,34 +249,45 @@ export function AccountSelect({
   options,
   onPick,
   error,
+  disabled,
 }: {
   label: string;
   selected: AccountOption | null;
   options: AccountOption[];
   onPick: (o: AccountOption) => void;
   error?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const groups = Array.from(new Set(options.map((o) => o.group)));
   return (
     <div className="relative">
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => !disabled && setOpen((o) => !o)}
         aria-label={label}
-        className="flex w-full items-center gap-3 rounded-[6px] border bg-white px-3 py-2.5 text-left transition-colors"
-        style={{ borderColor: error ? "#ff444f" : open ? "#181c25" : "#d6d9dd" }}
+        className={`flex w-full items-center gap-3 bg-[#f5f5f5] px-4 py-3 text-left transition-colors ${
+          disabled ? "cursor-default" : "hover:bg-[#efefef]"
+        }`}
       >
-        <Pocket tone={selected?.tone ?? "navy"} />
         <span className="min-w-0 flex-1">
-          <span className="block text-[8px] uppercase tracking-wide text-[#6c717b]">{label}</span>
-          <span className="block truncate text-[11px] font-semibold text-[#181c25]">
-            {selected ? selected.text : "Select an account"}
-          </span>
+          <span className={`block text-[11.5px] ${disabled ? "text-[#c4c8cd]" : "text-[#8a8f99]"}`}>{label}</span>
+          {selected ? (
+            <span className="mt-0.5 flex items-center gap-3">
+              <Pocket tone={selected.tone} />
+              <span className="min-w-0">
+                <span className={`block truncate text-[14px] font-bold ${disabled ? "text-[#a8adb5]" : "text-[#181c25]"}`}>
+                  {selected.text}
+                </span>
+                <span className={`block text-[12px] tabular-nums ${disabled ? "text-[#c4c8cd]" : "text-[#8a8f99]"}`}>
+                  {selected.balance.toFixed(2)} USD
+                </span>
+              </span>
+            </span>
+          ) : (
+            <span className={`mt-0.5 block text-[14px] ${disabled ? "text-[#c4c8cd]" : "text-[#8a8f99]"}`}>Select</span>
+          )}
         </span>
-        {selected && (
-          <span className="shrink-0 text-[10px] font-semibold tabular-nums text-[#5c6470]">{selected.balance.toFixed(2)}</span>
-        )}
-        <IconChevronDown size={16} className={`shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        <IconChevronDown size={16} className={`shrink-0 ${disabled ? "text-[#c4c8cd]" : "text-[#8a8f99]"}`} />
       </button>
 
       {open && (
@@ -288,7 +299,7 @@ export function AccountSelect({
           >
             {groups.map((g) => (
               <div key={g}>
-                <div className="px-3 pb-1 pt-2 text-[8px] font-bold uppercase tracking-wide text-[#9aa1aa]">{g}</div>
+                <div className="px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wide text-[#9aa1aa]">{g}</div>
                 {options
                   .filter((o) => o.group === g)
                   .map((o) => {
@@ -304,10 +315,10 @@ export function AccountSelect({
                       >
                         <Pocket tone={o.tone} />
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[11px] font-semibold text-[#181c25]">{o.text}</span>
-                          <span className="block truncate text-[9px] text-[#6c717b]">{o.detail}</span>
+                          <span className="block truncate text-[14px] font-semibold text-[#181c25]">{o.text}</span>
+                          <span className="block truncate text-[11.5px] text-[#6c717b]">{o.detail}</span>
                         </span>
-                        <span className="shrink-0 text-[10px] font-semibold tabular-nums text-[#5c6470]">{o.balance.toFixed(2)}</span>
+                        <span className="shrink-0 text-[12.5px] font-semibold tabular-nums text-[#5c6470]">{o.balance.toFixed(2)}</span>
                       </button>
                     );
                   })}
@@ -316,7 +327,7 @@ export function AccountSelect({
           </div>
         </>
       )}
-      {error && <p className="mt-1.5 pl-1 text-[9.5px] text-[#ff444f]">{error}</p>}
+      {error && <p className="mt-1.5 pl-1 text-[12.5px] text-[#ff444f]">{error}</p>}
     </div>
   );
 }
@@ -324,8 +335,11 @@ export function AccountSelect({
 function Pocket({ tone }: { tone: "teal" | "amber" | "navy" }) {
   const bg = { teal: "#4bb4b3", amber: "#ffad3a", navy: "#181c25" }[tone];
   return (
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full" style={{ background: bg }}>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <span
+      className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full"
+      style={{ background: bg, boxShadow: "inset 0 0 0 2px rgba(255,255,255,.35)" }}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2.5" y="6" width="19" height="13" rx="2.5" />
         <path d="M2.5 10.5h19M16 15h2.5" />
       </svg>

@@ -34,7 +34,7 @@ export function HomeHeader(p: Props) {
   const [ring, setRing] = useState(false);
   return (
     <header
-      className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 px-6 text-white transition-colors duration-300"
+      className="sticky top-0 z-30 flex h-[60px] shrink-0 items-center gap-2 px-4 text-white transition-colors duration-300"
       style={{ background: p.bg ?? "#181c25" }}
     >
       {p.back && (
@@ -42,21 +42,17 @@ export function HomeHeader(p: Props) {
           <IconBack size={17} />
         </Circle>
       )}
-      {p.avatar && (
-        <Circle label="Profile" onClick={p.onAvatar} className="text-[9px] font-semibold">
-          {p.initials ?? "JD"}
-        </Circle>
-      )}
+
       <Circle label="Search" onClick={p.onSearch}>
         <IconSearch size={17} />
       </Circle>
 
-      <div className="flex-1" />
-
+      {/* Ask Amy sits centred-left next to search, with the profile/eye/bell
+          group pushed to the right edge — the arrangement on the real app. */}
       {p.amy && (
         <button
           onClick={p.onAmy}
-          className="amy-pill press anim-fade-in flex h-9 shrink-0 items-center gap-1.5 px-4"
+          className="amy-pill press anim-fade-in ml-1 flex h-9 shrink-0 items-center gap-1.5 px-4"
           aria-label="Ask Amy"
         >
           <span className="flex shrink-0" style={{ animation: "sparkle-twinkle 3s ease-in-out infinite" }}>
@@ -64,6 +60,14 @@ export function HomeHeader(p: Props) {
           </span>
           <span className="amy-text whitespace-nowrap text-[13px] font-extrabold tracking-tight">Ask Amy</span>
         </button>
+      )}
+
+      <div className="flex-1" />
+
+      {p.avatar && (
+        <Circle label="Profile" onClick={p.onAvatar} className="text-[9px] font-semibold">
+          {p.initials ?? "JD"}
+        </Circle>
       )}
 
       {p.eye && (
@@ -84,7 +88,7 @@ export function HomeHeader(p: Props) {
         {p.unread > 0 && (
           <span
             key={p.unread}
-            className="anim-pop absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#ff444f] px-1 text-[8px] font-bold leading-none text-white"
+            className="anim-pop absolute -right-1 -top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#ff444f] px-1 text-[8px] font-bold leading-none text-white"
           >
             {p.unread}
           </span>

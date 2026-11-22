@@ -1,15 +1,7 @@
 import { useState } from "react";
 import { fmtUsd, useProfile } from "../account";
 import { useToast } from "../ui";
-import {
-  AccountSelect,
-  CashierScreen,
-  Field,
-  GhostButton,
-  InlineMessage,
-  PrimaryButton,
-  type AccountOption,
-} from "./kit";
+import { AccountSelect, CashierScreen, GhostButton, PrimaryButton, type AccountOption } from "./kit";
 import { DateRows, SuccessTick, TransferRoute } from "./Receipt";
 
 /**
@@ -37,6 +29,7 @@ export function TransferFlow({ onClose }: { onClose: () => void }) {
   const [amount, setAmount] = useState("");
   const [step, setStep] = useState<Step>("form");
   const [busy, setBusy] = useState(false);
+  const [showNotice, setShowNotice] = useState(true);
   const [move, setMove] = useState(0);
 
   const num = Number(amount);
@@ -161,54 +154,116 @@ export function TransferFlow({ onClose }: { onClose: () => void }) {
     );
   }
 
-  return (
-    <CashierScreen title="Transfer" onClose={onClose}>
-      <div className="px-5 pb-10 pt-4">
-        <h2 className="text-[12px] font-bold text-[#181c25]">Transfer between your accounts in Deriv</h2>
-        <div className="mt-3">
-          <InlineMessage type="info">
-            Transfers within accounts are only available for trading, not withdrawals. To withdraw funds, use the same
-            method you used to deposit.
-          </InlineMessage>
-        </div>
+  const noFunds = from.balance <= 0;
 
-        <div className="mt-5 space-y-3">
-          <AccountSelect label="From" selected={from} options={options} onPick={setFrom} />
-          <div className="flex justify-center">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f2f3f4] text-[#4bb4b3]">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 4v16M7 15l5 5 5-5" />
+  return (
+    <div className="page-push flex h-full flex-col bg-white">
+      {/* Back circle + page title, as on deriv.com's Transfer page */}
+      <div className="shrink-0 px-4 pb-1 pt-4">
+        <button
+          onClick={onClose}
+          aria-label="Back"
+          className="press flex h-[38px] w-[38px] items-center justify-center rounded-full bg-[#f5f5f5] text-[#181c25] transition-colors hover:bg-[#ebebeb]"
+        >
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 19 8 12l7-7" />
+          </svg>
+        </button>
+        <h1 className="mt-5 text-[24px] font-bold tracking-tight text-[#181c25]">Transfer</h1>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-4 pb-6 pt-4">
+        {/* What's-new banner with the two inline actions */}
+        {showNotice && (
+          <div className="anim-fade-up rounded-[10px] bg-[#eef6fe] px-4 py-4">
+            <div className="flex gap-2.5">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2196f3" strokeWidth="2" strokeLinecap="round" className="mt-[2px] shrink-0">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 11v5M12 7.6v.2" />
+              </svg>
+              <p className="text-[12.5px] leading-[1.5] text-[#1f4b6e]">
+                We've updated how transfers work. The process is now simpler and faster.
+              </p>
+            </div>
+            <div className="mt-3 flex items-center gap-4 pl-[27px]">
+              <button
+                onClick={() => toast({ kind: "info", message: "Simpler transfers", detail: "Fewer steps: pick accounts, enter an amount, confirm." })}
+                className="press rounded-full border border-[#181c25] px-3 py-[6px] text-[11.5px] font-bold text-[#181c25] transition-colors hover:bg-white"
+              >
+                See what changed
+              </button>
+              <button onClick={() => setShowNotice(false)} className="press text-[11.5px] font-bold text-[#181c25] underline">
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* No funds strip + From / To cards, welded into one hairline stack */}
+        <div className="mt-4 overflow-hidden rounded-[10px] border border-[#eceef0]">
+          {noFunds && (
+            <button onClick={onClose} className="flex w-full items-center gap-3 bg-[#fff6e5] px-4 py-3 text-left">
+              <span className="flex-1 text-[12.5px] font-bold text-[#8a6210]">
+                No funds available. <span className="underline underline-offset-2">Deposit now.</span>
+              </span>
+              <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-[#c98a12] text-white">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m9 5 7 7-7 7" />
+                </svg>
+              </span>
+            </button>
+          )}
+
+          <div className="relative">
+            <AccountSelect label="From" selected={from} options={options} onPick={setFrom} disabled={noFunds} />
+            {/* the swap glyph that straddles the two cards */}
+            <span className="absolute -bottom-[17px] left-1/2 z-10 flex h-[34px] w-[34px] -translate-x-1/2 items-center justify-center rounded-full border border-[#eceef0] bg-white text-[#181c25] shadow-[0_2px_6px_rgba(0,0,0,.08)]">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3v8M8.5 7.5 12 11l3.5-3.5M12 21v-8M8.5 16.5 12 13l3.5 3.5" />
               </svg>
             </span>
           </div>
-          <AccountSelect
-            label="To"
-            selected={to}
-            options={options.filter((o) => o.value !== from.value)}
-            onPick={setTo}
-            error={to.value === from.value ? "Choose a different account." : undefined}
-          />
+          <div className="mt-[26px]">
+            <AccountSelect
+              label="To"
+              selected={to}
+              options={options.filter((o) => o.value !== from.value)}
+              onPick={setTo}
+              error={to.value === from.value ? "Choose a different account." : undefined}
+            />
+          </div>
         </div>
 
-        <div className="mt-5">
-          <Field
-            label="Amount"
-            value={amount}
-            onChange={setAmount}
-            suffix="USD"
-            error={error}
-            hint={
-              <>
-                Available: <span className="font-semibold text-[#181c25]">{fmtUsd(from.balance)} USD</span> · Transfer limits: 0.35 – 10,000 USD
-              </>
-            }
-          />
+        {/* Amount label sits outside the field here, unlike the cashier form */}
+        <div className="mt-6">
+          <label className="block text-[13px] text-[#181c25]">Amount</label>
+          <div
+            className="mt-2 flex items-center rounded-[8px] border bg-white px-4 transition-colors"
+            style={{ borderColor: error ? "#ff444f" : "#d6d9dd" }}
+          >
+            <input
+              inputMode="decimal"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
+              placeholder="0.00"
+              className="h-[50px] w-full bg-transparent text-[16px] text-[#181c25] outline-none placeholder:text-[#9aa1aa]"
+            />
+            <span className="shrink-0 text-[13px] font-semibold text-[#6c717b]">USD</span>
+          </div>
+          {error ? (
+            <p className="mt-1.5 text-[11.5px] text-[#ff444f]">{error}</p>
+          ) : (
+            <p className="mt-1.5 text-[11.5px] text-[#8a8f99]">
+              Available {fmtUsd(from.balance)} USD · Limits 0.35 – 10,000 USD
+            </p>
+          )}
           <div className="mt-3 grid grid-cols-4 gap-2">
             {PCTS.map((p, i) => (
               <button
                 key={p}
                 onClick={() => setAmount(((from.balance * p) / 100).toFixed(2))}
-                className="step-in rounded-full border border-[#d6d9dd] py-2 text-[10px] font-semibold text-[#181c25] transition-colors hover:border-[#181c25]"
+                disabled={noFunds}
+                className="step-in rounded-full border border-[#d6d9dd] py-2 text-[11.5px] font-semibold text-[#181c25] transition-colors hover:border-[#181c25] disabled:opacity-40"
                 style={{ animationDelay: `${i * 50}ms` }}
               >
                 {p}%
@@ -216,13 +271,20 @@ export function TransferFlow({ onClose }: { onClose: () => void }) {
             ))}
           </div>
         </div>
-
-        <div className="mt-6">
-          <PrimaryButton onClick={() => setStep("confirm")} disabled={!valid}>
-            Transfer
-          </PrimaryButton>
-        </div>
       </div>
-    </CashierScreen>
+
+      {/* Disabled-until-valid pink Transfer button, pinned like the screenshot */}
+      <div className="shrink-0 px-4 pb-5">
+        <button
+          onClick={() => setStep("confirm")}
+          disabled={!valid}
+          className={`press w-full rounded-full py-[15px] text-[15px] font-bold transition-colors ${
+            valid ? "bg-[#ff444f] text-white hover:bg-[#ff5a64]" : "bg-[#ffc9cc] text-white"
+          }`}
+        >
+          Transfer
+        </button>
+      </div>
+    </div>
   );
 }

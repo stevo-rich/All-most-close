@@ -652,3 +652,11 @@ export function DbLogo({ size = 44 }: { size?: number }) {
     </div>
   );
 }
+
+/** Restart-arrow cluster used by the bot's "Restart trading conditions" block. */
+export const IconRestart = (p: P) => (
+  <svg width={p.size ?? 24} height={p.size ?? 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={p.strokeWidth ?? 1.8} strokeLinecap="round" strokeLinejoin="round" className={p.className}>
+    <path d="M4 9h4V5" />
+    <path d="M4 9a8 8 0 1 1 1.5 8" />
+  </svg>
+);
