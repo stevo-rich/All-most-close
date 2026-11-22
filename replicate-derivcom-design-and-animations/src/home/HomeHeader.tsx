@@ -47,6 +47,15 @@ export function HomeHeader(p: Props) {
       className="sticky top-0 z-30 grid h-[60px] shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 text-white transition-colors duration-300"
       style={{ background: p.bg ?? "#181c25" }}
     >
+      {/* The header and the total-value card are the same colour, but at a
+          fractional device-pixel ratio a hairline of the white scroller shows
+          between them. Painting a pixel of the header's own colour below the
+          bar hides the seam and keeps the two a single card. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-full h-px"
+        style={{ background: p.bg ?? "#181c25" }}
+      />
       <div className="flex min-w-0 items-center gap-2">
         {p.back && (
           <Circle label="Back" onClick={p.onBack}>

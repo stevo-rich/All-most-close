@@ -39,6 +39,8 @@ function OptionsHeader({
   const [ring, setRing] = useState(false);
   return (
     <header className="sticky top-0 z-30 flex shrink-0 items-center gap-2.5 bg-[#181c25] px-4 py-3 text-white">
+      {/* Hides the sub-pixel seam against the total-value card below. */}
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-full h-px bg-[#181c25]" />
       <button
         aria-label="Profile"
         onClick={onProfile}
