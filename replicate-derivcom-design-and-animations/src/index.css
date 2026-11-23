@@ -247,6 +247,14 @@ body {
   white-space: nowrap;
 }
 
+/* Dotted workspace canvas behind the bot blocks, as on bot.deriv.com. */
+.dbot-canvas {
+  background-color: #fbfbfc;
+  background-image: radial-gradient(rgba(24, 28, 37, 0.14) 1px, transparent 1px);
+  background-size: 14px 14px;
+  background-position: 0 0;
+}
+
 /* ---------- Ask Amy pill (soft glassy pill, rainbow text) ---------- */
 .amy-pill {
   position: relative;
@@ -494,4 +502,234 @@ body {
 }
 .anim-spin-loop {
   animation: spin-loop 0.8s linear infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* 3D motion (Home) — pointer tilt + CSS-3D scene                      */
+/* ------------------------------------------------------------------ */
+
+/* Cards tilt towards the pointer. --rx / --ry are written by useTilt. */
+.tilt {
+  --rx: 0deg;
+  --ry: 0deg;
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.scene3d {
+  perspective: 820px;
+}
+.scene3d__stage {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(9deg) rotateY(-11deg);
+}
+
+.scene3d__glow {
+  position: absolute;
+  inset: -40% -20% auto -20%;
+  height: 150%;
+  background:
+    radial-gradient(42% 52% at 22% 26%, rgba(75, 180, 179, 0.34) 0%, rgba(75, 180, 179, 0) 70%),
+    radial-gradient(38% 48% at 82% 30%, rgba(255, 68, 79, 0.28) 0%, rgba(255, 68, 79, 0) 72%);
+  filter: blur(2px);
+}
+
+/* Perspective floor grid that keeps scrolling towards the viewer. */
+.scene3d__floor {
+  position: absolute;
+  left: -30%;
+  right: -30%;
+  bottom: -46%;
+  height: 210px;
+  background-image:
+    linear-gradient(rgba(75, 180, 179, 0.32) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(75, 180, 179, 0.32) 1px, transparent 1px);
+  background-size: 34px 34px;
+  transform: perspective(420px) rotateX(66deg);
+  animation: floor-scroll 5.5s linear infinite;
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent 72%);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent 72%);
+}
+
+/* Two orbit rings around the candle stack. */
+.scene3d__ring {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: 196px;
+  height: 196px;
+  margin: -98px 0 0 -98px;
+  border-radius: 50%;
+  border: 1.4px solid rgba(75, 180, 179, 0.5);
+  box-shadow: inset 0 0 34px rgba(75, 180, 179, 0.22);
+  transform: rotateX(74deg);
+  animation: ring-orbit 9s linear infinite;
+}
+.scene3d__ring--inner {
+  width: 132px;
+  height: 132px;
+  margin: -66px 0 0 -66px;
+  border-color: rgba(255, 68, 79, 0.42);
+  border-style: dashed;
+  animation-duration: 6.5s;
+  animation-direction: reverse;
+}
+
+.scene3d__bars {
+  position: absolute;
+  left: 50%;
+  top: 34px;
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  height: 104px;
+  transform: translateX(-50%) translateZ(14px);
+  transform-style: preserve-3d;
+}
+
+.scene3d__bar {
+  width: 13px;
+  border-radius: 4px;
+  transform: translateZ(var(--z)) translateY(0);
+  animation: bar-float 4.2s ease-in-out infinite;
+}
+.scene3d__bar--up {
+  background: linear-gradient(180deg, #7fe0d8 0%, #2e9b96 55%, #16706d 100%);
+  box-shadow: 0 8px 20px rgba(75, 180, 179, 0.4), inset 0 -8px 14px rgba(0, 0, 0, 0.22);
+}
+.scene3d__bar--down {
+  background: linear-gradient(180deg, #ff8d95 0%, #e8454f 55%, #a5212a 100%);
+  box-shadow: 0 8px 20px rgba(255, 68, 79, 0.35), inset 0 -8px 14px rgba(0, 0, 0, 0.22);
+}
+
+/* Spinning coin, drawn with a gradient so it reads as a disc in 3D. */
+.scene3d__coin {
+  position: absolute;
+  top: 22px;
+  right: 26px;
+  display: grid;
+  height: 46px;
+  width: 46px;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 800;
+  color: #5a3a06;
+  background: radial-gradient(circle at 32% 28%, #ffe9a8 0%, #ffc94d 42%, #d99a12 100%);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 3px rgba(255, 255, 255, 0.28);
+  transform-style: preserve-3d;
+  animation: coin-spin 8s linear infinite;
+}
+
+.scene3d__chip {
+  position: absolute;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transform-style: preserve-3d;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+}
+.scene3d__chip--a {
+  left: 16px;
+  top: 46px;
+  background: rgba(75, 180, 179, 0.9);
+  color: #04241f;
+  transform: translateZ(46px) rotate(-8deg);
+  animation: chip-drift 5s ease-in-out infinite;
+}
+.scene3d__chip--b {
+  left: 62px;
+  top: 92px;
+  background: rgba(255, 68, 79, 0.92);
+  color: #fff;
+  transform: translateZ(24px) rotate(6deg);
+  animation: chip-drift 6.5s ease-in-out infinite reverse;
+}
+
+.scene3d__live {
+  animation: scene-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes floor-scroll {
+  to {
+    background-position: 0 34px;
+  }
+}
+@keyframes ring-orbit {
+  to {
+    transform: rotateX(74deg) rotate(360deg);
+  }
+}
+@keyframes bar-float {
+  0%,
+  100% {
+    transform: translateZ(var(--z)) translateY(0);
+  }
+  50% {
+    transform: translateZ(var(--z)) translateY(-8px);
+  }
+}
+@keyframes coin-spin {
+  to {
+    transform: rotateY(360deg);
+  }
+}
+@keyframes chip-drift {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -7px;
+  }
+}
+@keyframes scene-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(75, 180, 179, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(75, 180, 179, 0);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Reduced motion: keep every end state visible, drop the movement.    */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .tilt,
+  .scene3d__stage {
+    transform: none;
+  }
+  .scene3d__bar,
+  .scene3d__chip,
+  .scene3d__coin {
+    transform: none;
+  }
+  .scene3d__ring {
+    transform: rotateX(74deg);
+  }
+  /* These two only look right once their draw-in animation has finished. */
+  .receipt-tick__path {
+    stroke-dashoffset: 0;
+  }
+  .receipt-tick__halo {
+    display: none;
+  }
 }

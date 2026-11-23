@@ -400,16 +400,15 @@ export function OptionsPage({
   unread,
   onBell,
   onProfile,
-  balance,
   onTransfer,
 }: {
-  onOpenTrader: (market?: string) => void;
+  /** `account` tells the trader which pocket (real / demo) the stake comes from. */
+  onOpenTrader: (market?: string, account?: OptionsAccount) => void;
   onOpenBot: () => void;
   hidden: boolean;
   unread: number;
   onBell: () => void;
   onProfile: () => void;
-  balance: number;
   onTransfer?: () => void;
 }) {
   const toast = useToast();
@@ -453,8 +452,8 @@ export function OptionsPage({
 
       <BalanceHero
         hidden={hide}
-        balance={account === "demo" ? 10000 : Math.max(balance, profile.balance)}
-        onTrade={() => onOpenTrader()}
+        balance={account === "demo" ? profile.demo : profile.balance}
+        onTrade={() => onOpenTrader(undefined, account)}
         onTransfer={() => (onTransfer ? onTransfer() : toast("Transfers are unavailable right now."))}
       />
 
@@ -468,7 +467,7 @@ export function OptionsPage({
               m={m}
               onPick={(mm) => {
                 toast(`${mm.name} selected`);
-                onOpenTrader(mm.name);
+                onOpenTrader(mm.name, account);
               }}
             />
           ))}
@@ -516,7 +515,7 @@ export function OptionsPage({
                       ))}
                     </div>
                     <button
-                      onClick={() => onOpenTrader(f.title)}
+                      onClick={() => onOpenTrader(undefined, account)}
                       className="press shrink-0 rounded-full border-[1.5px] border-[#181c25] px-4 py-[9px] text-[11px] font-bold text-[#181c25] hover:bg-[#181c25] hover:text-white"
                     >
                       Trade now
@@ -547,7 +546,7 @@ export function OptionsPage({
         <h2 className="text-[16.5px] font-bold tracking-tight text-[#181c25]">Platforms</h2>
         <div className="mt-4 space-y-3">
           {[
-            { name: "Deriv Trader", desc: "Trade options on 100+ markets. No overnight swap fees.", tile: "DT", tone: "red" as const, on: () => onOpenTrader() },
+            { name: "Deriv Trader", desc: "Trade options on 100+ markets. No overnight swap fees.", tile: "DT", tone: "red" as const, on: () => onOpenTrader(undefined, account) },
             { name: "Deriv Bot", desc: "Build and run automated bots, no coding needed.", tile: "DB", tone: "red" as const, on: onOpenBot },
             { name: "SmartTrader", desc: "Classic interface for advanced options traders.", tile: "ST", tone: "navy" as const, on: () => toast("SmartTrader is a demo placeholder.") },
           ].map((p, i) => (
@@ -591,7 +590,7 @@ export function OptionsPage({
               key={t.label}
               onClick={() => {
                 toast(`${t.label} — opening Deriv Trader`);
-                onOpenTrader(t.label);
+                onOpenTrader(undefined, account);
               }}
               className="press anim-fade-up flex flex-col items-center justify-center gap-2 rounded-[18px] bg-[#f4f5f6] px-2 py-5 text-center transition-colors hover:bg-[#eef0f2]"
               style={{ animationDelay: `${i * 45}ms` }}

@@ -14,10 +14,16 @@ export type Profile = {
   country: string;
   citizenship: string;
   nickname: string;
-  /** Real account balance in USD — the trading (Options) balance */
+  /** Options trading balance in USD — the money the trader stakes */
   balance: number;
-  /** Wallet balance in USD — where deposits land before moving to trading */
+  /**
+   * Main account balance in USD. This is the account the cashier works on:
+   * deposits land here and withdrawals are paid from here, then funds are
+   * transferred to Options before they can be traded.
+   */
   wallet: number;
+  /** Virtual demo trading balance in USD (never worth real money) */
+  demo: number;
   email: string;
   phone: string;
 };
@@ -33,6 +39,7 @@ export const DEFAULT_PROFILE: Profile = {
   nickname: "client_mq88g8gax6il",
   balance: 0,
   wallet: 0,
+  demo: 10000,
   email: "stephengachuhi178@gmail.com",
   phone: "+254106135124",
 };
@@ -47,6 +54,7 @@ const read = (): Profile => {
       ...p,
       balance: typeof p.balance === "number" && Number.isFinite(p.balance) ? Math.max(0, p.balance) : 0,
       wallet: typeof p.wallet === "number" && Number.isFinite(p.wallet) ? Math.max(0, p.wallet) : 0,
+      demo: typeof p.demo === "number" && Number.isFinite(p.demo) ? Math.max(0, p.demo) : DEFAULT_PROFILE.demo,
     };
   } catch {
     return DEFAULT_PROFILE;
@@ -79,6 +87,8 @@ export const accountStore = {
   adjustBalance: (delta: number) => write({ ...get(), balance: Math.max(0, Math.round((get().balance + delta) * 100) / 100) }),
   setWallet: (wallet: number) => write({ ...get(), wallet: Math.max(0, Math.round(wallet * 100) / 100) }),
   adjustWallet: (delta: number) => write({ ...get(), wallet: Math.max(0, Math.round((get().wallet + delta) * 100) / 100) }),
+  setDemo: (demo: number) => write({ ...get(), demo: Math.max(0, Math.round(demo * 100) / 100) }),
+  adjustDemo: (delta: number) => write({ ...get(), demo: Math.max(0, Math.round((get().demo + delta) * 100) / 100) }),
 };
 
 /** Subscribe a component to profile + balance changes. */
@@ -88,19 +98,35 @@ export function useProfile() {
   useEffect(() => {
     const l = (p: Profile) => setProfile(p);
     listeners.add(l);
-    // resync in case another tab changed it
     setProfile(get());
+
+    // Another tab changed the store: drop the in-memory cache, re-read from
+    // localStorage and push the fresh profile to every subscriber.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== KEY) return;
+      current = null;
+      const next = read();
+      current = next;
+      listeners.forEach((fn) => fn(next));
+    };
+    window.addEventListener("storage", onStorage);
+
     return () => {
       listeners.delete(l);
+      window.removeEventListener("storage", onStorage);
     };
   }, []);
 
   const save = useCallback((patch: Partial<Profile>) => accountStore.set(patch), []);
   const setBalance = useCallback((n: number) => accountStore.setBalance(n), []);
   const setWallet = useCallback((n: number) => accountStore.setWallet(n), []);
+  const setDemo = useCallback((n: number) => accountStore.setDemo(n), []);
 
-  return { profile, save, setBalance, setWallet };
+  return { profile, save, setBalance, setWallet, setDemo };
 }
+
+/** Everything the trader owns, across the main account and Options. */
+export const totalUsd = (p: Profile) => Math.round((p.wallet + p.balance) * 100) / 100;
 
 export const fullName = (p: Profile) => `${p.firstName} ${p.lastName}`.trim();
 export const fmtUsd = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });

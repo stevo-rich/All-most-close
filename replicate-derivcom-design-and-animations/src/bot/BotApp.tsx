@@ -29,7 +29,20 @@ import { ALL_VOLATILITY, marketByName } from "../home/markets";
 
 type BotTab = "dashboard" | "builder" | "chart" | "menu";
 type Account = "real" | "demo";
-type Tx = { id: number; entry: number; exit: number; stake: number; profit: number; rise: boolean; contractId?: number };
+type Tx = {
+  id: number;
+  entry: number;
+  exit: number;
+  stake: number;
+  profit: number;
+  rise: boolean;
+  contractId?: number;
+  /** Trade type / contract pair, e.g. "Matches/Differs · Matches". */
+  type?: string;
+  /** Purchase condition that was bought, e.g. "Over", "Even", "Fall". */
+  side?: string;
+};
+
 type Cfg = {
   symbol: string;
   tradeType: string;
@@ -43,7 +56,83 @@ type Cfg = {
   stake: number;
   purchase: string;
   prediction: number;
+  barrier: number;
+  stopLoss: number;
+  restartOutcome: string;
+  restartCount: number;
 };
+
+/**
+ * Trade type → contract type trees, mirroring bot.deriv.com. Selecting a trade
+ * type re-populates the contract-type and purchase-condition selects, and the
+ * prediction / barrier rows only appear for the trades that need them.
+ */
+type TradeSubtype = {
+  label: string;
+  /** Contract types (block 1) */
+  contracts: string[];
+  /** Purchase conditions (block 2) */
+  purchases: string[];
+  /** Digits trades ask for the last-digit prediction. */
+  prediction?: boolean;
+  /** Barrier trades ask for an offset. */
+  barrier?: boolean;
+};
+
+const TRADE_TREE: { label: string; subtypes: TradeSubtype[] }[] = [
+  {
+    label: "Up/Down",
+    subtypes: [
+      { label: "Rise/Fall", contracts: ["Both", "Rise", "Fall"], purchases: ["Rise", "Fall"] },
+      { label: "Higher/Lower", contracts: ["Both", "Higher", "Lower"], purchases: ["Higher", "Lower"], barrier: true },
+    ],
+  },
+  {
+    label: "Digits",
+    subtypes: [
+      { label: "Matches/Differs", contracts: ["Both", "Matches", "Differs"], purchases: ["Matches", "Differs"], prediction: true },
+      { label: "Even/Odd", contracts: ["Both", "Even", "Odd"], purchases: ["Even", "Odd"] },
+      { label: "Over/Under", contracts: ["Both", "Over", "Under"], purchases: ["Over", "Under"], prediction: true },
+    ],
+  },
+  {
+    label: "Asians",
+    subtypes: [
+      { label: "Asian Up/Down", contracts: ["Both", "Asian Up", "Asian Down"], purchases: ["Asian Up", "Asian Down"] },
+    ],
+  },
+  {
+    label: "Touches",
+    subtypes: [
+      { label: "Touch/No Touch", contracts: ["Both", "Touch", "No Touch"], purchases: ["Touch", "No Touch"], barrier: true },
+    ],
+  },
+];
+
+const groupFor = (tradeType: string) => TRADE_TREE.find((g) => g.label === tradeType);
+const subtypeFor = (tradeType: string, label: string) =>
+  groupFor(tradeType)?.subtypes.find((s) => s.label === label);
+
+/**
+ * The builder's cascade. Choosing a trade type (or one of its variations)
+ * re-selects the variation, resets Contract type to "Both" and picks the first
+ * purchase condition that belongs to the new segments — so the blocks below
+ * always show segments of the trade type that is selected, never stale ones.
+ */
+export function segmentChain(tradeType: string, tradeType2?: string) {
+  const group = groupFor(tradeType);
+  const subtype = (tradeType2 ? subtypeFor(tradeType, tradeType2) : undefined) ?? group?.subtypes[0];
+  return {
+    tradeType,
+    tradeType2: subtype?.label ?? "",
+    contractType: "Both",
+    purchase: subtype?.purchases[0] ?? "",
+    contracts: subtype?.contracts ?? [],
+    purchases: subtype?.purchases ?? [],
+    prediction: subtype?.prediction === true,
+    barrier: subtype?.barrier === true,
+  };
+}
 
 /**
  * The builder opens with the symbol chosen but trade type / contract type
@@ -60,8 +149,12 @@ const DEFAULT_CFG: Cfg = {
   durationUnit: "Ticks",
   duration: 1,
   stake: 1,
-  purchase: "Rise",
-  prediction: 1,
+  purchase: "",
+  prediction: 5,
+  barrier: 0,
+  stopLoss: 0,
+  restartOutcome: "Loss",
+  restartCount: 1,
 };
 
 /* ------------------------------------------------------------------ */
@@ -69,16 +162,15 @@ const DEFAULT_CFG: Cfg = {
 /* ------------------------------------------------------------------ */
 const STORE_KEY = "deriv-demo-bot-state-v1";
 
-type Store = { demoBal: number; txs: Tx[] };
+type Store = { txs: Tx[] };
 
 function loadState(): Store {
-  const fallback: Store = { demoBal: 10000, txs: [] };
+  const fallback: Store = { txs: [] };
   try {
     const raw = window.localStorage.getItem(STORE_KEY);
     if (!raw) return fallback;
     const parsed = JSON.parse(raw) as Partial<Store>;
     return {
-      demoBal: typeof parsed.demoBal === "number" ? parsed.demoBal : fallback.demoBal,
       txs: Array.isArray(parsed.txs) ? parsed.txs.filter((t) => typeof t?.id === "number") : [],
     };
   } catch {
@@ -88,9 +180,9 @@ function loadState(): Store {
 
 function saveState(s: Store) {
   try {
-    window.localStorage.setItem(STORE_KEY, JSON.stringify({ demoBal: s.demoBal, txs: s.txs.slice(0, 50) }));
+    window.localStorage.setItem(STORE_KEY, JSON.stringify({ txs: s.txs.slice(0, 50) }));
   } catch {
-    /* storage unavailable — demo continues in memory */
+    /* storage unavailable — the bot continues in memory */
   }
 }
 
@@ -128,13 +220,33 @@ function Sel({ value, options, onChange, placeholder = "" }: { value: string; op
   );
 }
 
-function Num({ value, onChange, w = 40 }: { value: number; onChange: (n: number) => void; w?: number }) {
+function Num({
+  value,
+  onChange,
+  w = 40,
+  min = 0,
+  max,
+  step,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  w?: number;
+  min?: number;
+  max?: number;
+  step?: number;
+}) {
   return (
     <input
       type="number"
-      min={1}
+      min={min}
+      max={max}
+      step={step}
       value={value}
-      onChange={(e) => onChange(Math.max(0, Number(e.target.value)))}
+      onChange={(e) => {
+        const n = Number(e.target.value);
+        if (!Number.isFinite(n)) return;
+        onChange(Math.min(max ?? Number.POSITIVE_INFINITY, Math.max(min, n)));
+      }}
       className="blk-field text-center text-[10.5px] text-[#333] outline-none focus:border-[#ff444f]"
       style={{ width: w + 24 }}
     />
@@ -142,8 +254,53 @@ function Num({ value, onChange, w = 40 }: { value: number; onChange: (n: number)
 }
 
 function Row({ children, className = "" }: { children: ReactNode; className?: string }) {
+  // Rows wrap instead of running off the block: the workspace is phone-width.
   return (
-    <div className={`flex w-max items-center gap-1.5 whitespace-nowrap rounded-[3px] bg-[#e5e7ea] px-2 py-[7px] text-[11px] text-[#333] ${className}`}>{children}</div>
+    <div className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 rounded-[3px] bg-[#e5e7ea] px-2 py-[6px] text-[10.5px] leading-snug text-[#333] ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+/** One Deriv Bot workspace block. */
+function Block({
+  n,
+  icon,
+  title,
+  optional,
+  children,
+}: {
+  n: number;
+  icon: ReactNode;
+  title: string;
+  optional?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section className="anim-fade-up w-full overflow-hidden rounded-[4px] bg-[#074f6f] pb-2.5 text-white shadow-[0_2px_6px_rgba(0,0,0,.18)]">
+      <header className="flex items-center gap-2 px-2.5 py-[9px] text-[12px] font-semibold">
+        <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[3px] bg-white/15 text-[10px] font-bold">{n}</span>
+        <span className="shrink-0 opacity-90">{icon}</span>
+        <span className="min-w-0 flex-1 truncate">{title}</span>
+        {optional && (
+          <span className="shrink-0 rounded-full bg-white/15 px-1.5 py-[1px] text-[7.5px] font-bold uppercase tracking-wide text-white/85">
+            Optional
+          </span>
+        )}
+      </header>
+      <div className="space-y-1 px-2">{children}</div>
+    </section>
+  );
+}
+
+/** Chevron that chains one block to the next. */
+function Connector() {
+  return (
+    <div className="flex h-5 w-full items-center justify-center text-[#b9bec4]" aria-hidden>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </div>
   );
 }
 
@@ -296,133 +453,194 @@ function Dashboard({ onBuilder, onQuick }: { onBuilder: () => void; onQuick: () 
 function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>) => void; zoom: number; onQuick: () => void }) {
   // Every Derived volatility index, exactly as bot.deriv.com lists them.
   const symbols = ALL_VOLATILITY.map((m) => m.name);
-  return (
-    <div className="relative h-full overflow-auto bg-white pb-20 pl-[57px] pt-3">
-      <button onClick={onQuick} className="press anim-fade-up rounded-[4px] bg-[#ff444f] px-[22px] py-[15px] text-[17px] font-bold text-white shadow-sm hover:bg-[#ff5a64]">
-        Quick strategy
-      </button>
+  const group = groupFor(cfg.tradeType);
+  const subtype = subtypeFor(cfg.tradeType, cfg.tradeType2);
+  const contractOptions = subtype?.contracts ?? [];
+  const purchaseOptions = subtype?.purchases ?? [];
 
-      {/* The canvas is wider than the screen so block 4 peeks in from the
-          right, exactly as bot.deriv.com shows it. */}
-      <div
-        style={{ transform: `scale(${zoom})`, transformOrigin: "0 0", transition: "transform .25s ease" }}
-        className="relative mt-8 ml-[18px] h-[560px] w-[760px]"
-      >
-        {/* Block 1 — Trade parameters */}
-        <div
-          className="anim-fade-up absolute left-0 top-0 w-[238px] rounded-[3px] bg-[#074f6f] pb-5 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]"
-          style={{ animationDelay: "60ms" }}
+  /**
+   * Trade type → variation → contract type → purchase condition is a chain.
+   * Picking a trade type immediately selects its first variation, contract
+   * type "Both" and the first purchase condition, so the blocks below are
+   * always filled in with segments that belong to the chosen trade type.
+   */
+  const pickTradeType = (v: string) => {
+    const next = segmentChain(v);
+    set({ tradeType: next.tradeType, tradeType2: next.tradeType2, contractType: next.contractType, purchase: next.purchase });
+  };
+  const pickSubtype = (v: string) => {
+    const next = segmentChain(cfg.tradeType, v);
+    set({ tradeType2: next.tradeType2, contractType: next.contractType, purchase: next.purchase });
+  };
+
+  const chips = [cfg.tradeType, cfg.tradeType2, cfg.contractType, cfg.purchase].filter(Boolean);
+
+  return (
+    <div className="relative h-full overflow-auto bg-white pb-24">
+      {/* Quick strategy + the chosen path, echoed so every change is obvious. */}
+      <div className="flex items-start justify-between gap-2 px-3 pt-3">
+        <button
+          onClick={onQuick}
+          className="press anim-fade-up rounded-[4px] bg-[#ff444f] px-5 py-3 text-[15px] font-bold text-white shadow-sm hover:bg-[#ff5a64]"
         >
-          <div className="flex items-center gap-3 px-3 py-[10px] text-[12.5px]">
-            <IconList size={18} />
-            1. Trade parameters
-          </div>
-          <div className="space-y-px pl-3.5">
+          Quick strategy
+        </button>
+        <span className="mt-1 shrink-0 rounded-[3px] bg-[#f2f3f4] px-2 py-1 text-[8.5px] font-semibold text-[#8a8f99]">
+          {Math.round(zoom * 100)}%
+        </span>
+      </div>
+
+      <div className="mt-3 flex min-h-[18px] flex-wrap items-center gap-1.5 px-3 text-[9.5px]">
+        {chips.length === 0 ? (
+          <span className="text-[#8a8f99]">Pick a trade type to build a strategy.</span>
+        ) : (
+          chips.map((c, i) => (
+            <span key={`${c}-${i}`} className="anim-pop rounded-[3px] bg-[#e5e7ea] px-2 py-[3px] font-bold text-[#333]">
+              {c}
+            </span>
+          ))
+        )}
+      </div>
+
+      {/* Workspace canvas: blocks chain downwards, so nothing overlaps or is
+          clipped no matter which trade type is selected. Re-keyed on the
+          selection so the cascade replays when the segments change. */}
+      <div className="dbot-canvas mt-3 px-3 pb-6 pt-4">
+        <div
+          key={`${cfg.tradeType}|${cfg.tradeType2}|${cfg.contractType}`}
+          style={{ transform: `scale(${zoom})`, transformOrigin: "0 0" }}
+          className="w-[318px] max-w-full"
+        >
+          {/* 1. Trade parameters */}
+          <Block n={1} icon={<IconList size={15} />} title="Trade parameters">
             <Row>
-              Market:
+              <span>Market:</span>
               <Sel value="Derived" options={["Derived"]} onChange={() => {}} />
               <span>&gt;</span>
               <Sel value="Continuous Indices" options={["Continuous Indices"]} onChange={() => {}} />
-              <span>&gt;</span>
               <Sel value={cfg.symbol} options={symbols} onChange={(v) => set({ symbol: v })} />
             </Row>
             <Row>
-              Trade Type:
-              <Sel value={cfg.tradeType} options={["Up/Down", "Digits", "Even/Odd", "Over/Under"]} onChange={(v) => set({ tradeType: v })} />
-              <span>&gt;</span>
-              <Sel value={cfg.tradeType2} options={["Rise/Fall", "Over/Under", "Higher/Lower"]} onChange={(v) => set({ tradeType2: v })} />
+              <span>Trade Type:</span>
+              <Sel value={cfg.tradeType} options={TRADE_TREE.map((g) => g.label)} onChange={pickTradeType} />
+              <Sel value={cfg.tradeType2} options={group ? group.subtypes.map((x) => x.label) : []} onChange={pickSubtype} />
             </Row>
             <Row>
-              Contract Type:
-              <Sel value={cfg.contractType} options={["Both", "Rise", "Fall", "Over", "Under"]} onChange={(v) => set({ contractType: v })} />
+              <span>Contract Type:</span>
+              <Sel
+                value={cfg.contractType}
+                options={contractOptions}
+                onChange={(v) => {
+                  // "Both" defers the direction to Purchase conditions.
+                  set({ contractType: v, purchase: v === "Both" ? purchaseOptions[0] ?? "" : v });
+                }}
+              />
             </Row>
             <Row>
-              Default Candle Interval:
+              <span>Default Candle Interval:</span>
               <Sel value={cfg.candle} options={["1 minute", "2 minutes", "5 minutes", "15 minutes"]} onChange={(v) => set({ candle: v })} />
             </Row>
             <Row>
-              Restart buy/sell on error (disable for better performance):
+              <span>Restart buy/sell on error:</span>
               <Check checked={cfg.restartBuySell} onChange={(v) => set({ restartBuySell: v })} />
             </Row>
             <Row>
-              Restart last trade on error (bot ignores the unsuccessful trade):
+              <span>Restart last trade on error:</span>
               <Check checked={cfg.restartLast} onChange={(v) => set({ restartLast: v })} />
             </Row>
-          </div>
-
-          <div className="px-3 pb-2 pt-3 text-[12.5px]">Run once at start:</div>
-          <div className="ml-3.5 h-8 w-[64px] rounded-[3px] bg-[#0b5f83]" />
-
-          <div className="px-3 pb-2 pt-3 text-[12.5px]">Trade options:</div>
-          <div className="pl-3.5">
             <Row>
-              Duration:
+              <span>Run once at start:</span>
+              <span className="h-5 w-10 rounded-[2px] bg-[#0b5f83]" />
+            </Row>
+            <Row>
+              <span>Duration:</span>
               <Sel value={cfg.durationUnit} options={["Ticks", "Seconds", "Minutes"]} onChange={(v) => set({ durationUnit: v })} />
-              <Num value={cfg.duration} onChange={(n) => set({ duration: n })} w={16} />
-              Stake: USD
+              <Num value={cfg.duration} onChange={(n) => set({ duration: n })} w={16} min={1} />
+            </Row>
+            <Row>
+              <span>Stake: USD</span>
+              <Num value={cfg.stake} onChange={(n) => set({ stake: n })} w={24} min={0.35} step={0.01} />
               <Sel value="1-3-2-6 Trade Amount" options={["1-3-2-6 Trade Amount", "Martingale", "Flat"]} onChange={() => {}} />
-              Prediction:
-              <Num value={cfg.prediction} onChange={(n) => set({ prediction: n })} w={16} />
             </Row>
-          </div>
-        </div>
+            {subtype?.prediction && (
+              <Row>
+                <span>Prediction:</span>
+                <Num value={cfg.prediction} onChange={(n) => set({ prediction: n })} w={16} max={9} />
+              </Row>
+            )}
+            {subtype?.barrier && (
+              <Row>
+                <span>Barrier offset:</span>
+                <Num value={cfg.barrier} onChange={(n) => set({ barrier: n })} w={24} step={0.01} />
+              </Row>
+            )}
+          </Block>
 
-        {/* Block 2 — Purchase conditions */}
-        <div
-          className="anim-fade-up absolute left-0 top-[306px] w-[238px] rounded-[3px] bg-[#074f6f] pb-5 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]"
-          style={{ animationDelay: "140ms" }}
-        >
-          <div className="flex items-center gap-3 px-3 py-[10px] text-[12.5px]">
-            <IconBasket size={18} />
-            2. Purchase conditions
-          </div>
-          <div className="pl-3.5">
+          <Connector />
+
+          {/* 2. Purchase conditions */}
+          <Block n={2} icon={<IconBasket size={15} />} title="Purchase conditions">
             <Row>
-              Purchase
-              <Sel value={cfg.purchase} options={["Rise", "Fall", "Over", "Under"]} onChange={(v) => set({ purchase: v })} />
-              <span className="w-5" />
+              <span>Purchase</span>
+              <Sel
+                value={cfg.purchase}
+                options={purchaseOptions.filter((p) => cfg.contractType === "Both" || p === cfg.contractType)}
+                onChange={(v) => set({ purchase: v })}
+              />
             </Row>
-          </div>
-        </div>
-
-        {/* Block 4 — Restart trading conditions, clipped at the right edge */}
-        <div
-          className="anim-fade-up absolute left-[430px] top-[398px] w-[240px] rounded-[3px] bg-[#074f6f] pb-3 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]"
-          style={{ animationDelay: "220ms" }}
-        >
-          <div className="flex items-center gap-3 px-3 py-[10px] text-[12.5px]">
-            <IconRestart size={18} />
-            4. Restart trading conditions
-          </div>
-          <div className="pl-3.5">
-            <Row>if</Row>
             <Row>
-              <Sel value="1-3-2-6 Trade Again After Purchase" options={["1-3-2-6 Trade Again After Purchase"]} onChange={() => {}} />
-              <span className="text-[11px]">:</span>
-              <Num value={cfg.duration} onChange={(n) => set({ duration: n })} w={16} />
+              <span>Duration:</span>
+              <Sel value={cfg.durationUnit} options={["Ticks", "Seconds", "Minutes"]} onChange={(v) => set({ durationUnit: v })} />
+              <Num value={cfg.duration} onChange={(n) => set({ duration: n })} w={16} min={1} />
             </Row>
-            <Row>Trade again</Row>
-            <div className="mt-1 flex items-center gap-1.5">
-              <span className="flex h-[15px] w-[15px] items-center justify-center rounded-full bg-[#e6e8ea] text-[9px] font-bold text-[#333]">i</span>
-            </div>
-          </div>
-        </div>
+          </Block>
 
-        {/* Function pills under the blocks, like the generated helper functions */}
-        <div className="absolute left-[18px] top-[368px] space-y-2">
-          {[
-            "function 1-3-2-6 Core Functionality (1-3-2-6:resultsW…)",
-            "function 1-3-2-6 Trade Amount ()",
-            "function 1-3-2-6 Trade Again After Purchase (1-3-2-6:profit, 1-3-2-6:results_win)",
-          ].map((f, i) => (
-            <div
-              key={f}
-              className="anim-fade-up w-[318px] truncate rounded-[3px] bg-[#f2f3f4] px-2.5 py-[7px] text-[11px] text-[#333] shadow-[0_1px_2px_rgba(0,0,0,.08)]"
-              style={{ animationDelay: `${300 + i * 70}ms` }}
-            >
-              {f}
-            </div>
-          ))}
+          <Connector />
+
+          {/* 3. Sell conditions (optional in Deriv Bot) */}
+          <Block n={3} icon={<IconChart size={15} />} title="Sell conditions" optional>
+            <Row>
+              <span>if</span>
+              <Sel value="Stop loss" options={["Stop loss", "Take profit"]} onChange={() => {}} />
+              <span>:</span>
+              <Num value={cfg.stopLoss} onChange={(n) => set({ stopLoss: n })} w={24} step={0.01} />
+            </Row>
+            <Row>
+              <span>Sell at market</span>
+            </Row>
+          </Block>
+
+          <Connector />
+
+          {/* 4. Restart trading conditions */}
+          <Block n={4} icon={<IconRestart size={15} />} title="Restart trading conditions">
+            <Row>
+              <span>if</span>
+              <Sel value={cfg.restartOutcome} options={["Loss", "Win", "Either"]} onChange={(v) => set({ restartOutcome: v })} />
+              <span>:</span>
+              <Num value={cfg.restartCount} onChange={(n) => set({ restartCount: n })} w={16} />
+            </Row>
+            <Row>
+              <span>Trade again</span>
+            </Row>
+          </Block>
+
+          {/* Function pills, like the generated helper functions */}
+          <div className="mt-3 space-y-1.5">
+            {[
+              `function ${cfg.tradeType2 || "Trade"} Core Functionality (${cfg.tradeType || "…"}: results)`,
+              `function ${cfg.tradeType2 || "Trade"} Purchase Conditions (${cfg.purchase || "…"})`,
+              `function Restart Trading Conditions (${cfg.restartOutcome.toLowerCase()})`,
+            ].map((f, i) => (
+              <div
+                key={f}
+                className="anim-fade-up truncate rounded-[3px] bg-[#f2f3f4] px-2.5 py-[6px] text-[10px] text-[#333] shadow-[0_1px_2px_rgba(0,0,0,.08)]"
+                style={{ animationDelay: `${280 + i * 60}ms` }}
+              >
+                {f}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -540,7 +758,7 @@ function ActivityView({ tx, symbol, running }: { tx: Tx | null; symbol: string |
               <path d="M4 20 20 4M9 4h11v11" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           )}
-          {tx?.rise === false ? "Fall" : "Rise"}
+          {tx?.side || (tx?.rise === false ? "Fall" : "Rise")}
         </span>
       </div>
 
@@ -585,6 +803,7 @@ function ActivityView({ tx, symbol, running }: { tx: Tx | null; symbol: string |
           </div>
         </div>
         <div className="mt-4 border-t border-[#eceef0] pt-2.5 text-center text-[10px] text-[#6c717b]">
+          {tx?.type ? `${tx.type} · ` : ""}
           {running ? "Resale not offered" : "Contract closed"}
         </div>
       </div>
@@ -657,9 +876,9 @@ function Drawer({
       className="absolute inset-0 z-20 flex flex-col bg-white transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)]"
       style={{ transform: open ? "translateY(0)" : "translateY(calc(100% - 36px))", pointerEvents: "none" }}
     >
-      <div className="pointer-events-auto relative flex h-9 shrink-0 items-center justify-center border-y border-[#e6e8ea] bg-white shadow-[0_-2px_6px_rgba(0,0,0,.04)]">
+      <div className="pointer-events-auto relative flex h-9 shrink-0 items-center justify-center bg-white">
         <button aria-label="Toggle panel" onClick={() => setOpen(!open)} className="press flex h-full w-40 items-center justify-center text-[#181c25]">
-          {open ? <IconChevronDown size={30} strokeWidth={2} /> : <IconChevronUp size={30} strokeWidth={2} />}
+          {open ? <IconChevronDown size={26} strokeWidth={2} /> : <IconChevronUp size={26} strokeWidth={2} />}
         </button>
         {open && (
           <button onClick={reset} className="press anim-fade-in absolute right-4 rounded-[4px] border border-[#999] px-4 py-[3px] text-[11px] font-bold text-[#333]">
@@ -710,11 +929,14 @@ function Drawer({
             <div className="min-h-0 flex-1 overflow-y-auto">
               {txs.map((t) => (
                 <div key={t.id} className="anim-fade-up grid grid-cols-[1.1fr_1.5fr_1.5fr] items-center border-b border-[#e6e8ea] px-4 py-2 text-[11.5px] text-[#333]">
-                  <span className="flex items-center gap-4">
+                  <span className="flex min-w-0 items-center gap-3">
                     <CandleBadge />
-                    <svg width="22" height="22" viewBox="0 0 24 24" className="rotate-0" style={{ color: t.rise ? "#ff444f" : "#4bb4b3" }}>
-                      <path d={t.rise ? "M4 20 20 4M9 4h11v11" : "M4 4 20 20M9 20h11V9"} stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <span className="min-w-0">
+                      <svg width="22" height="22" viewBox="0 0 24 24" className="rotate-0" style={{ color: t.rise ? "#ff444f" : "#4bb4b3" }}>
+                        <path d={t.rise ? "M4 20 20 4M9 4h11v11" : "M4 4 20 20M9 20h11V9"} stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <span className="block truncate text-[8.5px] text-[#8a8f99]">{t.type ?? "Rise/Fall"}</span>
+                    </span>
                   </span>
                   <span className="space-y-1">
                     <span className="flex items-center gap-3">
@@ -794,11 +1016,10 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
     return () => window.clearTimeout(t);
   }, []);
   const [account, setAccount] = useState<Account>("real");
-  const [demoBal, setDemoBal] = useState<number>(() => loadState().demoBal);
   const { profile } = useProfile();
-  // The real account balance is the single shared balance edited in
-  // Personal details, so trades here move the number shown everywhere.
-  const bal: { real: number; demo: number } = { real: profile.balance, demo: demoBal };
+  // Both pockets live in the shared account store, so trades here move the
+  // same numbers shown on Home, Portfolio and the Options tab.
+  const bal: { real: number; demo: number } = { real: profile.balance, demo: profile.demo };
   const [acctMenu, setAcctMenu] = useState(false);
   const [running, setRunning] = useState(false);
   const [drawer, setDrawer] = useState(false);
@@ -813,13 +1034,11 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
   cfgRef.current = cfg;
   const accRef = useRef(account);
   accRef.current = account;
-  const demoBalRef = useRef(demoBal);
-  demoBalRef.current = demoBal;
   const idRef = useRef(Math.max(1, ...loadState().txs.map((t) => t.id + 1)));
 
   useEffect(() => {
-    saveState({ demoBal, txs });
-  }, [demoBal, txs]);
+    saveState({ txs });
+  }, [txs]);
 
   const set = (p: Partial<Cfg>) => setCfg((c) => ({ ...c, ...p }));
   const log = (m: string) => setJournal((j) => [`${new Date().toLocaleTimeString()}  ${m}`, ...j].slice(0, 60));
@@ -842,21 +1061,36 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
   };
 
   const start = () => {
+    // The blocks must describe a real contract before the bot can trade it.
+    if (!cfg.tradeType) {
+      toast({ message: "Choose a trade type in block 1 first." });
+      go("builder");
+      return;
+    }
+    if (!cfg.tradeType2) {
+      toast({ message: `Choose the ${cfg.tradeType} contract type in block 1 first.` });
+      go("builder");
+      return;
+    }
+    if (!cfg.contractType) {
+      toast({ message: "Choose a contract type in block 1 first." });
+      go("builder");
+      return;
+    }
     const stake = cfg.stake;
     if (!stake || stake <= 0) {
       toast({ message: "Set a stake greater than 0 to run the bot." });
       return;
     }
-    // A real account may still be at 0 USD. Rather than dead-ending, fall
-    // back to the funded demo account so trades always run. Once the real
-    // balance is funded in Personal details, trades hit the real account.
+    // A real Options account may still be at 0 USD. Rather than dead-ending,
+    // fall back to the funded demo pocket so trades always run.
     if (bal[account] < stake) {
       if (bal.demo >= stake) {
         setAccount("demo");
         accRef.current = "demo";
-        toast({ message: "Not enough on the real account — switched to Demo so the bot can trade." });
+        toast({ message: "Not enough on the Options account — switched to Demo so the bot can trade." });
       } else {
-        setDemoBal(10000);
+        accountStore.setDemo(10000);
         accRef.current = "demo";
         setAccount("demo");
         toast({ message: "Demo balance topped up to 10,000.00 USD." });
@@ -864,7 +1098,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
     }
     setRunning(true);
     setActiveSymbol(cfg.symbol);
-    log(`Bot started on ${cfg.symbol}.`);
+    log(`Bot started on ${cfg.symbol} · ${cfg.tradeType2} · ${cfg.purchase || cfg.contractType}.`);
   };
 
   // Trade simulation
@@ -873,7 +1107,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
     const id = window.setInterval(() => {
       const c = cfgRef.current;
       const acc = accRef.current;
-      const pocket = acc === "real" ? accountStore.get().balance : demoBalRef.current;
+      const pocket = acc === "real" ? accountStore.get().balance : accountStore.get().demo;
       // Never stake more than the account holds. Without this a losing streak
       // silently drains the real balance to 0 — which is what looked like the
       // balance "disappearing" while trading.
@@ -884,7 +1118,8 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
         toast({ message: "Balance used up — top up in Personal details, or switch to Demo." });
         return;
       }
-      const rise = c.purchase === "Rise";
+      // Direction the contract is bought in, for the arrow in the drawer.
+      const rise = !["Fall", "Lower", "Differs", "Odd", "Under", "No Touch", "Asian Down"].includes(c.purchase);
       const entry = 1525 + Math.random() * 1.2 - 0.6;
       // 7 wins out of 10, like the payout-weighted feel of a real Deriv bot.
       const win = Math.random() < 0.7;
@@ -895,14 +1130,15 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
       const pct = (marketByName(c.symbol)?.payout ?? 95.8) / 100;
       const profit = win ? Math.round(stake * pct * 100) / 100 : -stake;
       const contractId = 4089100000 + Math.floor(Math.random() * 99999);
-      const tx: Tx = { id: idRef.current++, entry, exit, stake, profit, rise, contractId };
+      const type = [c.tradeType2, c.contractType === "Both" ? c.purchase : c.contractType].filter(Boolean).join(" · ");
+      const tx: Tx = { id: idRef.current++, entry, exit, stake, profit, rise, contractId, type, side: c.purchase };
       setTxs((t) => [tx, ...t]);
       setActiveSymbol(c.symbol);
       if (acc === "real") accountStore.adjustBalance(profit);
-      else setDemoBal((d) => Math.max(0, Math.round((d + profit) * 100) / 100));
+      else accountStore.adjustDemo(profit);
       setJournal((j) => [
         `${win ? "Profit" : "Loss"} amount: ${fmt(Math.abs(profit))} USD`,
-        `Bought! Contract purchased (ID: ${contractId})`,
+        `Bought! ${type || "Rise/Fall"} contract purchased (ID: ${contractId})`,
         ...j,
       ].slice(0, 60));
     }, 2200);
@@ -1052,19 +1288,6 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
         />
       </div>
 
-      {/* Collapse handle, as on bot.deriv.com */}
-      <button
-        onClick={() => setDrawer((d) => !d)}
-        aria-label="Toggle transactions"
-        className="press relative z-30 flex h-[38px] shrink-0 items-center justify-center border-t border-[#eceef0] bg-white text-[#333]"
-      >
-        <span className={`transition-transform duration-300 ${drawer ? "" : "rotate-180"}`}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m6 14 6-6 6 6" />
-          </svg>
-        </span>
-      </button>
-
       {/* Run panel — teal Run button, status, tick track */}
       <div className="relative z-30 shrink-0 bg-white px-4 pb-3">
         <div className="flex h-[52px] overflow-hidden rounded-[4px] border border-[#d6d9dd] bg-white">
@@ -1088,27 +1311,19 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
           </div>
         </div>
 
-        {/* The tick track under the panel: a thin rail with tick markers. */}
-        <div className="relative mt-2.5 h-[7px]">
-          <span className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-[#e6e8ea]" />
+        {/* Progress stays inside the panel as a quiet line, not across the page. */}
+        <div className="mt-2 h-[3px] overflow-hidden rounded-full bg-transparent">
           {running && (
-            <span
-              className="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-[#4bb4b3] transition-[width] duration-700 ease-out"
+            <div
+              className="h-full rounded-full bg-[#4bb4b3] transition-[width] duration-700 ease-out"
               style={{ width: `${runProgress}%` }}
             />
           )}
-          {[0, 50, 100].map((pct) => (
-            <span
-              key={pct}
-              className="absolute top-1/2 h-[7px] w-[2.5px] -translate-y-1/2 rounded-full"
-              style={{ left: `calc(${pct}% - 1px)`, background: running ? "#4bb4b3" : "#9aa1aa" }}
-            />
-          ))}
         </div>
       </div>
 
       {/* Bottom nav */}
-      <nav className="relative z-30 flex h-[70px] shrink-0 border-t border-[#f2f3f4] bg-white">
+      <nav className="relative z-30 flex h-[70px] shrink-0 bg-white">
         {navItems.map((n, i) => {
           const active = n.id === tab;
           return (
@@ -1139,11 +1354,11 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
               <button
                 key={q.n}
                 onClick={() => {
-                  set({ stake: q.s, tradeType: "Up/Down", tradeType2: "Rise/Fall", contractType: "Both" });
-                  setZoom(0.7);
+                  set({ stake: q.s, tradeType: "Up/Down", tradeType2: "Rise/Fall", contractType: "Both", purchase: "Rise" });
+                  setZoom(0.85);
                   setQuick(false);
                   go("builder");
-                  toast(`${q.n} strategy loaded — zoomed out to show both blocks.`);
+                  toast(`${q.n} strategy loaded into the workspace.`);
                 }}
                 className="anim-fade-up w-full rounded-xl border border-[#e6e8ea] p-4 text-left transition-colors hover:border-[#ff444f] hover:bg-[#fff5f5]"
                 style={{ animationDelay: `${i * 60}ms` }}

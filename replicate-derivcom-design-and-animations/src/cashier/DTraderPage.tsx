@@ -42,7 +42,16 @@ function Chart({ series, tone }: { series: number[]; tone: string }) {
   );
 }
 
-export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?: string }) {
+export function DTraderPage({
+  onClose,
+  symbol,
+  account = "real",
+}: {
+  onClose: () => void;
+  symbol?: string;
+  /** Which pocket the stake comes from — the main trader or the demo balance. */
+  account?: "real" | "demo";
+}) {
   const { profile } = useProfile();
   const toast = useToast();
   const market = marketByName(symbol ?? "") ?? marketByName("Volatility 100 (1s) Index")!;
@@ -54,7 +63,10 @@ export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?:
   const [series, setSeries] = useState<number[]>(() => [...market.series]);
   const [profit, setProfit] = useState(0);
   const timer = useRef<number | undefined>(undefined);
+  const opening = useRef<number | undefined>(undefined);
   const active = ALL_VOLATILITY.find((m) => m.name === sym) ?? market;
+  const balance = account === "demo" ? profile.demo : profile.balance;
+  const settle = (delta: number) => (account === "demo" ? accountStore.adjustDemo(delta) : accountStore.adjustBalance(delta));
 
   // Live tick feed so the chart breathes like the real one.
   useEffect(() => {
@@ -68,23 +80,37 @@ export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?:
     return () => window.clearInterval(id);
   }, []);
 
-  useEffect(() => () => window.clearTimeout(timer.current), []);
+  useEffect(() => () => {
+    window.clearTimeout(opening.current);
+    window.clearTimeout(timer.current);
+  }, []);
+
+  // Switching symbol starts a fresh series at that market's quote.
+  useEffect(() => {
+    const m = marketByName(sym);
+    if (!m) return;
+    setTick(m.price);
+    setSeries([...m.series]);
+  }, [sym]);
 
   const buy = (rise: boolean) => {
-    if (stake > profile.balance) {
-      toast({ kind: "error", message: "Insufficient balance", detail: "Top up or lower your stake." });
+    if (stake > balance) {
+      toast({ kind: "error", message: "Insufficient balance", detail: "Transfer funds from your main account or lower your stake." });
       return;
     }
+    if (phase === "buying" || phase === "open") return;
     setPhase("buying");
-    window.setTimeout(() => {
+    opening.current = window.setTimeout(() => {
+      opening.current = undefined;
       setPhase("open");
       timer.current = window.setTimeout(() => {
+        timer.current = undefined;
         const win = Math.random() < 0.7;
         const p = win ? Math.round(stake * (active.payout / 100) * 100) / 100 : -stake;
         setProfit(p);
-        // Settle the contract against the one shared balance, so the header,
+        // Settle against the pocket this screen is trading, so the header,
         // Portfolio and the bot all see the same money.
-        accountStore.adjustBalance(p);
+        settle(p);
         setPhase(win ? "won" : "lost");
         toast({
           kind: win ? "success" : "error",
@@ -96,7 +122,7 @@ export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?:
   };
 
   const payout = Math.round(stake * (1 + active.payout / 100) * 100) / 100;
-  const tone = phase === "lost" ? "#ff444f" : phase === "won" ? "#4bb4b3" : "#4bb4b3";
+  const tone = phase === "lost" ? "#ff444f" : "#4bb4b3";
 
   return (
     <div className="page-push flex h-full flex-col bg-[#f2f3f4]">
@@ -109,13 +135,13 @@ export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?:
           </button>
           <span className="flex-1 truncate text-[11px] font-bold">Deriv Trader</span>
           <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-semibold">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#4bb4b3]" />
-            Options
+            <span className={`h-1.5 w-1.5 rounded-full ${account === "demo" ? "bg-[#ffad3a]" : "bg-[#4bb4b3]"}`} />
+            {account === "demo" ? "Demo" : "Options"}
           </span>
         </div>
         <div className="flex items-baseline justify-between px-4 pb-3">
           <span className="text-[9px] text-white/60">Balance</span>
-          <span className="text-[13px] font-bold tabular-nums">{fmtUsd(profile.balance)} USD</span>
+          <span className="text-[13px] font-bold tabular-nums">{fmtUsd(balance)} USD</span>
         </div>
       </header>
 
@@ -163,7 +189,7 @@ export function DTraderPage({ onClose, symbol }: { onClose: () => void; symbol?:
           <input
             type="range"
             min={0.35}
-            max={Math.max(2, Math.min(100, profile.balance || 2))}
+            max={Math.max(2, Math.min(100, balance || 2))}
             step={0.35}
             value={stake}
             onChange={(e) => setStake(Number(e.target.value))}

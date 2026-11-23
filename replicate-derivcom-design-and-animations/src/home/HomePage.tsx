@@ -11,8 +11,9 @@ import {
   TileP2p,
   TileTv,
 } from "../icons";
-import { useLoaded, useToast } from "../ui";
-import { fmtUsd, useProfile } from "../account";
+import { useLoaded } from "../ui";
+import { fmtUsd, totalUsd, useProfile } from "../account";
+import { Scene3D, TiltButton } from "./three";
 import antImg from "../assets/ant.jpg";
 import dxnImg from "../assets/dxn.jpg";
 import metalsImg from "../assets/metals.jpg";
@@ -24,14 +25,14 @@ type Props = {
   balanceHidden: boolean;
   go: (t: HomeTab) => void;
   openMore: () => void;
+  onDeposit: () => void;
 };
 
 /* ------------------------------------------------------------------ */
 /* Hero                                                                */
 /* ------------------------------------------------------------------ */
-function Hero({ hidden }: { hidden: boolean }) {
+function Hero({ hidden, onDeposit, go }: { hidden: boolean; onDeposit: () => void; go: Props["go"] }) {
   const loaded = useLoaded(750);
-  const toast = useToast();
   const { profile } = useProfile();
   const [spin, setSpin] = useState(0);
   const [updated, setUpdated] = useState("just now");
@@ -53,14 +54,16 @@ function Hero({ hidden }: { hidden: boolean }) {
 
   return (
     <section className="rounded-b-[32px] bg-[#181c25] px-4 pb-6 pt-1 text-white">
-      <button className="flex items-center gap-0.5 text-[10px] text-white/70">
+      <button onClick={() => go("portfolio")} className="press flex items-center gap-0.5 text-[10px] text-white/70">
         Total value <IconChevronRight size={13} />
       </button>
       <div className="mt-1.5 flex items-end justify-between">
         <div>
           {loaded ? (
             <div className="anim-fade-in flex items-center gap-2.5">
-              <span className="text-[19.5px] font-bold leading-8 tracking-tight">{hidden ? "••••••" : fmtUsd(profile.balance)} USD</span>
+              <span className="text-[19.5px] font-bold leading-8 tracking-tight">
+                {hidden ? "••••••" : fmtUsd(totalUsd(profile))} USD
+              </span>
               <button aria-label="Refresh" onClick={refresh} className="press text-white">
                 <span key={spin} className={`flex ${spin ? "anim-spin-once" : ""}`}>
                   <IconRefresh size={18} />
@@ -73,7 +76,7 @@ function Hero({ hidden }: { hidden: boolean }) {
           <div className="mt-1 text-[9.5px] text-white/60">{loaded ? (busy ? "Updating…" : `Updated ${updated}`) : <span className="skeleton inline-block h-3 w-24 rounded" />}</div>
         </div>
         <button
-          onClick={() => toast("Deposits are unavailable right now. Try again shortly.")}
+          onClick={onDeposit}
           className="press rounded-full bg-[#ff444f] px-6 py-2.5 text-[10.5px] font-bold text-white shadow-[0_6px_18px_rgba(255,68,79,.35)] hover:bg-[#ff5a64]"
         >
           Deposit
@@ -359,10 +362,10 @@ function Highlights({ go }: Pick<Props, "go">) {
       </div>
       <div ref={ref} onScroll={upd} className="hide-scroll mt-4 flex snap-x gap-4 overflow-x-auto px-4 scroll-px-4">
         {cards.map((c, i) => (
-          <button
+          <TiltButton
             key={c.title}
             onClick={() => go(c.tab)}
-            className="group anim-fade-up w-[245px] shrink-0 snap-start overflow-hidden rounded-3xl bg-[#f4f4f5] text-left transition-transform duration-300 active:scale-[0.97]"
+            className="group anim-fade-up w-[245px] shrink-0 snap-start overflow-hidden rounded-3xl bg-[#f4f4f5] text-left active:scale-[0.97]"
             style={{ animationDelay: `${i * 80}ms` }}
           >
             <div className="relative h-[139px] overflow-hidden">
@@ -388,18 +391,19 @@ function Highlights({ go }: Pick<Props, "go">) {
                 ))}
               </div>
             </div>
-          </button>
+          </TiltButton>
         ))}
       </div>
     </section>
   );
 }
 
-export function HomePage({ balanceHidden, go, openMore }: Props) {
+export function HomePage({ balanceHidden, go, openMore, onDeposit }: Props) {
   return (
     <div className="pb-2">
-      <Hero hidden={balanceHidden} />
+      <Hero hidden={balanceHidden} onDeposit={onDeposit} go={go} />
       <Accounts hidden={balanceHidden} go={go} />
+      <Scene3D />
       <PromoCarousel />
       <Explore go={go} openMore={openMore} />
       <WhatsNew />

@@ -16,6 +16,7 @@ import {
   TileTv,
 } from "../icons";
 import { Sheet, useToast } from "../ui";
+import { fullName, useProfile } from "../account";
 import { type CashierRoute } from "../cashier/CashierHub";
 import { DepositFlow } from "../cashier/DepositFlow";
 import { WithdrawFlow } from "../cashier/WithdrawFlow";
@@ -64,6 +65,14 @@ const SEARCH_ITEMS: { label: string; tab: HomeTab; icon: ReactNode }[] = [
 
 export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" | "chart" | "menu") => void }) {
   const toast = useToast();
+  const { profile } = useProfile();
+  const initials =
+    fullName(profile)
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase())
+      .join("") || "DT";
   const [tab, setTab] = useState<HomeTab>("home");
   const [prev, setPrev] = useState<HomeTab>("home");
   const [hidden, setHidden] = useState(false);
@@ -72,6 +81,8 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
   const [overlay, setOverlay] = useState<null | "search" | "bell" | "more">(null);
   const [query, setQuery] = useState("");
   const [cashier, setCashier] = useState<CashierRoute>(null);
+  // Which market + pocket the trader was opened with.
+  const [trader, setTrader] = useState<{ symbol?: string; account?: "real" | "demo" }>({});
   const scroller = useRef<HTMLDivElement>(null);
 
   const go = (t: HomeTab) => {
@@ -92,6 +103,7 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
         {tab !== "options" && !isProfile && (
           <HomeHeader
             avatar={tab !== "portfolio"}
+            initials={initials}
             amy
             onAmy={() => toast("Amy, your AI assistant, is a demo placeholder here.")}
             eye={!isProfile}
@@ -106,19 +118,28 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
           />
         )}
         <div key={tab} className="page-enter">
-          {tab === "home" && <HomePage balanceHidden={hidden} go={go} openMore={() => setOverlay("more")} />}
+          {tab === "home" && (
+            <HomePage
+              balanceHidden={hidden}
+              go={go}
+              openMore={() => setOverlay("more")}
+              onDeposit={() => setCashier("deposit")}
+            />
+          )}
           {tab === "portfolio" && <PortfolioPage balanceHidden={hidden} />}
           {isProfile && <ProfilePage unread={unread} onBell={() => setOverlay("bell")} onBack={() => go("home")} />}
           {(tab === "cfds" || tab === "exchange") && <ProductPage kind={tab} />}
         </div>
         {tab === "options" && (
           <OptionsPage
-            onOpenTrader={() => setCashier("trader")}
+            onOpenTrader={(symbol, account) => {
+              setTrader({ symbol, account });
+              setCashier("trader");
+            }}
             onOpenBot={() => openBot("builder")}
             onTransfer={() => setCashier("transfer")}
             hidden={hidden}
             unread={unread}
-            balance={0}
             onBell={() => setOverlay("bell")}
             onProfile={() => go("profile")}
           />
@@ -141,12 +162,22 @@ export function HomeApp({ openBot }: { openBot: (tab?: "dashboard" | "builder" |
 
       {cashier && (
         <div className="absolute inset-0 z-[55]">
-          {cashier === "deposit" && <DepositFlow onClose={() => setCashier(null)} />}
-          {cashier === "withdraw" && <WithdrawFlow onClose={() => setCashier(null)} />}
-          {cashier === "transfer" && (
-            <TransferFlow onClose={() => setCashier(null)} onStartTrading={() => setCashier("trader")} />
+          {cashier === "deposit" && (
+            <DepositFlow onClose={() => setCashier(null)} onTransfer={() => setCashier("transfer")} />
           )}
-          {cashier === "trader" && <DTraderPage onClose={() => setCashier(null)} />}
+          {cashier === "withdraw" && (
+            <WithdrawFlow onClose={() => setCashier(null)} onTransfer={() => setCashier("transfer")} />
+          )}
+          {cashier === "transfer" && (
+            <TransferFlow
+              onClose={() => setCashier(null)}
+              onStartTrading={() => setCashier("trader")}
+              onDeposit={() => setCashier("deposit")}
+            />
+          )}
+          {cashier === "trader" && (
+            <DTraderPage symbol={trader.symbol} account={trader.account} onClose={() => setCashier(null)} />
+          )}
         </div>
       )}
 

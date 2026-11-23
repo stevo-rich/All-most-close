@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { fmtUsd, useProfile } from "../account";
+import { useEffect, useRef, useState } from "react";
+import { accountStore, fmtUsd, useProfile } from "../account";
 import { useToast } from "../ui";
 import { CashierScreen, Field, GhostButton, InlineMessage, PrimaryButton, StatusPill, useCountdown } from "./kit";
 import { DateRows, ReceiptAmount, SuccessTick } from "./Receipt";
@@ -44,10 +44,14 @@ function MethodGlyph({ kind }: { kind: "mpesa" | "crypto" | "card" }) {
   );
 }
 
-export function WithdrawFlow({ onClose }: { onClose: () => void }) {
-  const { profile, setBalance } = useProfile();
+export function WithdrawFlow({ onClose, onTransfer }: { onClose: () => void; onTransfer?: () => void }) {
+  const { profile } = useProfile();
   const toast = useToast();
   const countdown = useCountdown(60);
+  const pending = useRef<number | undefined>(undefined);
+
+  // Leaving the screen mid-request must not deduct anything behind the scenes.
+  useEffect(() => () => window.clearTimeout(pending.current), []);
 
   const [step, setStep] = useState<Step>("verify");
   const [method, setMethod] = useState(METHODS[0].id);
@@ -63,8 +67,8 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
         ? "Enter an amount greater than 0."
         : num < min
           ? `Minimum withdrawal is ${min}.00 USD.`
-          : num > profile.balance
-            ? "Insufficient balance"
+          : num > profile.wallet
+            ? "Insufficient balance in your main account"
             : undefined;
   const valid = !!amount && !error;
   const chosen = METHODS.find((m) => m.id === method)!;
@@ -77,11 +81,13 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
 
   const submit = () => {
     setBusy(true);
-    window.setTimeout(() => {
+    window.clearTimeout(pending.current);
+    pending.current = window.setTimeout(() => {
+      pending.current = undefined;
       setBusy(false);
-      // Deriv deducts the amount from the balance when the request is accepted,
-      // then the receipt shows it as "In review" until it is processed.
-      setBalance(profile.balance - num);
+      // Withdrawals are paid from the main account. Deriv deducts the amount
+      // when the request is accepted, then shows it as "In review".
+      accountStore.adjustWallet(-num);
       setStep("done");
       toast({ kind: "warning", message: "Withdrawal requested", detail: `${fmtUsd(num)} USD is in review.` });
     }, 1100);
@@ -184,7 +190,7 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
             rows={[
               ["Withdrawal method", `${chosen.name} · ${chosen.sub}`],
               ["Estimated arrival", chosen.eta],
-              ["Remaining balance", `${fmtUsd(profile.balance - num)} USD`],
+              ["Remaining main account balance", `${fmtUsd(profile.wallet)} USD`],
               ["Fee", "0.00 USD"],
               ["Reference", `WDR-${Math.random().toString(36).slice(2, 8).toUpperCase()}`],
             ]}
@@ -199,6 +205,7 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
 
           <div className="mt-6 space-y-2.5">
             <PrimaryButton onClick={onClose}>Done</PrimaryButton>
+            {onTransfer && <GhostButton onClick={onTransfer}>Transfer from Options</GhostButton>}
             <GhostButton onClick={() => setStep("form")}>Make another withdrawal</GhostButton>
           </div>
         </div>
@@ -246,6 +253,15 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
           })}
         </div>
 
+        {profile.wallet <= 0 && onTransfer && (
+          <button
+            onClick={onTransfer}
+            className="press mt-4 flex w-full items-center justify-center rounded-full border border-[#181c25] py-2.5 text-[10.5px] font-bold text-[#181c25] hover:bg-[#f5f5f5]"
+          >
+            Transfer funds from Options to your main account
+          </button>
+        )}
+
         <div className="mt-5">
           <Field
             label="Amount"
@@ -263,7 +279,7 @@ export function WithdrawFlow({ onClose }: { onClose: () => void }) {
             {[25, 50, 75, 100].map((p, i) => (
               <button
                 key={p}
-                onClick={() => setAmount(((profile.balance * p) / 100).toFixed(2))}
+                onClick={() => setAmount(((profile.wallet * p) / 100).toFixed(2))}
                 className="step-in rounded-full border border-[#d6d9dd] py-2 text-[10px] font-semibold text-[#181c25] transition-colors hover:border-[#181c25]"
                 style={{ animationDelay: `${i * 50}ms` }}
               >

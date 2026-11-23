@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { fmtUsd, useProfile } from "../account";
+import { accountStore, fmtUsd, useProfile } from "../account";
 import { useToast } from "../ui";
 import { AccountSelect, InlineMessage, type AccountOption } from "./kit";
 
@@ -19,20 +19,37 @@ type Step = "form" | "review" | "done";
 
 const PCTS = [25, 50, 75, 100];
 
-/** Deriv brands this pocket as "Wallet" in the transfer picker. */
-export function TransferFlow({ onClose, onStartTrading }: { onClose: () => void; onStartTrading?: () => void }) {
-  const { profile, setBalance, setWallet } = useProfile();
+/**
+ * Transfer moves money between the two real pockets Deriv exposes: the main
+ * account (cashier, receives deposits) and the Options trading account.
+ */
+export function TransferFlow({
+  onClose,
+  onStartTrading,
+  onDeposit,
+}: {
+  onClose: () => void;
+  onStartTrading?: () => void;
+  /** Opens the deposit flow when the selected side has no funds. */
+  onDeposit?: () => void;
+}) {
+  const { profile } = useProfile();
   const toast = useToast();
 
+  /**
+   * Deriv only lets you move money between the main account (the cashier
+   * account that receives deposits) and the Options trading account. There is
+   * no third pocket: demo money is virtual and never transferable, and the
+   * other product accounts (CFDs, P2P) stay empty.
+   */
   const options: AccountOption[] = [
-    { group: "Deriv accounts", value: "options", text: "Options", detail: "Real · USD", balance: profile.balance, tone: "teal" },
-    { group: "Deriv accounts", value: "wallet", text: "Wallet", detail: "Real · USD", balance: profile.wallet, tone: "navy" },
-    { group: "Deriv accounts", value: "demo", text: "Demo account", detail: "Virtual · USD", balance: 10000, tone: "amber" },
+    { group: "Deriv accounts", value: "main", text: "Main account", detail: "Real · USD", balance: profile.wallet, tone: "teal" },
+    { group: "Deriv accounts", value: "options", text: "Options", detail: "Real · USD", balance: profile.balance, tone: "navy" },
   ];
   const byId = (id: string) => options.find((o) => o.value === id)!;
 
-  const [fromId, setFromId] = useState("options");
-  const [toId, setToId] = useState("wallet");
+  const [fromId, setFromId] = useState("main");
+  const [toId, setToId] = useState("options");
   const [amount, setAmount] = useState("");
   const [step, setStep] = useState<Step>("form");
   const [showNotice, setShowNotice] = useState(true);
@@ -60,10 +77,11 @@ export function TransferFlow({ onClose, onStartTrading }: { onClose: () => void;
   const move = (delta: number) => {
     // Guard: a transfer to the same account is a no-op, not a credit.
     if (fromId === toId) return;
-    if (fromId === "wallet") setWallet(profile.wallet - delta);
-    if (toId === "wallet") setWallet(profile.wallet + delta);
-    if (fromId === "options") setBalance(profile.balance - delta);
-    if (toId === "options") setBalance(profile.balance + delta);
+    // Apply deltas against the live store, never a balance captured at render.
+    if (fromId === "main") accountStore.adjustWallet(-delta);
+    if (toId === "main") accountStore.adjustWallet(delta);
+    if (fromId === "options") accountStore.adjustBalance(-delta);
+    if (toId === "options") accountStore.adjustBalance(delta);
   };
 
   const submit = () => {
@@ -94,7 +112,7 @@ export function TransferFlow({ onClose, onStartTrading }: { onClose: () => void;
             Transfer successful
           </h1>
           <p className="anim-fade-up mt-1.5 text-center text-[11.5px] leading-snug text-white/80" style={{ animationDelay: "220ms" }}>
-            {fmtUsd(done.amount)} USD transferred to your {done.to} account.
+            {fmtUsd(done.amount)} USD transferred to your {done.to === "Main account" ? "main account" : `${done.to} account`}.
           </p>
 
           <div className="mt-auto w-full pt-8">
@@ -230,7 +248,7 @@ export function TransferFlow({ onClose, onStartTrading }: { onClose: () => void;
                 }
               }}
             />
-            {fromEmpty && <NoFunds text={`No funds in ${from.text}.`} onDeposit={onClose} />}
+            {fromEmpty && <NoFunds text={`No funds in ${from.text}.`} onDeposit={onDeposit ?? onClose} />}
           </div>
 
           <div className="relative">
@@ -246,7 +264,7 @@ export function TransferFlow({ onClose, onStartTrading }: { onClose: () => void;
                 }
               }}
             />
-            {toEmpty && !fromEmpty && <NoFunds text={`No funds in ${to.text}.`} onDeposit={onClose} />}
+            {toEmpty && !fromEmpty && <NoFunds text={`No funds in ${to.text}.`} onDeposit={onDeposit ?? onClose} />}
             <span className="pointer-events-none absolute left-1/2 top-0 z-10 flex h-[30px] w-[30px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#eceef0] bg-white text-[#181c25] shadow-[0_2px_6px_rgba(0,0,0,.08)]">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 3v8M8.5 7.5 12 11l3.5-3.5M12 21v-8M8.5 16.5 12 13l3.5 3.5" />
@@ -289,6 +307,31 @@ export function TransferFlow({ onClose, onStartTrading }: { onClose: () => void;
               >
                 {p}%
               </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-[10px] border border-[#eceef0] p-3.5">
+          <div className="text-[11px] font-bold text-[#181c25]">Other accounts</div>
+          <p className="mt-1 text-[10.5px] leading-snug text-[#6c717b]">
+            Only the main account and Options can hold or receive transfers. Everything else stays empty.
+          </p>
+          <div className="mt-3 space-y-2">
+            {[
+              { name: "Demo account", detail: "Virtual funds · never transferable" },
+              { name: "CFD · MT5 Standard", detail: "Empty · transfers unavailable" },
+              { name: "P2P", detail: "Empty · transfers unavailable" },
+            ].map((o) => (
+              <div key={o.name} className="flex items-center gap-3 rounded-[8px] bg-[#f7f8f9] px-3 py-2.5">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#e6e8ea] text-[10px] font-bold text-[#9aa1aa]">
+                  —
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[11.5px] font-semibold text-[#8a8f99]">{o.name}</span>
+                  <span className="block text-[9.5px] text-[#9aa1aa]">{o.detail}</span>
+                </span>
+                <span className="shrink-0 text-[11.5px] font-semibold tabular-nums text-[#9aa1aa]">0.00 USD</span>
+              </div>
             ))}
           </div>
         </div>

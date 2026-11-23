@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { fmtUsd, useProfile } from "../account";
+import { useEffect, useRef, useState } from "react";
+import { accountStore, fmtUsd, useProfile } from "../account";
 import { useToast } from "../ui";
 import { CashierScreen, Field, GhostButton, InlineMessage, PrimaryButton } from "./kit";
 import { DateRows, SuccessTick } from "./Receipt";
@@ -52,13 +52,25 @@ function Glyph({ kind }: { kind: "mpesa" | "agent" | "crypto" | "card" }) {
 
 const RATE = 129.4; // USD → KES, shown the way the cashier shows a conversion
 
-export function DepositFlow({ onClose }: { onClose: () => void }) {
-  const { profile, setBalance } = useProfile();
+export function DepositFlow({
+  onClose,
+  onTransfer,
+}: {
+  onClose: () => void;
+  /** Optional hand-off: after a deposit, jump straight to Transfer. */
+  onTransfer?: () => void;
+}) {
+  const { profile } = useProfile();
   const toast = useToast();
 
   const [step, setStep] = useState<Step>("methods");
   const [method, setMethod] = useState(METHODS[0].id);
   const [amount, setAmount] = useState("");
+  const pending = useRef<number | undefined>(undefined);
+
+  // A cancelled deposit must never be credited: clear the payment timer on
+  // unmount as well as when the user cancels.
+  useEffect(() => () => window.clearTimeout(pending.current), []);
 
   const chosen = METHODS.find((m) => m.id === method)!;
   const num = Number(amount);
@@ -75,12 +87,25 @@ export function DepositFlow({ onClose }: { onClose: () => void }) {
   const valid = !!amount && !error;
 
   const pay = () => {
+    window.clearTimeout(pending.current);
     setStep("waiting");
-    window.setTimeout(() => {
-      setBalance(profile.balance + num);
+    pending.current = window.setTimeout(() => {
+      pending.current = undefined;
+      // Deposits land in the main account; Transfer moves them to Options.
+      accountStore.adjustWallet(num);
       setStep("done");
-      toast({ kind: "success", message: "Deposit successful", detail: `${fmtUsd(num)} USD added to your account.` });
+      toast({
+        kind: "success",
+        message: "Deposit successful",
+        detail: `${fmtUsd(num)} USD added to your main account.`,
+      });
     }, 2200);
+  };
+
+  const cancelPayment = () => {
+    window.clearTimeout(pending.current);
+    pending.current = undefined;
+    setStep("methods");
   };
 
   if (step === "waiting") {
@@ -102,11 +127,7 @@ export function DepositFlow({ onClose }: { onClose: () => void }) {
             <div className="mt-1 text-[9.5px] text-[#6c717b]">≈ KES {fmtUsd(num * RATE)}</div>
           </div>
           <div className="mt-6 w-full max-w-[300px]">
-            <GhostButton
-              onClick={() => setStep("methods")}
-            >
-              Cancel payment
-            </GhostButton>
+            <GhostButton onClick={cancelPayment}>Cancel payment</GhostButton>
           </div>
         </div>
       </CashierScreen>
@@ -130,14 +151,23 @@ export function DepositFlow({ onClose }: { onClose: () => void }) {
             rows={[
               ["Deposit method", `${chosen.name} · ${chosen.sub}`],
               ["Amount", `${fmtUsd(num)} USD`],
-              ["New balance", `${fmtUsd(profile.balance + num)} USD`],
+              ["Credited to", "Main account"],
+              ["Main account balance", `${fmtUsd(profile.wallet)} USD`],
               ["Reference", `DEP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`],
               ["Date", new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })],
             ]}
           />
           <div className="mt-6 space-y-2.5">
             <PrimaryButton onClick={onClose}>Done</PrimaryButton>
-            <GhostButton onClick={() => setStep("methods")}>Make another deposit</GhostButton>
+            {onTransfer && <GhostButton onClick={onTransfer}>Transfer to Options</GhostButton>}
+            <GhostButton
+              onClick={() => {
+                setAmount("");
+                setStep("methods");
+              }}
+            >
+              Make another deposit
+            </GhostButton>
           </div>
         </div>
       </CashierScreen>

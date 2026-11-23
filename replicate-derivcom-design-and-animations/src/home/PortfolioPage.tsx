@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { IconMinus, IconPlus, IconRefresh, IconTransfer } from "../icons";
 import { useLoaded } from "../ui";
-import { fmtUsd, useProfile } from "../account";
+import { fmtUsd, totalUsd, useProfile } from "../account";
 import { CashierHub, type CashierRoute } from "../cashier/CashierHub";
 import { DepositFlow } from "../cashier/DepositFlow";
 import { WithdrawFlow } from "../cashier/WithdrawFlow";
@@ -136,7 +136,7 @@ function Overview({ onDeposit }: { onDeposit: () => void }) {
                 <path d="M2.5 10.5h19M16 15h2.5" />
               </svg>
             </span>
-            <span className="flex-1 text-[15px] text-[#181c25]">Wallet</span>
+            <span className="flex-1 text-[15px] text-[#181c25]">Main account</span>
             <span className="text-[14px] tabular-nums text-[#181c25]">{fmtUsd(profile.wallet)} USD</span>
           </div>
           <div className="h-px bg-[#eceef0]" />
@@ -247,7 +247,9 @@ export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
               <div className="text-[11px] text-[#b5b9c2]">Estimated total value</div>
               <div className="mt-0.5 flex items-center gap-3">
                 {loaded ? (
-                  <span className="anim-fade-in text-[19.5px] font-bold tracking-tight">{balanceHidden ? "••••••" : fmtUsd(profile.balance)} USD</span>
+                  <span className="anim-fade-in text-[19.5px] font-bold tracking-tight">
+                    {balanceHidden ? "••••••" : fmtUsd(totalUsd(profile))} USD
+                  </span>
                 ) : (
                   <span className="skeleton h-8 w-36 rounded-lg" />
                 )}
@@ -280,9 +282,15 @@ export function PortfolioPage({ balanceHidden }: { balanceHidden: boolean }) {
 
       {route && (
         <div className="absolute inset-0 z-50">
-          {route === "deposit" && <DepositFlow onClose={() => setRoute(null)} />}
-          {route === "withdraw" && <WithdrawFlow onClose={() => setRoute(null)} />}
-          {route === "transfer" && <TransferFlow onClose={() => setRoute(null)} onStartTrading={() => setRoute("trader")} />}
+          {route === "deposit" && <DepositFlow onClose={() => setRoute(null)} onTransfer={() => setRoute("transfer")} />}
+          {route === "withdraw" && <WithdrawFlow onClose={() => setRoute(null)} onTransfer={() => setRoute("transfer")} />}
+          {route === "transfer" && (
+            <TransferFlow
+              onClose={() => setRoute(null)}
+              onStartTrading={() => setRoute("trader")}
+              onDeposit={() => setRoute("deposit")}
+            />
+          )}
           {route === "trader" && <DTraderPage onClose={() => setRoute(null)} />}
           {route === "hub" && <CashierHub onClose={() => setRoute(null)} onGo={(r) => setRoute(r)} />}
         </div>
