@@ -114,27 +114,6 @@ const subtypeFor = (tradeType: string, label: string) =>
   groupFor(tradeType)?.subtypes.find((s) => s.label === label);
 
 /**
- * The builder's cascade. Choosing a trade type (or one of its variations)
- * re-selects the variation, resets Contract type to "Both" and picks the first
- * purchase condition that belongs to the new segments — so the blocks below
- * always show segments of the trade type that is selected, never stale ones.
- */
-export function segmentChain(tradeType: string, tradeType2?: string) {
-  const group = groupFor(tradeType);
-  const subtype = (tradeType2 ? subtypeFor(tradeType, tradeType2) : undefined) ?? group?.subtypes[0];
-  return {
-    tradeType,
-    tradeType2: subtype?.label ?? "",
-    contractType: "Both",
-    purchase: subtype?.purchases[0] ?? "",
-    contracts: subtype?.contracts ?? [],
-    purchases: subtype?.purchases ?? [],
-    prediction: subtype?.prediction === true,
-    barrier: subtype?.barrier === true,
-  };
-}
-
-/**
  * The builder opens with the symbol chosen but trade type / contract type
  * unselected, matching the reference bot.deriv.com screenshot.
  */
@@ -254,53 +233,8 @@ function Num({
 }
 
 function Row({ children, className = "" }: { children: ReactNode; className?: string }) {
-  // Rows wrap instead of running off the block: the workspace is phone-width.
   return (
-    <div className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 rounded-[3px] bg-[#e5e7ea] px-2 py-[6px] text-[10.5px] leading-snug text-[#333] ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-/** One Deriv Bot workspace block. */
-function Block({
-  n,
-  icon,
-  title,
-  optional,
-  children,
-}: {
-  n: number;
-  icon: ReactNode;
-  title: string;
-  optional?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <section className="anim-fade-up w-full overflow-hidden rounded-[4px] bg-[#074f6f] pb-2.5 text-white shadow-[0_2px_6px_rgba(0,0,0,.18)]">
-      <header className="flex items-center gap-2 px-2.5 py-[9px] text-[12px] font-semibold">
-        <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[3px] bg-white/15 text-[10px] font-bold">{n}</span>
-        <span className="shrink-0 opacity-90">{icon}</span>
-        <span className="min-w-0 flex-1 truncate">{title}</span>
-        {optional && (
-          <span className="shrink-0 rounded-full bg-white/15 px-1.5 py-[1px] text-[7.5px] font-bold uppercase tracking-wide text-white/85">
-            Optional
-          </span>
-        )}
-      </header>
-      <div className="space-y-1 px-2">{children}</div>
-    </section>
-  );
-}
-
-/** Chevron that chains one block to the next. */
-function Connector() {
-  return (
-    <div className="flex h-5 w-full items-center justify-center text-[#b9bec4]" aria-hidden>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-        <path d="m6 9 6 6 6-6" />
-      </svg>
-    </div>
+    <div className={`flex w-max items-center gap-1.5 whitespace-nowrap rounded-[3px] bg-[#e5e7ea] px-2 py-[7px] text-[11px] text-[#333] ${className}`}>{children}</div>
   );
 }
 
@@ -459,38 +393,26 @@ function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>)
   const purchaseOptions = subtype?.purchases ?? [];
 
   /**
-   * Trade type → variation → contract type → purchase condition is a chain.
-   * Picking a trade type immediately selects its first variation, contract
-   * type "Both" and the first purchase condition, so the blocks below are
-   * always filled in with segments that belong to the chosen trade type.
+   * Trade type → contract type is a dependency chain: picking a new trade type
+   * clears the downstream selects, picking a contract type resets the contract
+   * side and the purchase condition to something that pair actually offers.
    */
-  const pickTradeType = (v: string) => {
-    const next = segmentChain(v);
-    set({ tradeType: next.tradeType, tradeType2: next.tradeType2, contractType: next.contractType, purchase: next.purchase });
-  };
+  const pickTradeType = (v: string) => set({ tradeType: v, tradeType2: "", contractType: "", purchase: "" });
   const pickSubtype = (v: string) => {
-    const next = segmentChain(cfg.tradeType, v);
-    set({ tradeType2: next.tradeType2, contractType: next.contractType, purchase: next.purchase });
+    const next = subtypeFor(cfg.tradeType, v);
+    set({ tradeType2: v, contractType: "Both", purchase: next?.purchases[0] ?? "" });
   };
 
   const chips = [cfg.tradeType, cfg.tradeType2, cfg.contractType, cfg.purchase].filter(Boolean);
 
   return (
-    <div className="relative h-full overflow-auto bg-white pb-24">
-      {/* Quick strategy + the chosen path, echoed so every change is obvious. */}
-      <div className="flex items-start justify-between gap-2 px-3 pt-3">
-        <button
-          onClick={onQuick}
-          className="press anim-fade-up rounded-[4px] bg-[#ff444f] px-5 py-3 text-[15px] font-bold text-white shadow-sm hover:bg-[#ff5a64]"
-        >
-          Quick strategy
-        </button>
-        <span className="mt-1 shrink-0 rounded-[3px] bg-[#f2f3f4] px-2 py-1 text-[8.5px] font-semibold text-[#8a8f99]">
-          {Math.round(zoom * 100)}%
-        </span>
-      </div>
+    <div className="relative h-full overflow-auto bg-white pb-20 pl-[57px] pt-3">
+      <button onClick={onQuick} className="press anim-fade-up rounded-[4px] bg-[#ff444f] px-[22px] py-[15px] text-[17px] font-bold text-white shadow-sm hover:bg-[#ff5a64]">
+        Quick strategy
+      </button>
 
-      <div className="mt-3 flex min-h-[18px] flex-wrap items-center gap-1.5 px-3 text-[9.5px]">
+      {/* The path chosen in the blocks, echoed back so every change is obvious. */}
+      <div className="mt-4 flex max-w-[330px] flex-wrap items-center gap-1.5 text-[9.5px]">
         {chips.length === 0 ? (
           <span className="text-[#8a8f99]">Pick a trade type to build a strategy.</span>
         ) : (
@@ -502,88 +424,105 @@ function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>)
         )}
       </div>
 
-      {/* Workspace canvas: blocks chain downwards, so nothing overlaps or is
-          clipped no matter which trade type is selected. Re-keyed on the
-          selection so the cascade replays when the segments change. */}
-      <div className="dbot-canvas mt-3 px-3 pb-6 pt-4">
+      {/* The canvas is wider than the screen so block 4 peeks in from the
+          right, exactly as bot.deriv.com shows it. Re-keyed on the trade type
+          so the blocks replay their cascade when the selection changes. */}
+      <div
+        key={`${cfg.tradeType}|${cfg.tradeType2}`}
+        style={{ transform: `scale(${zoom})`, transformOrigin: "0 0", transition: "transform .25s ease" }}
+        className="relative mt-6 ml-[18px] h-[620px] w-[760px]"
+      >
+        {/* Block 1 — Trade parameters */}
         <div
-          key={`${cfg.tradeType}|${cfg.tradeType2}|${cfg.contractType}`}
-          // CSS zoom (not a transform) so the scaled blocks still occupy the
-          // right amount of layout: the canvas scrolls instead of clipping.
-          style={{ zoom }}
-          className="w-[318px] max-w-full"
+          className="anim-fade-up absolute left-0 top-0 w-[262px] rounded-[3px] bg-[#074f6f] pb-5 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]"
+          style={{ animationDelay: "60ms" }}
         >
-          {/* 1. Trade parameters */}
-          <Block n={1} icon={<IconList size={15} />} title="Trade parameters">
+          <div className="flex items-center gap-3 px-3 py-[10px] text-[12.5px]">
+            <IconList size={18} />
+            1. Trade parameters
+          </div>
+          <div className="space-y-px pl-3.5">
             <Row>
-              <span>Market:</span>
+              Market:
               <Sel value="Derived" options={["Derived"]} onChange={() => {}} />
               <span>&gt;</span>
               <Sel value="Continuous Indices" options={["Continuous Indices"]} onChange={() => {}} />
+              <span>&gt;</span>
               <Sel value={cfg.symbol} options={symbols} onChange={(v) => set({ symbol: v })} />
             </Row>
             <Row>
-              <span>Trade Type:</span>
+              Trade Type:
               <Sel value={cfg.tradeType} options={TRADE_TREE.map((g) => g.label)} onChange={pickTradeType} />
+              <span>&gt;</span>
               <Sel value={cfg.tradeType2} options={group ? group.subtypes.map((x) => x.label) : []} onChange={pickSubtype} />
             </Row>
             <Row>
-              <span>Contract Type:</span>
+              Contract Type:
               <Sel
                 value={cfg.contractType}
                 options={contractOptions}
                 onChange={(v) => {
-                  // "Both" defers the direction to Purchase conditions.
+                  // "Both" needs a purchase condition; the others imply one.
                   set({ contractType: v, purchase: v === "Both" ? purchaseOptions[0] ?? "" : v });
                 }}
               />
             </Row>
             <Row>
-              <span>Default Candle Interval:</span>
+              Default Candle Interval:
               <Sel value={cfg.candle} options={["1 minute", "2 minutes", "5 minutes", "15 minutes"]} onChange={(v) => set({ candle: v })} />
             </Row>
             <Row>
-              <span>Restart buy/sell on error:</span>
+              Restart buy/sell on error (disable for better performance):
               <Check checked={cfg.restartBuySell} onChange={(v) => set({ restartBuySell: v })} />
             </Row>
             <Row>
-              <span>Restart last trade on error:</span>
+              Restart last trade on error (bot ignores the unsuccessful trade):
               <Check checked={cfg.restartLast} onChange={(v) => set({ restartLast: v })} />
             </Row>
+          </div>
+
+          <div className="px-3 pb-2 pt-3 text-[12.5px]">Run once at start:</div>
+          <div className="ml-3.5 h-8 w-[64px] rounded-[3px] bg-[#0b5f83]" />
+
+          <div className="px-3 pb-2 pt-3 text-[12.5px]">Trade options:</div>
+          <div className="space-y-px pl-3.5">
             <Row>
-              <span>Run once at start:</span>
-              <span className="h-5 w-10 rounded-[2px] bg-[#0b5f83]" />
-            </Row>
-            <Row>
-              <span>Duration:</span>
+              Duration:
               <Sel value={cfg.durationUnit} options={["Ticks", "Seconds", "Minutes"]} onChange={(v) => set({ durationUnit: v })} />
               <Num value={cfg.duration} onChange={(n) => set({ duration: n })} w={16} min={1} />
             </Row>
             <Row>
-              <span>Stake: USD</span>
+              Stake: USD
               <Num value={cfg.stake} onChange={(n) => set({ stake: n })} w={24} min={0.35} step={0.01} />
               <Sel value="1-3-2-6 Trade Amount" options={["1-3-2-6 Trade Amount", "Martingale", "Flat"]} onChange={() => {}} />
             </Row>
             {subtype?.prediction && (
               <Row>
-                <span>Prediction:</span>
+                Prediction:
                 <Num value={cfg.prediction} onChange={(n) => set({ prediction: n })} w={16} max={9} />
               </Row>
             )}
             {subtype?.barrier && (
               <Row>
-                <span>Barrier offset:</span>
+                Barrier offset:
                 <Num value={cfg.barrier} onChange={(n) => set({ barrier: n })} w={24} step={0.01} />
               </Row>
             )}
-          </Block>
+          </div>
+        </div>
 
-          <Connector />
-
-          {/* 2. Purchase conditions */}
-          <Block n={2} icon={<IconBasket size={15} />} title="Purchase conditions">
+        {/* Block 2 — Purchase conditions */}
+        <div
+          className="anim-fade-up absolute left-0 top-[330px] w-[262px] rounded-[3px] bg-[#074f6f] pb-5 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]"
+          style={{ animationDelay: "140ms" }}
+        >
+          <div className="flex items-center gap-3 px-3 py-[10px] text-[12.5px]">
+            <IconBasket size={18} />
+            2. Purchase conditions
+          </div>
+          <div className="pl-3.5">
             <Row>
-              <span>Purchase</span>
+              Purchase
               <Sel
                 value={cfg.purchase}
                 options={purchaseOptions.filter((p) => cfg.contractType === "Both" || p === cfg.contractType)}
@@ -591,58 +530,71 @@ function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>)
               />
             </Row>
             <Row>
-              <span>Duration:</span>
+              Duration:
               <Sel value={cfg.durationUnit} options={["Ticks", "Seconds", "Minutes"]} onChange={(v) => set({ durationUnit: v })} />
               <Num value={cfg.duration} onChange={(n) => set({ duration: n })} w={16} min={1} />
             </Row>
-          </Block>
+          </div>
+        </div>
 
-          <Connector />
-
-          {/* 3. Sell conditions (optional in Deriv Bot) */}
-          <Block n={3} icon={<IconChart size={15} />} title="Sell conditions" optional>
+        {/* Block 3 — Sell conditions */}
+        <div
+          className="anim-fade-up absolute left-[430px] top-[236px] w-[240px] rounded-[3px] bg-[#074f6f] pb-3 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]"
+          style={{ animationDelay: "180ms" }}
+        >
+          <div className="flex items-center gap-3 px-3 py-[10px] text-[12.5px]">
+            <IconChart size={18} />
+            3. Sell conditions
+          </div>
+          <div className="space-y-px pl-3.5">
             <Row>
-              <span>if</span>
+              if
               <Sel value="Stop loss" options={["Stop loss", "Take profit"]} onChange={() => {}} />
               <span>:</span>
               <Num value={cfg.stopLoss} onChange={(n) => set({ stopLoss: n })} w={24} step={0.01} />
             </Row>
-            <Row>
-              <span>Sell at market</span>
-            </Row>
-          </Block>
+            <Row>Sell at market</Row>
+          </div>
+        </div>
 
-          <Connector />
-
-          {/* 4. Restart trading conditions */}
-          <Block n={4} icon={<IconRestart size={15} />} title="Restart trading conditions">
+        {/* Block 4 — Restart trading conditions, clipped at the right edge */}
+        <div
+          className="anim-fade-up absolute left-[430px] top-[398px] w-[240px] rounded-[3px] bg-[#074f6f] pb-3 text-white shadow-[0_2px_6px_rgba(0,0,0,.15)]"
+          style={{ animationDelay: "220ms" }}
+        >
+          <div className="flex items-center gap-3 px-3 py-[10px] text-[12.5px]">
+            <IconRestart size={18} />
+            4. Restart trading conditions
+          </div>
+          <div className="space-y-px pl-3.5">
+            <Row>if</Row>
             <Row>
-              <span>if</span>
               <Sel value={cfg.restartOutcome} options={["Loss", "Win", "Either"]} onChange={(v) => set({ restartOutcome: v })} />
-              <span>:</span>
+              <span className="text-[11px]">:</span>
               <Num value={cfg.restartCount} onChange={(n) => set({ restartCount: n })} w={16} />
             </Row>
-            <Row>
-              <span>Trade again</span>
-            </Row>
-          </Block>
-
-          {/* Function pills, like the generated helper functions */}
-          <div className="mt-3 space-y-1.5">
-            {[
-              `function ${cfg.tradeType2 || "Trade"} Core Functionality (${cfg.tradeType || "…"}: results)`,
-              `function ${cfg.tradeType2 || "Trade"} Purchase Conditions (${cfg.purchase || "…"})`,
-              `function Restart Trading Conditions (${cfg.restartOutcome.toLowerCase()})`,
-            ].map((f, i) => (
-              <div
-                key={f}
-                className="anim-fade-up truncate rounded-[3px] bg-[#f2f3f4] px-2.5 py-[6px] text-[10px] text-[#333] shadow-[0_1px_2px_rgba(0,0,0,.08)]"
-                style={{ animationDelay: `${280 + i * 60}ms` }}
-              >
-                {f}
-              </div>
-            ))}
+            <Row>Trade again</Row>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className="flex h-[15px] w-[15px] items-center justify-center rounded-full bg-[#e6e8ea] text-[9px] font-bold text-[#333]">i</span>
+            </div>
           </div>
+        </div>
+
+        {/* Function pills under the blocks, like the generated helper functions */}
+        <div className="absolute left-[18px] top-[500px] space-y-2">
+          {[
+            `function ${cfg.tradeType2 || "Trade"} Core Functionality (${cfg.tradeType || "…"}: results)`,
+            `function ${cfg.tradeType2 || "Trade"} Purchase Conditions (${cfg.purchase || "…"})`,
+            `function Restart Trading Conditions (${cfg.restartOutcome.toLowerCase()})`,
+          ].map((f, i) => (
+            <div
+              key={f}
+              className="anim-fade-up w-[330px] truncate rounded-[3px] bg-[#f2f3f4] px-2.5 py-[7px] text-[11px] text-[#333] shadow-[0_1px_2px_rgba(0,0,0,.08)]"
+              style={{ animationDelay: `${300 + i * 70}ms` }}
+            >
+              {f}
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -878,9 +830,9 @@ function Drawer({
       className="absolute inset-0 z-20 flex flex-col bg-white transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)]"
       style={{ transform: open ? "translateY(0)" : "translateY(calc(100% - 36px))", pointerEvents: "none" }}
     >
-      <div className="pointer-events-auto relative flex h-9 shrink-0 items-center justify-center bg-white">
+      <div className="pointer-events-auto relative flex h-9 shrink-0 items-center justify-center border-y border-[#e6e8ea] bg-white shadow-[0_-2px_6px_rgba(0,0,0,.04)]">
         <button aria-label="Toggle panel" onClick={() => setOpen(!open)} className="press flex h-full w-40 items-center justify-center text-[#181c25]">
-          {open ? <IconChevronDown size={26} strokeWidth={2} /> : <IconChevronUp size={26} strokeWidth={2} />}
+          {open ? <IconChevronDown size={30} strokeWidth={2} /> : <IconChevronUp size={30} strokeWidth={2} />}
         </button>
         {open && (
           <button onClick={reset} className="press anim-fade-in absolute right-4 rounded-[4px] border border-[#999] px-4 py-[3px] text-[11px] font-bold text-[#333]">
@@ -1029,7 +981,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
   const [txs, setTxs] = useState<Tx[]>(() => loadState().txs);
   const [journal, setJournal] = useState<string[]>([]);
   const [activeSymbol, setActiveSymbol] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.8);
   const [quick, setQuick] = useState(false);
   const [cfg, setCfg] = useState<Cfg>(DEFAULT_CFG);
   const cfgRef = useRef(cfg);
@@ -1290,6 +1242,19 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
         />
       </div>
 
+      {/* Collapse handle, as on bot.deriv.com */}
+      <button
+        onClick={() => setDrawer((d) => !d)}
+        aria-label="Toggle transactions"
+        className="press relative z-30 flex h-[38px] shrink-0 items-center justify-center border-t border-[#eceef0] bg-white text-[#333]"
+      >
+        <span className={`transition-transform duration-300 ${drawer ? "" : "rotate-180"}`}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m6 14 6-6 6 6" />
+          </svg>
+        </span>
+      </button>
+
       {/* Run panel — teal Run button, status, tick track */}
       <div className="relative z-30 shrink-0 bg-white px-4 pb-3">
         <div className="flex h-[52px] overflow-hidden rounded-[4px] border border-[#d6d9dd] bg-white">
@@ -1313,19 +1278,27 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
           </div>
         </div>
 
-        {/* Progress stays inside the panel as a quiet line, not across the page. */}
-        <div className="mt-2 h-[3px] overflow-hidden rounded-full bg-transparent">
+        {/* The tick track under the panel: a thin rail with tick markers. */}
+        <div className="relative mt-2.5 h-[7px]">
+          <span className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-[#e6e8ea]" />
           {running && (
-            <div
-              className="h-full rounded-full bg-[#4bb4b3] transition-[width] duration-700 ease-out"
+            <span
+              className="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-[#4bb4b3] transition-[width] duration-700 ease-out"
               style={{ width: `${runProgress}%` }}
             />
           )}
+          {[0, 50, 100].map((pct) => (
+            <span
+              key={pct}
+              className="absolute top-1/2 h-[7px] w-[2.5px] -translate-y-1/2 rounded-full"
+              style={{ left: `calc(${pct}% - 1px)`, background: running ? "#4bb4b3" : "#9aa1aa" }}
+            />
+          ))}
         </div>
       </div>
 
       {/* Bottom nav */}
-      <nav className="relative z-30 flex h-[70px] shrink-0 bg-white">
+      <nav className="relative z-30 flex h-[70px] shrink-0 border-t border-[#f2f3f4] bg-white">
         {navItems.map((n, i) => {
           const active = n.id === tab;
           return (
@@ -1356,11 +1329,11 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
               <button
                 key={q.n}
                 onClick={() => {
-                  set({ stake: q.s, tradeType: "Up/Down", tradeType2: "Rise/Fall", contractType: "Both", purchase: "Rise" });
-                  setZoom(1);
+                  set({ stake: q.s, tradeType: "Up/Down", tradeType2: "Rise/Fall", contractType: "Both" });
+                  setZoom(0.7);
                   setQuick(false);
                   go("builder");
-                  toast(`${q.n} strategy loaded into the workspace.`);
+                  toast(`${q.n} strategy loaded — zoomed out to show both blocks.`);
                 }}
                 className="anim-fade-up w-full rounded-xl border border-[#e6e8ea] p-4 text-left transition-colors hover:border-[#ff444f] hover:bg-[#fff5f5]"
                 style={{ animationDelay: `${i * 60}ms` }}

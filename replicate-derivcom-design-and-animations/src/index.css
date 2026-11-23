@@ -247,14 +247,6 @@ body {
   white-space: nowrap;
 }
 
-/* Dotted workspace canvas behind the bot blocks, as on bot.deriv.com. */
-.dbot-canvas {
-  background-color: #fbfbfc;
-  background-image: radial-gradient(rgba(24, 28, 37, 0.14) 1px, transparent 1px);
-  background-size: 14px 14px;
-  background-position: 0 0;
-}
-
 /* ---------- Ask Amy pill (soft glassy pill, rainbow text) ---------- */
 .amy-pill {
   position: relative;
