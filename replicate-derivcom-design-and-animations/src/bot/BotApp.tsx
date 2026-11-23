@@ -508,7 +508,9 @@ function Builder({ cfg, set, zoom, onQuick }: { cfg: Cfg; set: (p: Partial<Cfg>)
       <div className="dbot-canvas mt-3 px-3 pb-6 pt-4">
         <div
           key={`${cfg.tradeType}|${cfg.tradeType2}|${cfg.contractType}`}
-          style={{ transform: `scale(${zoom})`, transformOrigin: "0 0" }}
+          // CSS zoom (not a transform) so the scaled blocks still occupy the
+          // right amount of layout: the canvas scrolls instead of clipping.
+          style={{ zoom }}
           className="w-[318px] max-w-full"
         >
           {/* 1. Trade parameters */}
