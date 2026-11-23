@@ -1029,7 +1029,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
   const [txs, setTxs] = useState<Tx[]>(() => loadState().txs);
   const [journal, setJournal] = useState<string[]>([]);
   const [activeSymbol, setActiveSymbol] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(0.8);
+  const [zoom, setZoom] = useState(1);
   const [quick, setQuick] = useState(false);
   const [cfg, setCfg] = useState<Cfg>(DEFAULT_CFG);
   const cfgRef = useRef(cfg);
@@ -1357,7 +1357,7 @@ export function BotApp({ onHome, initialTab = "dashboard" }: { onHome: () => voi
                 key={q.n}
                 onClick={() => {
                   set({ stake: q.s, tradeType: "Up/Down", tradeType2: "Rise/Fall", contractType: "Both", purchase: "Rise" });
-                  setZoom(0.85);
+                  setZoom(1);
                   setQuick(false);
                   go("builder");
                   toast(`${q.n} strategy loaded into the workspace.`);
